@@ -5,7 +5,7 @@ alter table users drop constraint if exists users_passwords_rules;
 
 drop trigger if exists users_role_no_modify on users;
 
-drop function if exists role_no_modify();
+drop function if exists users_role_no_modify();
 
 /* 1) Le nom complet doit avoir une longueur d'au moins 3 caractères. */
 
@@ -56,7 +56,7 @@ check (
 
 /* Il faut d'abord une fonction, puis un trigger, sinon on a une erreur */
 
-create or replace function role_no_modify()
+create or replace function users_role_no_modify()
 returns trigger
 language plpgsql
 as $$
@@ -70,5 +70,5 @@ $$;
 
 create trigger users_role_no_modify
 before update on users
-for each row execute function role_no_modify();
+for each row execute function users_role_no_modify();
 
