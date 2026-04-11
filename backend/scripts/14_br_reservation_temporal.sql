@@ -1,7 +1,7 @@
 -- CLEANUP
 DROP TRIGGER IF EXISTS trg_br14_reservation_temporal ON reservations;
-drop function if exists get_current_logic_time();
-DROP FUNCTION IF EXISTS check_br14_reservation_temporal() CASCADE;
+DROP FUNCTION IF EXISTS get_current_logic_time();
+DROP FUNCTION IF EXISTS check_br14_reservation_temporal();
 
 -- FUNCTION
 
@@ -10,8 +10,7 @@ DROP FUNCTION IF EXISTS check_br14_reservation_temporal() CASCADE;
  * (Sans IA chaud de fou) */
 
 CREATE OR REPLACE FUNCTION get_current_logic_time()
-    RETURNS TIMESTAMP
-AS $$
+RETURNS TIMESTAMP AS $$
 DECLARE
     sim_time TEXT;
 BEGIN
@@ -24,9 +23,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+
 /* Fonction de check */
 CREATE OR REPLACE FUNCTION check_br14_reservation_temporal()
-    RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $$
 DECLARE
     now_logic TIMESTAMP := get_current_logic_time();
 BEGIN
@@ -56,4 +57,4 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_br14_reservation_temporal
     BEFORE INSERT OR UPDATE ON reservations
     FOR EACH ROW
-EXECUTE FUNCTION check_br14_reservation_temporal();
+    EXECUTE FUNCTION check_br14_reservation_temporal();

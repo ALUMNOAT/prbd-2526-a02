@@ -1,17 +1,20 @@
-alter table users drop constraint if exists users_full_name_min_length;
-alter table users drop constraint if exists users_passwords_rules;
+-- Drop Constraints
+ALTER TABLE users
+    DROP CONSTRAINT IF EXISTS users_full_name_min_length,
+    DROP CONSTRAINT IF EXISTS users_passwords_rules;
 
-/* on supprime d'abord les triggers, puis les fonctions, sinon on a erreur */
+-- Drop Triggers
+DROP TRIGGER IF EXISTS users_role_no_modify
+    ON users;
 
-drop trigger if exists users_role_no_modify on users;
-
-drop function if exists users_role_no_modify();
+-- Drop Functions
+DROP FUNCTION IF EXISTS users_role_no_modify();
 
 /* 1) Le nom complet doit avoir une longueur d'au moins 3 caractères. */
 
-alter table users
-add constraint users_full_name_min_length
-check (length(TRIM("full_name")) >= 3);
+ALTER TABLE users
+    ADD CONSTRAINT users_full_name_min_length
+    CHECK (length(TRIM("full_name")) >= 3);
 
 /* 2) Le mot de passe doit avoir au minimum une longueur de 8 caractères,
  * doit contenir au moins un chiffre, une lettre majuscule,
@@ -22,15 +25,15 @@ check (length(TRIM("full_name")) >= 3);
  * regexp_matches() → retourne un setof text[] (à utiliser dans un FROM)
  * ~ → retourne un boolean */
 
-alter table users
-add constraint users_passwords_rules
-check (
-    length("password") >= 8             /* minimum 8 charactères   */
-    and "password" ~ '[0-9]'            /* contient un chiffre     */
-    and "password" ~ '[A-Z]'            /* contient une majuscule  */
-    and "password" ~ '[a-z]'            /* contient une minuscule  */
-    and "password" ~ '[,;.:!?/$%&@#]'   /* contient un car spécial */
-);
+ALTER TABLE users
+    ADD CONSTRAINT users_passwords_rules
+    CHECK (
+        length("password") >= 8             /* minimum 8 charactères   */
+        AND "password" ~ '[0-9]'            /* contient un chiffre     */
+        AND "password" ~ '[A-Z]'            /* contient une majuscule  */
+        AND "password" ~ '[a-z]'            /* contient une minuscule  */
+        AND "password" ~ '[,;.:!?/$%&@#]'   /* contient un car spécial */
+    );
 
 /* 3) Le mot de passe doit être stocké de manière sécurisée (hachage + sel).
  * auth a une fonction encrypt_pass(), et la table users a ça
@@ -54,21 +57,20 @@ check (
  * Pour une validation sur les valeurs d'un seul record, un CHECK est toujours préférable.
  */
 
-/* Il faut d'abord une fonction, puis un trigger, sinon on a une erreur */
+CREATE OR REPLACE FUNCTION users_role_no_modify()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Empêche le changement de privilèges (ex: de 'client' à 'admin')
+    IF NEW."role" <> OLD."role" THEN
+        RAISE EXCEPTION 'Le rôle d''un utilisateur ne peut pas être modifié.';
+    END IF;
 
-create or replace function users_role_no_modify()
-returns trigger
-language plpgsql
-as $$
-begin
-	if new.role <> old.role then
-	   raise exception 'Le role d''un utilisateur ne peut pas etre modifié.';
-	   end if;
-	   return new;
-end;
-$$;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
-create trigger users_role_no_modify
-before update on users
-for each row execute function users_role_no_modify();
+CREATE TRIGGER users_role_no_modify
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+    EXECUTE FUNCTION users_role_no_modify();
 
