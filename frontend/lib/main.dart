@@ -1,23 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
-  runApp(TestPage());
-}
+import 'app/my_app.dart';
+import 'core/tools/params.dart';
 
-class TestPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: .fromSeed(seedColor: Colors.blue),
-      ),
-      home: Scaffold(
-        appBar: AppBar(title: Text('Test Page')),
-        body: Center(
-          child: Text('Welcome group a02!', style: TextStyle(fontSize: 24)),
-        ),
-      ),
-    );
-  }
+void main() async {
+  await Params.init();
+  await initializeDateFormatting('fr_FR', null);
+  runApp(ProviderScope(child: MyApp()));
 }
