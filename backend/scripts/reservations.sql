@@ -1,0 +1,79 @@
+-- Drop Constraints
+ALTER TABLE reservations
+    DROP CONSTRAINT IF EXISTS reservations_guestsize_check,
+    DROP CONSTRAINT IF EXISTS reservations_special_requests_check;
+
+-- Drop Triggers
+DROP TRIGGER IF EXISTS reservations_restaurant_no_modify
+    ON reservations;
+
+DROP TRIGGER IF EXISTS reservations_client_no_modify
+    ON reservations;
+
+-- Drop Functions
+DROP FUNCTION IF EXISTS reservations_restaurant_no_modify();
+DROP FUNCTION IF EXISTS reservations_client_no_modify();
+
+/* 1) Le statut d'une réservation doit être soit pending (en attente de confirmation),
+ * confirmed (confirmée), cancelled (annulée)
+ * ou completed (terminée suite à la venue effective du client).
+ *
+ * alter table reservations
+ * add constraint reservations_status_check
+ * check ("status" in ('pending', 'confirmed', 'cancelled', 'completed'));
+ *
+ * On peut faire ça, mais… Dans Data types, on a status_type qui est un enum (comme role_type)
+ * Ce qui veut dire qu'il fait un check interieur déjà, donc on ne dois rien écrire */
+
+
+/* 2) Le nombre de convives d'une réservation doit être strictement positif. */
+
+ALTER TABLE reservations
+    ADD CONSTRAINT reservations_guestsize_check
+    CHECK ("number_of_guests" > 0);
+
+/* 3) Le texte des demandes spéciales d'une réservation (special_requests),
+ * s'il est défini, doit avoir une longueur minimale de 10 caractères. */
+
+ALTER TABLE reservations
+    ADD CONSTRAINT reservations_special_requests_check
+    CHECK (
+        "special_requests" IS NULL
+        OR LENGTH(TRIM("special_requests")) >= 10
+    );
+
+/* 4) On ne peut pas modifier le restaurant ou le client d'une réservation.
+ * On compare nouvelle avec vieille valeur = function + trigger
+ * Et il faut 2 fonctions et 2 triggers du coup */
+
+CREATE OR REPLACE FUNCTION reservations_restaurant_no_modify()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.restaurant <> OLD.restaurant THEN
+        RAISE EXCEPTION 'Le restaurant ne peut pas etre modifié.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER reservations_restaurant_no_modify
+    BEFORE UPDATE ON reservations
+    FOR EACH ROW
+    EXECUTE FUNCTION reservations_restaurant_no_modify();
+
+CREATE OR REPLACE FUNCTION reservations_client_no_modify()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.client <> OLD.client THEN
+        RAISE EXCEPTION 'Le client ne peut pas etre modifié.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER reservations_client_no_modify
+    BEFORE UPDATE ON reservations
+    FOR EACH ROW
+    EXECUTE FUNCTION reservations_client_no_modify();

@@ -4,7 +4,7 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/02_security.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/03_tables_and_data.sql" />
     <script-mode>FILE</script-mode>
-    <data-source id="6d275bb5-c69c-4f95-bc29-f6a29631655b" namespace="database/&quot;prbd-2526-a02&quot;" />
+    <data-source id="ddd41155-14fe-4d46-803f-8e70c582de08" />
     <method v="2" />
   </configuration>
 </component>
