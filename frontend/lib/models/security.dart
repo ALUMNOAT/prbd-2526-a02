@@ -85,4 +85,17 @@ class Security {
     }
   }
 
+  /// Function returns a list
+  static Future<List<dynamic>> getClientReservations(String userID) async {
+    final response = await ApiClient.get(
+      'getclientreservations?userid=$userID',
+      anonymous: false,
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to gather reservations');
+    }
+  }
+
 }

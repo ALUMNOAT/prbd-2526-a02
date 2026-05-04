@@ -74,6 +74,18 @@ class SecurityNotifier extends AsyncNotifier<String?> {
     }
   }
 
+  String? get userID => _getIDFromToken(state.value);
+
+  static String? _getIDFromToken(String? token) {
+    if (token == null) return null;
+    try {
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      return decodedToken['user_id']?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> signup({
     required String name,
     required String email,

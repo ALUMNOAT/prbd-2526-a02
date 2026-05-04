@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/providers/security_provider.dart';
+
+import '../models/security.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -19,25 +22,26 @@ void main() async {
 
 class HomeClientPage extends ConsumerStatefulWidget {
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _HomeClientPageState();
+  ConsumerState<HomeClientPage> createState() => _HomeClientPageState();
 }
 
 class _HomeClientPageState extends ConsumerState<HomeClientPage> {
 
+  String _currentFilter = 'pending';
+
   @override
   Widget build(BuildContext context) {
     ref.watch(securityProvider);
+    // On récupère le notifier pour accéder aux getters (userID, etc.)
     final securityNotifier = ref.read(securityProvider.notifier);
     final userName = securityNotifier.loggedUserName;
+    final userID = securityNotifier.userID;
 
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mes réservations'),
-        // On désactive le bouton retour (marche que sur interface windows)
-        // On utilise Navigator.pushReplacement dans login.dart pour meme comportement
-        // automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -115,264 +119,133 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
                     tooltip: 'Annulées',
                   ),
                 ],
-                selected: const {'pending'},
-                onSelectionChanged: (_) {},
+                selected: {_currentFilter},
+                onSelectionChanged: (Set<String> newSelection) {
+                  setState(() {
+                    _currentFilter = newSelection.first;
+                  });
+                },
               ),
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16.0),
-                children: [
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            Tooltip(
-                              message: 'En attente',
-                              child: const Icon(Icons.pending, size: 32, color: Colors.orange),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Bistrot du port',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
+              // Si non connecté, alors le rond tourne, sinon, on fetch
+              child: userID == null
+                ? const Center(child: CircularProgressIndicator())
+                : FutureBuilder<List<dynamic>>(
+                // On appelle ta fonction avec l'ID du notifier
+                future: Security.getClientReservations(userID),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Erreur: ${snapshot.error}'));
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final allReservations = snapshot.data ?? [];
+
+                  final reservations = allReservations.where((res) {
+                    if (_currentFilter == 'all') return true;
+                    return res['status'] == _currentFilter;
+                  }).toList();
+
+                  if (reservations.isEmpty) {
+                    return const Center(child: Text('Aucune réservation trouvée.'));
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16.0),
+                    itemCount: reservations.length,
+                    itemBuilder: (context, index) {
+                      final res = reservations[index];
+
+                      // On définit l'icône et la couleur selon le statut reçu de SQL
+                      IconData statusIcon;
+                      Color statusColor;
+                      switch (res['status']) {
+                        case 'confirmed':
+                          statusIcon = Icons.check_circle;
+                          statusColor = Colors.green;
+                          break;
+                        case 'pending':
+                          statusIcon = Icons.pending;
+                          statusColor = Colors.orange;
+                          break;
+                        case 'cancelled':
+                          statusIcon = Icons.cancel;
+                          statusColor = Colors.red;
+                          break;
+                        default:
+                          statusIcon = Icons.event_available;
+                          statusColor = Colors.blue;
+                      }
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: InkWell(
+                          onTap: () {
+                            print("Id de la réservation cliquée : ${res['id']}");
+                            // C'est ici qu'on passera 'res' à notre écran de vue/edition
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                Tooltip(
+                                  message: res['status'],
+                                  child: Icon(statusIcon, size: 32, color: statusColor),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Icon(Icons.location_on, size: 14),
-                                      const SizedBox(width: 4),
                                       Text(
-                                        'Anvers',
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                        res['resto_name'], // Donnée dynamique
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.location_on, size: 14),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            res['city'], // Donnée dynamique
+                                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.access_time, size: 16),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            DateFormat('EEE dd/MM/yyyy à HH:mm', 'fr_FR').format(DateTime.parse(res['datetime'])),
+                                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          const Icon(Icons.people, size: 16),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${res['number_of_guests']} convives', // Donnée dynamique
+                                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.access_time, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'sam. 06/12/2024 à 19:00',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Icon(Icons.people, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '2 convives',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                                ),
+                                const Icon(Icons.chevron_right),
+                              ],
                             ),
-                            const Icon(Icons.chevron_right),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            Tooltip(
-                              message: 'En attente',
-                              child: const Icon(Icons.pending, size: 32, color: Colors.orange),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'La Trattoria',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.location_on, size: 14),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Bruxelles',
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.access_time, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'ven. 05/12/2024 à 20:00',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Icon(Icons.people, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '4 convives',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            Tooltip(
-                              message: 'Confirmée',
-                              child: const Icon(Icons.check_circle, size: 32, color: Colors.green),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'La Table du Chef',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.location_on, size: 14),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Liège',
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.access_time, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'dim. 01/12/2024 à 13:00',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Icon(Icons.people, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '4 convives',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            Tooltip(
-                              message: 'Terminée',
-                              child: const Icon(Icons.event_available, size: 32, color: Colors.blue),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Sushi House',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.location_on, size: 14),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Bruxelles',
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.access_time, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'mar. 26/11/2024 à 19:30',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Icon(Icons.people, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '2 convives',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],
