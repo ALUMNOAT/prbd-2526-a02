@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:prbd_2526_a02/views/detail_reservation.dart';
 
 import 'package:prbd_2526_a02/views/login.dart';
 import '../providers/security_provider.dart';
@@ -27,6 +28,7 @@ class MyApp extends ConsumerWidget {
         '/homeClient': (context) => HomeClientPage(),
         '/homeManager': (context) => HomeManagerPage(),
         '/signup': (context) => SignupPage(),
+        '/details_reservation': (context) => ReservationDetailsPage(),
       },
     );
   }

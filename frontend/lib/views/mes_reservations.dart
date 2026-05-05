@@ -185,8 +185,20 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
                         margin: const EdgeInsets.only(bottom: 16),
                         child: InkWell(
                           onTap: () {
-                            print("Id de la réservation cliquée : ${res['id']}");
-                            // C'est ici qu'on passera 'res' à notre écran de vue/edition
+                            // 1. Log des infos dans la console
+                            print("--- Détails de la réservation cliquée ---");
+                            print("ID: ${res['id']}");
+                            print("Titre (Resto): ${res['resto_name']}");
+                            print("Adresse (Ville): ${res['city']}");
+                            print("Date: ${res['datetime']}");
+                            print("Status: ${res['status']}");
+                            print("------------------------------------------");
+
+                            Navigator.pushNamed(
+                              context,
+                              '/details_reservation',
+                              arguments: res, // On passe l'objet 'res' complet à la page suivante
+                            );
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),

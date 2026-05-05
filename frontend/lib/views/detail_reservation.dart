@@ -1,0 +1,268 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
+import 'package:prbd_2526_a02/views/mes_reservations.dart';
+
+import '../providers/security_provider.dart';
+
+void main() async {
+  await initializeDateFormatting('fr_FR', null);
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
+      ),
+      home: ReservationDetailsPage(),
+    ),
+  );
+}
+
+class ReservationDetailsPage extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<ReservationDetailsPage> createState() => _ReservationDetailsPage();
+}
+
+class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
+
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(securityProvider);
+
+    // On récupère l'objet 'res' passé en argument de mes_reservations.dart (lors qu'on redirige)
+    final res = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
+    // Pour gérer les couleurs du status
+    Color statusColor;
+    String statusName;
+    switch (res['status']) {
+      case 'confirmed':
+        statusColor = Colors.green;
+        statusName = 'Confirmée';
+        break;
+      case 'pending':
+        statusColor = Colors.orange;
+        statusName = 'En Cours';
+        break;
+      case 'cancelled':
+        statusColor = Colors.red;
+        statusName = 'Annulée';
+        break;
+      default:
+        statusColor = Colors.blue;
+        statusName = 'Terminée';
+    }
+
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Détails de la réservation'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Cette ligne permet de fermer la page actuelle
+            // et de revenir à HomeClientPage
+            Navigator.pop(context);
+          },
+        ),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Rafraîchir les données',
+            onPressed: () => Navigator.pushReplacementNamed(context, '/homeClient'),
+          ),
+        ],
+        elevation: 2,
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        surfaceTintColor: Colors.transparent,
+        flexibleSpace: Align(
+          alignment: Alignment.topCenter,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 2.0),
+              child: Tooltip(
+                message:
+                'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                child: Text(
+                  'mercredi 04/12/2024 16:00',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey[400],
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.restaurant),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              res['resto_name'],
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              res['resto_address'],
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.phone, size: 16, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Text(
+                            res['phone'],
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Icon(Icons.calendar_today, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Date : ${DateFormat('EEE dd/MM/yyyy', 'fr_FR').format(DateTime.parse(res['datetime']))}',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.access_time, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Heure : ${DateFormat('HH:mm', 'fr_FR').format(DateTime.parse(res['datetime']))}',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.people, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                              'Nombre de convives: ${res['number_of_guests']}',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.info, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                              'Statut: ',
+                          ),
+                          Chip(
+                            label: Text(
+                              statusName,
+                              style: TextStyle(fontSize: 12, color: Colors.white),
+                            ),
+                            backgroundColor: statusColor,
+                            padding: EdgeInsets.zero,
+                          ),
+                        ],
+                      ),
+
+                      if (res['special_requests'] != null) ...[
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                        const Text(
+                          'Demandes spéciales',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          res['special_requests'],
+                          style: TextStyle(color: Colors.grey[700]),
+                        ),
+                      ],
+
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // On n'affiche la ligne de boutons QUE si le statut n'est pas "completed" ni "cancelled"
+              if (res['status'] != 'completed' && res['status'] != 'cancelled')
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      // Si confirmé, onPressed est null (bouton grisé), sinon il est actif
+                      onPressed: res['status'] == 'confirmed' ? null
+                        : () {
+                            print("Action : Modifier la réservation ${res['id']}");
+                        },
+                      icon: const Icon(Icons.edit),
+                      label: const Text('Modifier'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      // Toujours actif ici car on est déjà dans le "if" qui exclut annulé/terminé
+                      onPressed: () {
+                        print("Action : Annuler la réservation ${res['id']}");
+                      },
+                      icon: const Icon(Icons.cancel),
+                      label: const Text('Annuler'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
