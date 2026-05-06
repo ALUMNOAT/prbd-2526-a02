@@ -184,7 +184,7 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
                       return Card(
                         margin: const EdgeInsets.only(bottom: 16),
                         child: InkWell(
-                          onTap: () {
+                          onTap: () async {
                             // 1. Log des infos dans la console
                             print("--- Détails de la réservation cliquée ---");
                             print("ID: ${res['id']}");
@@ -194,11 +194,16 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
                             print("Status: ${res['status']}");
                             print("------------------------------------------");
 
-                            Navigator.pushNamed(
+                            await Navigator.pushNamed(
                               context,
                               '/details_reservation',
                               arguments: res, // On passe l'objet 'res' complet à la page suivante
                             );
+
+                            // si on retourne de detail_reservation, la view s'update
+                            if (mounted) {
+                              setState(() {});
+                            }
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),

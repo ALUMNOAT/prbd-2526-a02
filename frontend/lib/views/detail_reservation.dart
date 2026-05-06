@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_a02/core/widgets/dialog_action.dart';
 import 'package:prbd_2526_a02/views/mes_reservations.dart';
 
+import '../core/widgets/dialog_box.dart';
 import '../providers/security_provider.dart';
 
 void main() async {
@@ -73,7 +75,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () => Navigator.pushReplacementNamed(context, '/homeClient'),
+            onPressed: () => Navigator.pushReplacementNamed(context, '/details_reservation'),
           ),
         ],
         elevation: 2,
@@ -250,9 +252,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
                   Expanded(
                     child: OutlinedButton.icon(
                       // Toujours actif ici car on est déjà dans le "if" qui exclut annulé/terminé
-                      onPressed: () {
-                        print("Action : Annuler la réservation ${res['id']}");
-                      },
+                      onPressed: () => _cancel_reservation(context, res),
                       icon: const Icon(Icons.cancel),
                       label: const Text('Annuler'),
                     ),
@@ -264,5 +264,45 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
         ),
       ),
     );
+  }
+
+  void _cancel_reservation(BuildContext context, Map<String, dynamic> res) async {
+    final confirm = await DialogBox(
+      title: 'Annuler la réservation',
+      message: 'Êtes-vous sûr de vouloir annuler cette réservation ? ',
+      actions: [
+        DialogAction(label: 'Non'),
+        DialogAction(label: 'Oui', color: Colors.red, isFilled: true),
+      ],
+    ).show(context);
+
+    if (confirm != 'Oui') return;
+
+    try {
+      /// If res['id'] is already an int inside the map,
+      /// int.parse() will crash because it expects a String. To be 100% safe, we use:
+      /// int.parse(res['id'].toString())
+      /// This works whether the source is a String or an Int.
+
+      final int id = int.parse(res['id'].toString());
+      await ref.read(securityProvider.notifier).annuler_reservation(id: id);
+
+      if (!context.mounted) return;
+
+      // Instead of replacing the route, we just tell the UI to update locally
+      setState(() {
+        res['status'] = 'cancelled';
+      });
+
+    } catch (e) {
+      if (!context.mounted) return;
+      DialogBox(
+        title: 'Impossible d annuler la réservation',
+        message: 'Checker votre connection avec la base de données',
+        actions: [
+          DialogAction(label: 'OK'),
+        ],
+      ).show(context);
+    }
   }
 }

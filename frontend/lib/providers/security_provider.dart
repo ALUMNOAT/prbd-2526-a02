@@ -114,4 +114,19 @@ class SecurityNotifier extends AsyncNotifier<String?> {
       );
     }
   }
+
+  Future<void> annuler_reservation({
+    required int id
+  }) async {
+    try {
+      await Security.annuler_reservation(id: id);
+    } catch (e) {
+      state = AsyncError(
+          "Cancelling the reservation $id failed.",
+          StackTrace.current,
+      );
+    }
+  }
+
+
 }

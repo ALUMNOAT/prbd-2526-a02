@@ -98,4 +98,20 @@ class Security {
     }
   }
 
+  /// Function returns void
+  static Future<void> annuler_reservation ({
+    required int id
+}) async {
+    final response = await ApiClient.post(
+      'clientannulerreservation',
+      body: json.encode({
+        '_id': id,
+      }),
+      anonymous: false,
+    );
+    if (response.statusCode != 204) {
+      throw Exception('Failed to cancel reservation\n\n${response.body}');
+    }
+  }
+
 }

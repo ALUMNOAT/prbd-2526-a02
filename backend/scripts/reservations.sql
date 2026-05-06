@@ -14,6 +14,7 @@ DROP TRIGGER IF EXISTS reservations_client_no_modify
 DROP FUNCTION IF EXISTS reservations_restaurant_no_modify();
 DROP FUNCTION IF EXISTS reservations_client_no_modify();
 drop function if exists getclientreservations(int);
+drop function if exists clientannulerreservation(int);
 
 /* 1) Le statut d'une réservation doit être soit pending (en attente de confirmation),
  * confirmed (confirmée), cancelled (annulée)
@@ -105,3 +106,17 @@ $$
     language plpgsql;
 
 GRANT EXECUTE ON FUNCTION getclientreservations(int) TO authenticated;
+
+create or replace function clientannulerreservation(_id int)
+returns void
+as
+$$
+begin
+    -- Use UPDATE to modify the existing record
+    update reservations
+    set status = 'cancelled'  -- Use single quotes for string/enum literals
+    where id = _id;           -- Use the parameter to target the specific row
+end
+$$ language plpgsql security definer;
+
+GRANT EXECUTE ON FUNCTION clientannulerreservation(int) TO authenticated;

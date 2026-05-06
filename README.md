@@ -56,3 +56,20 @@ Mes reservations (flux)
 4) ListView.builder : C'est une usine de generation des cartes. On lui dit "Il y a 5 éléments dans reservations".
 
 5) res = reservations[index] : À chaque ligne qu'il construit, l'usine prend une seule ligne du tableau (l'index 0, puis 1, puis 2...) pour remplir la carte correspondante.
+
+### 🚀 Navigation & State Sync: The `await` Pattern
+
+When navigating from a list (Home) to a detail view where data might be modified (e.g., cancelling a reservation), using `async/await` on the `Navigator` is critical to keep the UI in sync.
+
+| Step  | User Action    | Code State (Home Page)   | Description                                                                       |
+|:------|:---------------|:-------------------------|:----------------------------------------------------------------------------------|
+| **1** | **Click Card** | `await Navigator.push()` | The code **pauses** execution at this line.                                       |
+| **2** | **Interact**   | *Idle (Waiting)*         | The user is on the Details Page. They update the reservation (e.g., `Annuler`).   |
+| **3** | **Click Back** | `Navigator.pop()`        | The Details Page is removed. This "wakes up" the code on the Home Page.           |
+| **4** | **Resume**     | **Reactive**             | The `await` finishes. The code moves to the very next line automatically.         |
+| **5** | **Rebuild**    | `setState(() {})`        | We trigger a rebuild of the Home Page.                                            |
+| **6** | **Update**     | `FutureBuilder`          | The `FutureBuilder` re-runs, fetches fresh DB data, and shows the updated status. |
+
+#### ⚠️ Why we avoid "Fire and Forget" (No Await)
+If `await` is omitted, **Step 5** and **Step 6** execute immediately after **Step 1**.
+The Home Page refreshes its data *before* the user has actually clicked "Cancel" on the next screen. Consequently, the list remains stale when the user eventually returns.
