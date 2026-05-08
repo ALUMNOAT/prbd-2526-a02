@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:prbd_2526_a02/views/detail_reservation.dart';
 
 import 'package:prbd_2526_a02/views/login.dart';
+import 'package:prbd_2526_a02/views/recherche_restaurants.dart';
 import '../providers/security_provider.dart';
 import '../views/mes_reservations.dart';
 import '../views/mes_restaurants.dart';
@@ -29,6 +30,7 @@ class MyApp extends ConsumerWidget {
         '/homeManager': (context) => HomeManagerPage(),
         '/signup': (context) => SignupPage(),
         '/details_reservation': (context) => ReservationDetailsPage(),
+        '/recherche_restaurants': (context) => SearchRestaurantsPage(),
       },
     );
   }
