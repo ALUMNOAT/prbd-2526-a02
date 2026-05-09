@@ -75,7 +75,12 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () => Navigator.pushReplacementNamed(context, '/details_reservation'),
+            onPressed: () => Navigator.pushReplacementNamed(
+                context,
+                '/details_reservation',
+                // Si on inclue pas argument lors du rechargement, il devient null = page plante
+                arguments: res,
+            ),
           ),
         ],
         elevation: 2,

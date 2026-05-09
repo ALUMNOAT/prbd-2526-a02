@@ -270,7 +270,7 @@ class _SearchRestaurantsPageState extends ConsumerState<SearchRestaurantsPage> {
                                       onTap: () async {
                                         await Navigator.pushNamed(
                                           context,
-                                          '/details_restaurant',
+                                          '/detail_restaurant',
                                           arguments: res,
                                         );
                                         if (mounted) setState(() {});
