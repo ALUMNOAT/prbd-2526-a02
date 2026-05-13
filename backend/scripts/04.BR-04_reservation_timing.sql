@@ -7,12 +7,12 @@
 (6) https://stackoverflow.com/questions/22835874/postgresql-convert-timestamp-to-time-or-retrieve-only-time-from-timestamp-col#22835922
 (7) https://www.geeksforgeeks.org/postgresql/how-to-extract-day-of-week-from-date-field-in-postgresql/
 (8) https://www.postgresql.org/docs/current/functions-formatting.html
+(9) https://vrcacademy.com/tutorials/postgresql-database-triggers/
  */
 
 
--- finds all the reservations whose reserved table's restaurant
--- isn't the reserved restaurant itself.
-CREATE OR REPLACE FUNCTION check_tables_ownership()
+-- gets all the reservations who have no availability in the chosen restaurant
+CREATE OR REPLACE FUNCTION check_reservation_timing()
     RETURNS TRIGGER AS $$
 BEGIN
     IF EXISTS(      -- see doc(1)
@@ -32,18 +32,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql security definer;
 
+-- if services change, then we need to re-evaluate everything ? seems wrong
+CREATE TRIGGER trigger_validate_services_timing
+    AFTER DELETE OR UPDATE OF day_of_week, start_time, end_time
+    ON services
+EXECUTE FUNCTION check_reservation_timing();
 
--- does the reservation use the table(s) from the correct restaurant ?
-CREATE TRIGGER trigger_validate_reservation_tables_ownership
-    AFTER INSERT
-    ON reservation_tables
-    -- deferred because reservation_tables is "delete cascade"-linked to reservations
-    -- therefore it waits for the reservations to update first before executing this trigger
-EXECUTE FUNCTION check_tables_ownership();
-
--- if a reservation changes restaurant, its table(s) should too !
-CREATE TRIGGER trigger_validate_reservation_tables_ownership
-    AFTER INSERT
+-- if a reservation changes datetime, we check if the restaurant allows it
+CREATE TRIGGER trigger_validate_reservations_timing
+    AFTER INSERT OR UPDATE OF datetime
     ON reservations
     FOR EACH ROW
-EXECUTE FUNCTION check_tables_ownership();
+EXECUTE FUNCTION check_reservation_timing();
