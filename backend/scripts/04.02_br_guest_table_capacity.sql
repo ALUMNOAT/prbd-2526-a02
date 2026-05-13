@@ -1,23 +1,25 @@
--- (1) https://www.postgresql.org/docs/current/functions-conditional.html
---
+/*
+(1) https://www.postgresql.org/docs/current/functions-conditional.html
+(2) https://www.postgresql.org/docs/9.0/sql-createconstraint.html
+(3) https://www.postgresql.org/docs/current/sql-createtrigger.html
+(4) https://www.postgresql.org/docs/current/sql-insert.html
+ */
 
--- NETTOYAGE --
---DROP TRIGGER IF EXISTS trg_check_guest_table_capacity ON reservations;
---DROP FUNCTION IF EXISTS check_guest_table_capacity();
 
-
+-- this function executes only when a trigger calls it. If we modify the DB correctly,
+-- there should not be any error happening
 CREATE OR REPLACE FUNCTION check_guest_table_capacity()
     RETURNS TRIGGER AS $$
 BEGIN
-    IF EXISTS(
-        SELECT r.id, r.number_of_guests, COALESCE(SUM(), 0)
+    IF EXISTS(      -- see doc(1)
+        SELECT r.id, r.number_of_guests, COALESCE(SUM(t.capacity), 0)
         FROM reservations r
-            LEFT JOIN reservation_tables rt ON r.id = rt.reservation
-            LEFT JOIN tables t ON rt.table = t.id
+            LEFT JOIN reservation_tables rt ON rt.reservation = r.id
+            LEFT JOIN tables t ON t.id = rt.table
         WHERE r.status IN ('confirmed'::status_type, 'completed'::status_type)
         GROUP BY r.id, r.number_of_guests
-        HAVING r.number_of_guests > COALESCE(SUM(), 0)
-    ) THEN
+        HAVING r.number_of_guests > COALESCE(SUM(t.capacity), 0))
+    THEN
         RAISE EXCEPTION 'Too many guests. Table capacity not suitable';
     END IF;
 
@@ -25,36 +27,37 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql security definer;
 
-
-/*
--- NETTOYAGE --
-DROP TRIGGER IF EXISTS trg_check_reservation_client ON reservations;
-DROP FUNCTION IF EXISTS check_reservation_client_role();
-
--- CREATION FONCTION --
-CREATE OR REPLACE FUNCTION check_reservation_client_role()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Vérifie si l'ID de l'utilisateur existe avec le rôle spécifique
-    IF NOT EXISTS (
-        SELECT 1
-        FROM users
-        WHERE id = NEW.client
-          AND role = 'client'::role_type
-    ) THEN
-        -- Si l'utilisateur n'est pas trouvé ou n'est pas un client, on lève une exception
-        RAISE EXCEPTION
-            'BR-01: L''utilisateur (ID %) doit avoir le rôle "client" pour effectuer une réservation.',
-            NEW.client;
-END IF;
-
-    -- Si tout est correct, on autorise l'opération
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- CREATION TRIGGER --
-CREATE TRIGGER trg_check_reservation_client
-    BEFORE INSERT OR UPDATE OF client ON reservations
+-- if more guests come to a reservation, do we have enough table seats ?
+CREATE TRIGGER trigger_validate_reservation_capacity
+    AFTER INSERT OR UPDATE OF number_of_guests, status
+    ON reservations
     FOR EACH ROW
-    EXECUTE FUNCTION check_reservation_client_role();
+EXECUTE FUNCTION check_guest_table_capacity();
+
+-- if we remove reservation tables, we first need to check that the
+-- reservation itself was deleted which changes the status to "cancelled",
+-- which doesn't trigger check_guest_table_capacity())
+-- CONSTRAINT because it is deferred. see doc(2)
+CREATE CONSTRAINT TRIGGER trigger_validate_reservation_tables_capacity
+    AFTER DELETE
+    ON reservation_tables
+    -- deferred because reservation_tables is "delete cascade"-linked to reservations
+    -- therefore it waits for the reservations to update first before executing this trigger
+    DEFERRABLE INITIALLY DEFERRED
+    FOR EACH ROW
+EXECUTE FUNCTION check_guest_table_capacity();
+
+-- if we downsize a table, or delete a table, do we still have enough table seats ?
+CREATE CONSTRAINT TRIGGER trigger_validate_reservation_tables_capacity
+    AFTER UPDATE OF capacity OR DELETE
+    ON tables
+    FOR EACH ROW
+EXECUTE FUNCTION check_guest_table_capacity();
+
+-- TESTS PREPARATION see doc(4)
+INSERT INTO tables
+VALUES (99, 1, 99, 4);
+INSERT INTO reservations
+VALUES (99, 1, 1, '2030-1-1 19:00:00', 4, 'pending');
+
+
