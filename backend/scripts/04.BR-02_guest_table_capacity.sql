@@ -48,7 +48,7 @@ CREATE CONSTRAINT TRIGGER trigger_validate_reservation_tables_capacity
 EXECUTE FUNCTION check_guest_table_capacity();
 
 -- if we downsize a table, or delete a table, do we still have enough table seats ?
-CREATE CONSTRAINT TRIGGER trigger_validate_reservation_tables_capacity
+CREATE TRIGGER trigger_validate_reservation_tables_capacity
     AFTER UPDATE OF capacity OR DELETE
     ON tables
     FOR EACH ROW
