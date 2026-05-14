@@ -8,39 +8,34 @@
 (7) https://www.geeksforgeeks.org/postgresql/how-to-extract-day-of-week-from-date-field-in-postgresql/
 (8) https://www.postgresql.org/docs/current/functions-formatting.html
 (9) https://vrcacademy.com/tutorials/postgresql-database-triggers/
+(10) https://www.postgresql.org/docs/current/functions-subquery.html#FUNCTIONS-SUBQUERY-EXISTS
+(11) https://stackoverflow.com/questions/11299037/postgresql-if-statement <-- 'EXISTS' seems to be good practice
  */
 
 
--- gets all the reservations who have no availability in the chosen restaurant
+-- if the reservation fits into the restaurant's opening hours, then allow it.
 CREATE OR REPLACE FUNCTION check_reservation_timing()
     RETURNS TRIGGER AS $$
 BEGIN
     IF EXISTS(      -- see doc(1)
-        SELECT r.datetime, EXTRACT(ISODOW FROM r.datetime), s.day_of_week, s.start_time, s.end_time
+        SELECT 1
         FROM reservations r
-             LEFT JOIN restaurants rst ON rst.id = r.restaurant
-             LEFT JOIN services s ON s.id = rst.id
-        WHERE r.status IN ('pending'::status_type, 'confirmed'::status_type, 'completed'::status_type)
-        AND EXTRACT(ISODOW FROM r.datetime) = s.day_of_week     -- see doc(5) for 'ISODOW' keyword
-        AND s.start_time < r.datetime::time     -- see doc(6) for '::time' syntax
-        AND r.datetime::time < s.end_time
+        LEFT JOIN services s ON s.restaurant = r.restaurant
+        WHERE NEW.status IN ('pending'::status_type, 'confirmed'::status_type, 'completed'::status_type)
+          AND EXTRACT(ISODOW FROM NEW.datetime) = s.day_of_week     -- see doc(5) for 'ISODOW' keyword
+          AND NEW.datetime::time > s.start_time   -- see doc(6) for '::time' syntax
+          AND NEW.datetime::time < s.end_time
     ) THEN
-        RAISE EXCEPTION 'BR-04 : Timetable conflict for the reservation';
+        RETURN NEW;
     END IF;
 
-    RETURN NULL;
+    RAISE EXCEPTION 'BR-04 : Timetable conflict for the reservation';
 END;
 $$ LANGUAGE plpgsql security definer;
 
--- if services change, then we need to re-evaluate everything ? seems wrong
-CREATE TRIGGER trigger_validate_services_timing
-    AFTER DELETE OR UPDATE OF day_of_week, start_time, end_time
-    ON services
-EXECUTE FUNCTION check_reservation_timing();
-
--- if a reservation changes datetime, we check if the restaurant allows it
-CREATE TRIGGER trigger_validate_reservations_timing
-    AFTER INSERT OR UPDATE OF datetime
+-- 'tgv' = 'trigger_validate'
+CREATE TRIGGER tgv_new_reservation_timing
+    BEFORE INSERT OR UPDATE OF datetime, status -- new reservation status can only be 'pending' (BR-09)
     ON reservations
     FOR EACH ROW
 EXECUTE FUNCTION check_reservation_timing();
