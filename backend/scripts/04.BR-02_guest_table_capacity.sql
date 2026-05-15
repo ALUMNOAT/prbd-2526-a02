@@ -3,6 +3,8 @@
 (2) https://www.postgresql.org/docs/9.0/sql-createconstraint.html
 (3) https://www.postgresql.org/docs/current/sql-createtrigger.html
 (4) https://www.postgresql.org/docs/current/sql-insert.html
+(5) https://www.w3schools.com/sql/sql_join_left.asp
+(6) https://vrcacademy.com/tutorials/postgresql-database-triggers/
  */
 
 
@@ -53,11 +55,3 @@ CREATE TRIGGER trigger_validate_reservation_tables_capacity
     ON tables
     FOR EACH ROW
 EXECUTE FUNCTION check_guest_table_capacity();
-
--- TESTS PREPARATION see doc(4)
-INSERT INTO tables
-VALUES (99, 1, 99, 4);
-INSERT INTO reservations
-VALUES (99, 1, 1, '2030-1-1 19:00:00', 4, 'pending');
-
-
