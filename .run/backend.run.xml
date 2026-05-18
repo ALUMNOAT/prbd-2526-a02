@@ -16,6 +16,7 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/04.BR-05_slot.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.07_br_services_colliding.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.08_br_reservation_time_align_service_time.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.BR-09_new_reservation.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.10_br_restaurant_has_one_manager.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.11_br_reservation_no_modify.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.12_br_reservation_tables_nomodify.sql" />
