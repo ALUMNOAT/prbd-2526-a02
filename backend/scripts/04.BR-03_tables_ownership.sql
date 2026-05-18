@@ -10,17 +10,17 @@
 CREATE OR REPLACE FUNCTION check_table_ownership()
     RETURNS TRIGGER AS $$
 BEGIN
-    IF EXISTS(      -- see doc(1)
+    IF NOT EXISTS(      -- see doc(1)
         SELECT 1
-        FROM NEW
-            LEFT JOIN reservations r ON r.id = NEW.reservation
+        FROM reservations r
             LEFT JOIN tables t ON t.id = NEW.table
-        WHERE r.restaurant = t.restaurant
+        WHERE r.id = NEW.reservation
+          AND r.restaurant = t.restaurant
     ) THEN
-        RETURN NEW;
+        RAISE EXCEPTION 'BR-03: Selected table do not belong to the restaurant of the reservation';
     END IF;
 
-    RAISE EXCEPTION 'BR-03: Selected table do not belong to the restaurant of the reservation';
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql security definer;
 
@@ -30,3 +30,4 @@ CREATE TRIGGER tgv_reservation_tables_ownership
     ON reservation_tables
     FOR EACH ROW
 EXECUTE FUNCTION check_table_ownership();
+
