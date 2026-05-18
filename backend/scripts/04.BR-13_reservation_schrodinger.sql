@@ -26,7 +26,7 @@ END;
 $$ LANGUAGE plpgsql security definer;
 
 CREATE TRIGGER tgv_reservation_schrodinger
-    BEFORE INSERT
+    BEFORE INSERT OR UPDATE OF status
     ON reservations
     FOR EACH ROW
 EXECUTE FUNCTION check_reservation_schrodinger();
