@@ -23,8 +23,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_reservations(reservation_tables);
-CREATE OR REPLACE FUNCTION get_reservations(
+DROP FUNCTION get_reservation(reservation_tables);
+CREATE OR REPLACE FUNCTION get_reservation(
     IN rt reservation_tables)
     RETURNS SETOF reservations AS $$
 BEGIN
@@ -33,25 +33,20 @@ BEGIN
     WHERE r.id = rt.reservation;
 
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Tools: The given reservation id was not associated with any reservation';
+        RAISE EXCEPTION 'Tools: The given reservation table was not associated with any reservation';
     END IF;
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_table_reservations(INT);
-CREATE OR REPLACE FUNCTION get_table_reservations(
-    IN table_id INT)
+DROP FUNCTION get_restaurant_reservations(restaurants);
+CREATE OR REPLACE FUNCTION get_restaurant_reservations(
+    IN rst restaurants)
     RETURNS SETOF reservations AS $$
 BEGIN
     RETURN QUERY
         SELECT r.*
         FROM reservations r
-                 LEFT JOIN reservation_tables rt ON rt.reservation = r.id
-                 LEFT JOIN get_table(table_id) t ON t.id = rt."table";
-
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Tools: The given restaurant id was not associated with any services';
-    END IF;
+        WHERE r.restaurant = rst.id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -65,10 +60,38 @@ BEGIN
         FROM reservations r
         LEFT JOIN reservation_tables rt ON rt.reservation = r.id
         LEFT JOIN t ON t.id = rt."table";
+END;
+$$ LANGUAGE plpgsql;
 
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Tools: The given restaurant id was not associated with any services';
-    END IF;
+DROP FUNCTION get_all_restaurant_reservations_on_date(INT, DATE);
+CREATE OR REPLACE FUNCTION get_all_restaurant_reservations_on_date(
+    IN restaurant_id INT,
+    IN selected_day DATE)
+    RETURNS SETOF reservations AS $$
+BEGIN
+    RETURN QUERY
+        SELECT r.*
+        FROM get_restaurant(restaurant_id) rst
+                 LEFT JOIN reservations r ON r.restaurant = rst.id
+        WHERE r.datetime::date = selected_day;
+
+    --     IF NOT FOUND THEN
+--         RETURN NULL;
+--     END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION get_reservations_from_table_and_date(INT, DATE);
+CREATE OR REPLACE FUNCTION get_reservations_from_table_and_date(
+    IN table_id INT,
+    IN selected_day DATE)
+    RETURNS SETOF reservations AS $$
+BEGIN
+    RETURN QUERY
+        SELECT r.*
+        FROM get_table_reservations(table_id) r
+        WHERE r.datetime::date = selected_day;
+
 END;
 $$ LANGUAGE plpgsql;
 
@@ -151,21 +174,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_restaurant_service_at_timestamp(INT, TIMESTAMP);
-CREATE OR REPLACE FUNCTION get_restaurant_service_at_timestamp(
-    IN restaurant_id INT,
-    IN date_time TIMESTAMP)
-    RETURNS SETOF services AS $$
-BEGIN
-    RETURN QUERY
-        SELECT s.*
-        FROM get_restaurant_services(restaurant_id) s
-        WHERE EXTRACT(ISODOW FROM date_time) = s.day_of_week     -- see doc(5) for 'ISODOW' keyword
-          AND date_time::time > s.start_time   -- see doc(6) for '::time' syntax
-          AND date_time::time < s.end_time;
-END;
-$$ LANGUAGE plpgsql;
-
 
 -- ########
 -- SERVICES
@@ -222,6 +230,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP FUNCTION get_restaurant_service_at_timestamp(INT, TIMESTAMP);
+CREATE OR REPLACE FUNCTION get_restaurant_service_at_timestamp(
+    IN restaurant_id INT,
+    IN date_time TIMESTAMP)
+    RETURNS SETOF services AS $$
+BEGIN
+    RETURN QUERY
+        SELECT s.*
+        FROM get_restaurant_services(restaurant_id) s
+        WHERE EXTRACT(ISODOW FROM date_time) = s.day_of_week     -- see doc(5) for 'ISODOW' keyword
+          AND date_time::time > s.start_time   -- see doc(6) for '::time' syntax
+          AND date_time::time < s.end_time;
+END;
+$$ LANGUAGE plpgsql;
+
 
 -- ######
 -- TABLES
@@ -241,14 +264,41 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_restaurant_tables(INT);
-CREATE OR REPLACE FUNCTION get_restaurant_tables(
-    IN restaurant_id INT)
+DROP FUNCTION get_table(reservation_tables);
+CREATE OR REPLACE FUNCTION get_table(
+    IN rt reservation_tables)
     RETURNS SETOF tables AS $$
 BEGIN
     RETURN QUERY
-        SELECT * FROM tables t
-        WHERE t.restaurant = restaurant_id;
+        SELECT t.* FROM tables t
+        WHERE t.id = rt."table";
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Tools: The given reservation table was not associated with any table';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION get_table(reservations);
+CREATE OR REPLACE FUNCTION get_table(
+    IN r reservations)
+    RETURNS SETOF tables AS $$
+BEGIN
+    RETURN QUERY
+        SELECT t.* FROM tables t
+        LEFT JOIN reservation_tables rt ON rt."table" = t.id
+        LEFT JOIN r ON r.id = rt.reservation;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION get_restaurant_tables(restaurants);
+CREATE OR REPLACE FUNCTION get_restaurant_tables(
+    IN r restaurants)
+    RETURNS SETOF tables AS $$
+BEGIN
+    RETURN QUERY
+        SELECT t.* FROM tables t
+        WHERE t.restaurant = r.id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -268,71 +318,5 @@ BEGIN
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Tools: The given user id was not associated with any user';
     END IF;
-END;
-$$ LANGUAGE plpgsql;
-
-
-DROP FUNCTION get_all_restaurant_reservations(INT);
-CREATE OR REPLACE FUNCTION get_all_restaurant_reservations(
-    IN restaurant_id INT)
-    RETURNS SETOF reservations AS $$
-BEGIN
-    RETURN QUERY
-        SELECT r.*
-        FROM get_restaurant(restaurant_id) rst
-        LEFT JOIN reservations r ON r.restaurant = rst.id;
-
---     IF NOT FOUND THEN
---         RETURN NULL;
---     END IF;
-END;
-$$ LANGUAGE plpgsql;
-
-
-DROP FUNCTION get_all_restaurant_reservations_on_date(INT, DATE);
-CREATE OR REPLACE FUNCTION get_all_restaurant_reservations_on_date(
-    IN restaurant_id INT,
-    IN selected_day DATE)
-    RETURNS SETOF reservations AS $$
-BEGIN
-    RETURN QUERY
-        SELECT r.*
-        FROM get_restaurant(restaurant_id) rst
-        LEFT JOIN reservations r ON r.restaurant = rst.id
-        WHERE r.datetime::date = selected_day;
-
---     IF NOT FOUND THEN
---         RETURN NULL;
---     END IF;
-END;
-$$ LANGUAGE plpgsql;
-
-
-DROP FUNCTION get_reservations_from_table_and_date(INT, DATE);
-CREATE OR REPLACE FUNCTION get_reservations_from_table_and_date(
-    IN table_id INT,
-    IN selected_day DATE)
-    RETURNS SETOF reservations AS $$
-BEGIN
-    RETURN QUERY
-        SELECT r.*
-        FROM get_table_reservations(table_id) r
-        WHERE r.datetime::date = selected_day;
-
-END;
-$$ LANGUAGE plpgsql;
-
-
-DROP FUNCTION get_service_from_reservation(reservations);
-CREATE OR REPLACE FUNCTION get_service_from_reservation(
-    IN reservation reservations)
-    RETURNS SETOF services AS $$
-BEGIN
-    RETURN QUERY
-    SELECT s.*
-    FROM services s
-    WHERE EXTRACT(ISODOW FROM reservation.datetime) = s.day_of_week     -- see doc(5) for 'ISODOW' keyword
-      AND reservation.datetime::time >= s.start_time   -- see doc(6) for '::time' syntax
-      AND reservation.datetime::time <= s.end_time;
 END;
 $$ LANGUAGE plpgsql;
