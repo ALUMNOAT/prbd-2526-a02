@@ -10,23 +10,18 @@
  */
 
 
-CREATE OR REPLACE FUNCTION check_table_reservation_overflow()
+CREATE OR REPLACE FUNCTION check_new_table_reservation_overflow()
     RETURNS TRIGGER AS $$
 DECLARE
     current_reservation reservations = get_reservation(NEW.reservation);
+    current_service services = get_service_from_reservation(current_reservation);
 BEGIN
-    IF (current_reservation.status IN ('confirmed'::status_type, 'completed'::status_type))
+    IF (current_reservation.status IN ('confirmed'::status_type))
     AND EXISTS(
         SELECT 1
-        FROM reservations r
-        LEFT JOIN reservation_tables rt ON rt.reservation = r.id
-        WHERE rt."table" = NEW."table"
-          AND r.datetime::date = current_reservation.datetime::date
-          -- not necessary since each table is unique to a restaurant, but it pays to be cautious
-          AND r.restaurant = current_reservation.restaurant
-          AND r.status IN ('confirmed'::status_type, 'completed'::status_type)
-          AND current_reservation::time >= get_service(r.id).start_time
-          AND current_reservation::time <= get_service(r.id).end_time
+        FROM get_reservations_from_table_and_date(NEW.table, current_reservation.datetime) r
+
+        WHERE
     ) THEN
         RAISE EXCEPTION 'BR-06: This table is already reserved.';
     END IF;
@@ -35,41 +30,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql security definer;
 
-CREATE TRIGGER tgv_table_reservation_overflow
+CREATE TRIGGER tgv_new_table_reservation_overflow
     BEFORE INSERT
     ON reservation_tables
     FOR EACH ROW
-EXECUTE FUNCTION check_table_reservation_overflow();
-
-CREATE OR REPLACE FUNCTION get_service(
-    IN reservation_id INT)
-    RETURNS services AS $$
-BEGIN
-    RETURN QUERY    -- doc (8) & doc (9)
-    SELECT s.*
-    FROM services s
-    LEFT JOIN reservations r ON r.restaurant = s.restaurant
-    WHERE r.id = reservation_id     --I'd rather have the row itself instead of the id int...
-      AND s.day_of_week = EXTRACT(ISODOW FROM r.datetime)
-      AND r.datetime::time >= s.start_time AND r.datetime::time <= s.end_time;
-
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'BR-13: The given reservation id was not associated with any services';
-    END IF;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION get_reservation(
-    IN reservation_id INT)
-    RETURNS reservations AS $$
-BEGIN
-    RETURN QUERY
-    SELECT r.*
-    FROM reservations r
-    WHERE r.id = reservation_id;
-
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'BR-06: The given reservation id was not associated with any reservation';
-    END IF;
-END;
-$$ LANGUAGE plpgsql;
+EXECUTE FUNCTION check_new_table_reservation_overflow();
