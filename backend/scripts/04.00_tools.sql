@@ -8,7 +8,7 @@ set search_path to public;
 -- ############
 -- RESERVATIONS
 -- ############
-DROP FUNCTION get_reservation(INT);
+DROP FUNCTION IF EXISTS get_reservation(INT);
 CREATE OR REPLACE FUNCTION get_reservation(
     IN reservation_id INT)
     RETURNS SETOF reservations AS $$
@@ -23,7 +23,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_reservation(reservation_tables);
+DROP FUNCTION IF EXISTS get_reservation(reservation_tables);
 CREATE OR REPLACE FUNCTION get_reservation(
     IN rt reservation_tables)
     RETURNS SETOF reservations AS $$
@@ -38,8 +38,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_restaurant_reservations(restaurants);
-CREATE OR REPLACE FUNCTION get_restaurant_reservations(
+DROP FUNCTION IF EXISTS get_reservations(restaurants);
+CREATE OR REPLACE FUNCTION get_reservations(
     IN rst restaurants)
     RETURNS SETOF reservations AS $$
 BEGIN
@@ -50,8 +50,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_table_reservations(tables);
-CREATE OR REPLACE FUNCTION get_table_reservations(
+DROP FUNCTION IF EXISTS get_reservations(tables);
+CREATE OR REPLACE FUNCTION get_reservations(
     IN t tables)
     RETURNS SETOF reservations AS $$
 BEGIN
@@ -63,7 +63,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_all_restaurant_reservations_on_date(INT, DATE);
+DROP FUNCTION IF EXISTS get_all_restaurant_reservations_on_date(INT, DATE);
 CREATE OR REPLACE FUNCTION get_all_restaurant_reservations_on_date(
     IN restaurant_id INT,
     IN selected_day DATE)
@@ -81,7 +81,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_reservations_from_table_and_date(INT, DATE);
+DROP FUNCTION IF EXISTS get_reservations_from_table_and_date(INT, DATE);
 CREATE OR REPLACE FUNCTION get_reservations_from_table_and_date(
     IN table_id INT,
     IN selected_day DATE)
@@ -99,7 +99,7 @@ $$ LANGUAGE plpgsql;
 -- ###########
 -- RESTAURANTS
 -- ###########
-DROP FUNCTION get_restaurant(INT);
+DROP FUNCTION IF EXISTS get_restaurant(INT);
 CREATE OR REPLACE FUNCTION get_restaurant(
     IN restaurant_id INT)
     RETURNS SETOF restaurants AS $$
@@ -114,7 +114,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_restaurant(reservations);
+DROP FUNCTION IF EXISTS get_restaurant(reservations);
 CREATE OR REPLACE FUNCTION get_restaurant(
     IN r reservations)
     RETURNS SETOF restaurants AS $$
@@ -129,7 +129,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_restaurant(tables);
+DROP FUNCTION IF EXISTS get_restaurant(reservation_tables);
+CREATE OR REPLACE FUNCTION get_restaurant(
+    IN rt reservation_tables)
+    RETURNS SETOF restaurants AS $$
+BEGIN
+    RETURN QUERY
+        SELECT rst.*
+        FROM restaurants rst
+        LEFT JOIN reservations r ON r.restaurant = rst.id
+        LEFT JOIN rt ON rt.reservation = r.id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Tools: The given reservation table was not associated with any restaurant';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS get_restaurant(tables);
 CREATE OR REPLACE FUNCTION get_restaurant(
     IN t tables)
     RETURNS SETOF restaurants AS $$
@@ -144,7 +161,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_restaurant(services);
+DROP FUNCTION IF EXISTS get_restaurant(services);
 CREATE OR REPLACE FUNCTION get_restaurant(
     IN s services)
     RETURNS SETOF restaurants AS $$
@@ -159,7 +176,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_restaurant(restaurant_managers);
+DROP FUNCTION IF EXISTS get_restaurant(restaurant_managers);
 CREATE OR REPLACE FUNCTION get_restaurant(
     IN rm restaurant_managers)
     RETURNS SETOF restaurants AS $$
@@ -178,7 +195,7 @@ $$ LANGUAGE plpgsql;
 -- ########
 -- SERVICES
 -- ########
-DROP FUNCTION get_service(INT);
+DROP FUNCTION IF EXISTS get_service(INT);
 CREATE OR REPLACE FUNCTION get_service(
     IN service_id INT)
     RETURNS SETOF services AS $$
@@ -193,20 +210,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_service(TIMESTAMP);
-CREATE OR REPLACE FUNCTION get_service(
-    IN date_time TIMESTAMP)
-    RETURNS SETOF services AS $$
-BEGIN
-    RETURN QUERY
-        SELECT s.* FROM services s
-        WHERE s.day_of_week = EXTRACT(ISODOW FROM date_time)
-          AND s.start_time <= date_time::time
-          AND s.end_time >= date_time::time;
-END;
-$$ LANGUAGE plpgsql;
-
-DROP FUNCTION get_service(reservations);
+DROP FUNCTION IF EXISTS get_service(reservations);
 CREATE OR REPLACE FUNCTION get_service(
     IN r reservations)
     RETURNS SETOF services AS $$
@@ -219,7 +223,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_services(restaurants);
+DROP FUNCTION IF EXISTS get_services(TIMESTAMP);
+CREATE OR REPLACE FUNCTION get_services(
+    IN date_time TIMESTAMP)
+    RETURNS SETOF services AS $$
+BEGIN
+    RETURN QUERY
+        SELECT s.* FROM services s
+        WHERE s.day_of_week = EXTRACT(ISODOW FROM date_time)
+          AND s.start_time <= date_time::time
+          AND s.end_time >= date_time::time;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS get_services(restaurants);
 CREATE OR REPLACE FUNCTION get_services(
     IN rst restaurants)
     RETURNS SETOF services AS $$
@@ -230,7 +247,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_restaurant_service_at_timestamp(INT, TIMESTAMP);
+DROP FUNCTION IF EXISTS get_restaurant_service_at_timestamp(INT, TIMESTAMP);
 CREATE OR REPLACE FUNCTION get_restaurant_service_at_timestamp(
     IN restaurant_id INT,
     IN date_time TIMESTAMP)
@@ -249,7 +266,7 @@ $$ LANGUAGE plpgsql;
 -- ######
 -- TABLES
 -- ######
-DROP FUNCTION get_table(INT);
+DROP FUNCTION IF EXISTS get_table(INT);
 CREATE OR REPLACE FUNCTION get_table(
     IN table_id INT)
     RETURNS SETOF tables AS $$
@@ -264,7 +281,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_table(reservation_tables);
+DROP FUNCTION IF EXISTS get_table(reservation_tables);
 CREATE OR REPLACE FUNCTION get_table(
     IN rt reservation_tables)
     RETURNS SETOF tables AS $$
@@ -279,7 +296,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_table(reservations);
+DROP FUNCTION IF EXISTS get_table(reservations);
 CREATE OR REPLACE FUNCTION get_table(
     IN r reservations)
     RETURNS SETOF tables AS $$
@@ -291,8 +308,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_restaurant_tables(restaurants);
-CREATE OR REPLACE FUNCTION get_restaurant_tables(
+DROP FUNCTION IF EXISTS get_tables(restaurants);
+CREATE OR REPLACE FUNCTION get_tables(
     IN r restaurants)
     RETURNS SETOF tables AS $$
 BEGIN
@@ -306,7 +323,7 @@ $$ LANGUAGE plpgsql;
 -- #####
 -- USERS
 -- #####
-DROP FUNCTION get_user(INT);
+DROP FUNCTION IF EXISTS get_user(INT);
 CREATE OR REPLACE FUNCTION get_user(
     IN user_id INT)
     RETURNS SETOF users AS $$
@@ -318,5 +335,22 @@ BEGIN
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Tools: The given user id was not associated with any user';
     END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- #######
+-- BOOLEAN
+-- #######
+DROP FUNCTION IF EXISTS is_same_service(reservations, reservations);
+CREATE OR REPLACE FUNCTION is_same_service(
+    IN r1 reservations,
+    IN r2 reservations)
+    RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN EXISTS(
+        SELECT 1
+        WHERE
+    );
 END;
 $$ LANGUAGE plpgsql;
