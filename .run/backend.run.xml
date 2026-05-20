@@ -3,6 +3,25 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/01_init.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/02_security.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/03_tables_and_data.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.00_reservations.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.00_restaurants.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.00_services.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.00_tables.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.00_users.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.BR-00_checks.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.01_br_check_reservation_client_role.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.BR-02_guest_table_capacity.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.BR-03_tables_ownership.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.BR-04_reservation_timing.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.BR-05_slot.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.07_br_services_colliding.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.08_br_reservation_time_align_service_time.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.BR-09_new_reservation.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.10_br_restaurant_has_one_manager.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.11_br_reservation_no_modify.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.12_br_reservation_tables_nomodify.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.BR-14_past_reservation.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.14_br_reservation_temporal.sql" />
     <script-mode>FILE</script-mode>
     <data-source id="ddd41155-14fe-4d46-803f-8e70c582de08" />
     <method v="2" />

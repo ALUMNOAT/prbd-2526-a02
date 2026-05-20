@@ -6,37 +6,25 @@
  */
 
 
--- finds all the reservations whose reserved table's restaurant
--- isn't the reserved restaurant itself.
-CREATE OR REPLACE FUNCTION check_tables_ownership()
+-- if the table belongs to the restaurant, all good
+CREATE OR REPLACE FUNCTION check_table_ownership()
     RETURNS TRIGGER AS $$
+DECLARE
+    reservation_restaurant INT = (get_reservation(NEW.reservation)).restaurant;
+    table_restaurant INT = (get_table(NEW.table)).restaurant;
 BEGIN
-    IF EXISTS(      -- see doc(1)
-        SELECT r.id, r.restaurant, t.restaurant
-        FROM reservations r
-            LEFT JOIN reservation_tables rt ON rt.reservation = r.id
-            LEFT JOIN tables t ON t.id = rt.table
-        WHERE r.restaurant != t.restaurant)
-    THEN
-        RAISE EXCEPTION 'Selected table(s) do not belong to the selected restaurant''s reservation';
+    IF (reservation_restaurant != table_restaurant) THEN
+        RAISE EXCEPTION 'BR-03: Selected table do not belong to the restaurant of the reservation';
     END IF;
 
-    RETURN NULL;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql security definer;
 
-
--- does the reservation use the table(s) from the correct restaurant ?
-CREATE TRIGGER trigger_validate_reservation_tables_ownership
-    AFTER INSERT
+-- does the reservation table use the table from the correct restaurant ?
+CREATE TRIGGER tgv_reservation_tables_ownership
+    BEFORE INSERT -- we cannot update reservation_tables
     ON reservation_tables
-    -- deferred because reservation_tables is "delete cascade"-linked to reservations
-    -- therefore it waits for the reservations to update first before executing this trigger
-EXECUTE FUNCTION check_tables_ownership();
-
--- if a reservation changes restaurant, its table(s) should too !
-CREATE TRIGGER trigger_validate_reservation_tables_ownership
-    AFTER INSERT
-    ON reservations
     FOR EACH ROW
-EXECUTE FUNCTION check_tables_ownership();
+EXECUTE FUNCTION check_table_ownership();
+
