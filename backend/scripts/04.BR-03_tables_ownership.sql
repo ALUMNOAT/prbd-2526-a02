@@ -9,14 +9,11 @@
 -- if the table belongs to the restaurant, all good
 CREATE OR REPLACE FUNCTION check_table_ownership()
     RETURNS TRIGGER AS $$
+DECLARE
+    reservation_restaurant INT = (get_reservation(NEW.reservation)).restaurant;
+    table_restaurant INT = (get_table(NEW.table)).restaurant;
 BEGIN
-    IF NOT EXISTS(      -- see doc(1)
-        SELECT 1
-        FROM reservations r
-            LEFT JOIN tables t ON t.id = NEW.table
-        WHERE r.id = NEW.reservation
-          AND r.restaurant = t.restaurant
-    ) THEN
+    IF (reservation_restaurant != table_restaurant) THEN
         RAISE EXCEPTION 'BR-03: Selected table do not belong to the restaurant of the reservation';
     END IF;
 
