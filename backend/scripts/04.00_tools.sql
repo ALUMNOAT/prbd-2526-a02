@@ -67,3 +67,19 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+
+DROP FUNCTION get_restaurant_services(INT);
+CREATE OR REPLACE FUNCTION get_restaurant_services(
+    IN restaurant_id INT)
+    RETURNS SETOF services AS $$
+BEGIN
+    RETURN QUERY
+        SELECT * FROM services s
+        WHERE s.restaurant = restaurant_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Tools: The given restaurant id was not associated with any services';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
