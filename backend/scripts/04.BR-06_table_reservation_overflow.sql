@@ -13,8 +13,8 @@
 CREATE OR REPLACE FUNCTION check_new_table_reservation_overflow()
     RETURNS TRIGGER AS $$
 DECLARE
-    current_reservation reservations = get_reservation(NEW.reservation);
-    current_service services = get_service_from_reservation(current_reservation);
+    current_reservation reservations = get_reservation(NEW);
+    current_service services = get_service(current_reservation);
 BEGIN
     IF (current_reservation.status IN ('confirmed'::status_type))
     AND EXISTS(
