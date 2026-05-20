@@ -20,4 +20,5 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT (get_reservation(1)).datetime;
+SELECT r.datetime
+FROM get_reservation(1) r;
