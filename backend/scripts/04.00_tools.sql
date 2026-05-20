@@ -219,8 +219,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION get_restaurant_services(restaurants);
-CREATE OR REPLACE FUNCTION get_restaurant_services(
+DROP FUNCTION get_services(restaurants);
+CREATE OR REPLACE FUNCTION get_services(
     IN rst restaurants)
     RETURNS SETOF services AS $$
 BEGIN
