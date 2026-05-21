@@ -217,7 +217,8 @@ CREATE OR REPLACE FUNCTION get_service(
 BEGIN
     RETURN QUERY
         SELECT s.* FROM services s
-        WHERE s.day_of_week = EXTRACT(ISODOW FROM r.datetime)
+        WHERE s.restaurant = r.restaurant
+          AND s.day_of_week = EXTRACT(ISODOW FROM r.datetime)
           AND s.start_time <= r.datetime::time
           AND s.end_time >= r.datetime::time;
 END;
@@ -342,15 +343,18 @@ $$ LANGUAGE plpgsql;
 -- #######
 -- BOOLEAN
 -- #######
-DROP FUNCTION IF EXISTS is_same_service(reservations, reservations);
-CREATE OR REPLACE FUNCTION is_same_service(
+DROP FUNCTION IF EXISTS is_same_service_same_day(reservations, reservations);
+CREATE OR REPLACE FUNCTION is_same_service_same_day(
     IN r1 reservations,
     IN r2 reservations)
     RETURNS BOOLEAN AS $$
 BEGIN
-    RETURN EXISTS(
-        SELECT 1
-        WHERE
-    );
+    RETURN
+        (r1.datetime::date = r2.datetime::date)
+        AND EXISTS(
+            SELECT get_service(r1)
+            INTERSECT
+            SELECT get_service(r2)
+        );
 END;
 $$ LANGUAGE plpgsql;
