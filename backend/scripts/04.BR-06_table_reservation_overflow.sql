@@ -21,7 +21,8 @@ BEGIN
     AND EXISTS(
         SELECT 1
         FROM desired_table_reservations dtr
-        WHERE is_same_service_same_day(current_reservation, dtr)
+        WHERE dtr.status IN ('confirmed'::status_type, 'completed'::status_type)
+          AND is_same_service_same_day(current_reservation, dtr)
     ) THEN
         RAISE EXCEPTION 'BR-06: This table is already reserved.';
     END IF;
