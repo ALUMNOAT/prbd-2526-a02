@@ -7,15 +7,11 @@
 CREATE OR REPLACE FUNCTION check_new_reservation()
     RETURNS TRIGGER AS $$
 BEGIN
-    IF EXISTS(      -- see doc(8)
-        SELECT 1
-        FROM NEW
-        WHERE NEW.status = 'pending'::status_type
-    ) THEN
-        RETURN NEW;
+    IF NEW.status != 'pending'::status_type THEN
+        RAISE EXCEPTION 'BR-09: A new reservation can only be of status ''pending''';
     END IF;
 
-    RAISE EXCEPTION 'BR-09: A new reservation can only be of status ''pending''';
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql security definer;
 
@@ -28,18 +24,17 @@ EXECUTE FUNCTION check_new_reservation();
 
 CREATE OR REPLACE FUNCTION check_update_reservation()
     RETURNS TRIGGER AS $$
+DECLARE
+    date_time TIMESTAMP = COALESCE(
+            (SELECT st.simulated_time FROM system_time st),
+            current_timestamp(0));
 BEGIN
     IF (OLD.status = 'confirmed'::status_type AND NEW.status = 'pending'::status_type)
-    AND EXISTS(
-        SELECT 1 FROM system_time st
-        WHERE
-            OLD.datetime < COALESCE(st.simulated_time, current_timestamp(0))
-            OR NEW.datetime < COALESCE(st.simulated_time, current_timestamp(0))
-    ) THEN
+    AND (OLD.datetime > date_time)
+    THEN
         RAISE EXCEPTION 'BR-09: You can only edit a reservation that''s set in the future';
-
     ELSEIF
-        (OLD.status = 'pending'::status_type AND NEW.status = 'confirmed'::status_type)
+           (OLD.status = 'pending'::status_type AND NEW.status = 'confirmed'::status_type)
         OR (OLD.status = 'pending'::status_type AND NEW.status = 'cancelled'::status_type)
         OR (OLD.status = 'confirmed'::status_type AND NEW.status = 'completed'::status_type)
         OR (OLD.status = 'confirmed'::status_type AND NEW.status = 'cancelled'::status_type)
