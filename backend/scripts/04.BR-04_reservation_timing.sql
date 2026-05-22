@@ -10,6 +10,7 @@
 (9) https://vrcacademy.com/tutorials/postgresql-database-triggers/
 (10) https://www.postgresql.org/docs/current/functions-subquery.html#FUNCTIONS-SUBQUERY-EXISTS
 (11) https://stackoverflow.com/questions/11299037/postgresql-if-statement <-- 'EXISTS' seems to be good practice
+(12) https://www.postgresql.org/docs/current/plpgsql-trigger.html <-- OLD and NEW are records, not tables
  */
 
 
@@ -20,7 +21,7 @@ BEGIN
     IF NEW.status IN ('pending'::status_type, 'confirmed'::status_type, 'completed'::status_type)
     AND NOT EXISTS(      -- see doc(1)
         SELECT 1
-        FROM get_service(NEW)
+        FROM get_service(NEW.restaurant, NEW.datetime)
     ) THEN
         RAISE EXCEPTION 'BR-04 : Timetable conflict for reservation';
     END IF;
