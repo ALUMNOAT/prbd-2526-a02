@@ -13,16 +13,15 @@
 -- check only new reservations, or updates on datetime.
 CREATE OR REPLACE FUNCTION check_slot()
     RETURNS TRIGGER AS $$
+DECLARE
+    the_restaurant restaurants = get_restaurant(NEW.restaurant);
 BEGIN
-    IF (      -- see doc(8)
-        SELECT EXTRACT('minute', NEW.datetime) % rst.slot_duration = 0
-        FROM reservations r
-        LEFT JOIN restaurants rst ON rst.id = NEW.restaurant
-    ) THEN
-        RETURN NEW;
+    IF (EXTRACT(MINUTE FROM NEW.datetime) % the_restaurant.slot_duration != 0)
+    THEN
+        RAISE EXCEPTION 'BR-05: No slots exists at the given reservation''s timedate';
     END IF;
 
-    RAISE EXCEPTION 'BR-05: No slots exists at the given reservation''s timedate';
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql security definer;
 
