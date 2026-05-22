@@ -6,15 +6,11 @@
 CREATE OR REPLACE FUNCTION check_past_reservation()
     RETURNS TRIGGER AS $$
 BEGIN
-    IF EXISTS(
-        SELECT 1
-        FROM system_time st, NEW
-        WHERE NEW.datetime > COALESCE(st.simulated_time, current_timestamp(0))
-    ) THEN
-        RETURN NEW;
+    IF NEW.datetime < get_time() THEN
+        RAISE EXCEPTION 'BR-14: You cannot make a reservation in the past';
     END IF;
 
-    RAISE EXCEPTION 'BR-14: You cannot make a reservation in the past';
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql security definer;
 
