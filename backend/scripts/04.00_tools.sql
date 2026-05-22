@@ -227,6 +227,18 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP FUNCTION IF EXISTS get_service(restaurants, TIMESTAMP);
+CREATE OR REPLACE FUNCTION get_service(
+    IN r restaurants,
+    IN date_time TIMESTAMP)
+RETURNS SETOF services AS $$
+    SELECT s.* FROM services s
+    WHERE s.restaurant = r.id
+      AND s.day_of_week = EXTRACT(ISODOW FROM date_time)
+      AND s.start_time <= date_time::time
+      AND s.end_time >= date_time::time;;
+$$ LANGUAGE SQL;
+
 DROP FUNCTION IF EXISTS get_service(reservations);
 CREATE OR REPLACE FUNCTION get_service(
     IN r reservations)
@@ -395,6 +407,7 @@ $$ LANGUAGE plpgsql;
 -- NUMBERS
 -- #######
 -- doc(N-1) https://stackoverflow.com/questions/24755468/language-sql-vs-language-plpgsql-in-postgresql-functions
+
 DROP FUNCTION IF EXISTS total_tables_capacity(tables);
 CREATE OR REPLACE FUNCTION total_tables_capacity(IN t tables) RETURNS INT AS $$
     SELECT COALESCE(SUM(t.capacity), 0)
