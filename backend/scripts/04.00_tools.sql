@@ -50,6 +50,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP FUNCTION IF EXISTS get_reservations(reservation_tables);
+CREATE OR REPLACE FUNCTION get_reservations(
+    IN given_rt reservation_tables)
+    RETURNS SETOF reservations AS $$
+BEGIN
+    RETURN QUERY
+        SELECT r.* FROM reservations r
+        LEFT JOIN reservation_tables rt ON rt.reservation = r.id
+        WHERE rt."table" = given_rt."table";
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Tools: The given reservation table''s table was not associated with any reservation';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
 DROP FUNCTION IF EXISTS get_reservations(tables);
 CREATE OR REPLACE FUNCTION get_reservations(
     IN t tables)
