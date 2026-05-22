@@ -13,12 +13,11 @@
 -- check only new reservations, or updates on datetime.
 CREATE OR REPLACE FUNCTION check_slot()
     RETURNS TRIGGER AS $$
+DECLARE
+    the_restaurant restaurants = get_restaurant(NEW.restaurant);
 BEGIN
-    IF NOT EXISTS (      -- see doc(8)
-        SELECT 1
-        FROM get_restaurant(NEW.restaurant) rst
-        WHERE EXTRACT('minute', NEW.datetime) % rst.slot_duration = 0
-    ) THEN
+    IF (EXTRACT(MINUTE FROM NEW.datetime) % the_restaurant.slot_duration != 0)
+    THEN
         RAISE EXCEPTION 'BR-05: No slots exists at the given reservation''s timedate';
     END IF;
 
