@@ -14,15 +14,15 @@
 CREATE OR REPLACE FUNCTION check_slot()
     RETURNS TRIGGER AS $$
 BEGIN
-    IF (      -- see doc(8)
-        SELECT EXTRACT('minute', NEW.datetime) % rst.slot_duration = 0
-        FROM reservations r
-        LEFT JOIN restaurants rst ON rst.id = NEW.restaurant
+    IF NOT EXISTS (      -- see doc(8)
+        SELECT 1
+        FROM get_restaurant(NEW.restaurant) rst
+        WHERE EXTRACT('minute', NEW.datetime) % rst.slot_duration = 0
     ) THEN
-        RETURN NEW;
+        RAISE EXCEPTION 'BR-05: No slots exists at the given reservation''s timedate';
     END IF;
 
-    RAISE EXCEPTION 'BR-05: No slots exists at the given reservation''s timedate';
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql security definer;
 
