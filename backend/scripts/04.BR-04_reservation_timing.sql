@@ -17,42 +17,12 @@
 CREATE OR REPLACE FUNCTION check_new_reservation_timing()
     RETURNS TRIGGER AS $$
 BEGIN
-    IF NOT EXISTS(      -- see doc(1)
-        SELECT 1
-        FROM get_restaurant_services(NEW.restaurant) s
-        WHERE EXTRACT(ISODOW FROM NEW.datetime) = s.day_of_week     -- see doc(5) for 'ISODOW' keyword
-          AND NEW.datetime::time > s.start_time   -- see doc(6) for '::time' syntax
-          AND NEW.datetime::time < s.end_time
-    ) THEN
-        RAISE EXCEPTION 'BR-04 : The new reservation doesn''t fit into any services slot';
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql security definer;
-
--- 'tgv' = 'trigger_validate'
-CREATE TRIGGER tgv_new_reservation_timing
-    BEFORE INSERT -- new reservation status can only be 'pending' (BR-09)
-    ON reservations
-    FOR EACH ROW
-EXECUTE FUNCTION check_new_reservation_timing();
-
-
-
-
-CREATE OR REPLACE FUNCTION check_update_reservation_timing()
-    RETURNS TRIGGER AS $$
-BEGIN
     IF NEW.status IN ('pending'::status_type, 'confirmed'::status_type, 'completed'::status_type)
     AND NOT EXISTS(      -- see doc(1)
         SELECT 1
-        FROM get_restaurant_services(NEW.restaurant) s
-        WHERE EXTRACT(ISODOW FROM NEW.datetime) = s.day_of_week     -- see doc(5) for 'ISODOW' keyword
-          AND NEW.datetime::time > s.start_time   -- see doc(6) for '::time' syntax
-          AND NEW.datetime::time < s.end_time
+        FROM get_service(NEW)
     ) THEN
-        RAISE EXCEPTION 'BR-04 : Timetable conflict for the reservation';
+        RAISE EXCEPTION 'BR-04 : Timetable conflict for reservation';
     END IF;
 
     RETURN NEW;
@@ -60,11 +30,9 @@ END;
 $$ LANGUAGE plpgsql security definer;
 
 -- 'tgv' = 'trigger_validate'
-CREATE TRIGGER tgv_update_reservation_timing
-    -- new reservation status can only be 'pending' (BR-09)
-    -- cancelled or completed reservation cannot be modified
-    -- confirmed can become pending again
-    BEFORE UPDATE OF datetime, status
+DROP TRIGGER IF EXISTS tgv_new_reservation_timing ON reservations;
+CREATE TRIGGER tgv_new_reservation_timing
+    BEFORE INSERT OR UPDATE OF datetime, status-- new reservation status can only be 'pending' (BR-09)
     ON reservations
     FOR EACH ROW
-EXECUTE FUNCTION check_update_reservation_timing();
+EXECUTE FUNCTION check_new_reservation_timing();
