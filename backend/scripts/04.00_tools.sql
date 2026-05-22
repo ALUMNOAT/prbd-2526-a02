@@ -327,6 +327,16 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+-- ###########
+-- SYSTEM TIME
+-- ###########
+DROP FUNCTION IF EXISTS get_time();
+CREATE OR REPLACE FUNCTION get_time() RETURNS TIMESTAMP AS $$
+    SELECT COALESCE(st.simulated_time, current_timestamp(0))
+    FROM system_time st;
+$$ LANGUAGE SQL;
+
+
 -- ######
 -- TABLES
 -- ######
