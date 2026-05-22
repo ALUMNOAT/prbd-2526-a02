@@ -3,6 +3,8 @@
 (2) https://www.postgresql.org/docs/9.0/sql-createconstraint.html
 (3) https://www.postgresql.org/docs/current/sql-createtrigger.html
 (4) https://www.postgresql.org/docs/current/sql-insert.html
+(5) https://www.w3schools.com/sql/sql_join_left.asp
+(6) https://vrcacademy.com/tutorials/postgresql-database-triggers/
  */
 
 
@@ -27,18 +29,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql security definer;
 
+/*
 -- if more guests come to a reservation, do we have enough table seats ?
-CREATE TRIGGER trigger_validate_reservation_capacity
+DROP TRIGGER IF EXISTS tgv_reservations_capacity ON reservations;
+CREATE TRIGGER tgv_reservations_capacity
     AFTER INSERT OR UPDATE OF number_of_guests, status
     ON reservations
     FOR EACH ROW
 EXECUTE FUNCTION check_guest_table_capacity();
+ */
 
+DROP TRIGGER IF EXISTS tgv_reservation_tables_capacity ON reservation_tables;
 -- if we remove reservation tables, we first need to check that the
 -- reservation itself was deleted which changes the status to "cancelled",
 -- which doesn't trigger check_guest_table_capacity())
 -- CONSTRAINT because it is deferred. see doc(2)
-CREATE CONSTRAINT TRIGGER trigger_validate_reservation_tables_capacity
+CREATE CONSTRAINT TRIGGER tgv_reservation_tables_capacity
     AFTER DELETE
     ON reservation_tables
     -- deferred because reservation_tables is "delete cascade"-linked to reservations
@@ -47,17 +53,104 @@ CREATE CONSTRAINT TRIGGER trigger_validate_reservation_tables_capacity
     FOR EACH ROW
 EXECUTE FUNCTION check_guest_table_capacity();
 
+/*
+DROP TRIGGER IF EXISTS tgv_tables_capacity ON tables;
 -- if we downsize a table, or delete a table, do we still have enough table seats ?
-CREATE CONSTRAINT TRIGGER trigger_validate_reservation_tables_capacity
+CREATE TRIGGER tgv_tables_capacity
     AFTER UPDATE OF capacity OR DELETE
     ON tables
     FOR EACH ROW
 EXECUTE FUNCTION check_guest_table_capacity();
-
--- TESTS PREPARATION see doc(4)
-INSERT INTO tables
-VALUES (99, 1, 99, 4);
-INSERT INTO reservations
-VALUES (99, 1, 1, '2030-1-1 19:00:00', 4, 'pending');
+ */
 
 
+
+
+-- ############
+-- RESERVATIONS
+-- ############
+
+CREATE OR REPLACE FUNCTION check_reservation_table_capacity()
+    RETURNS TRIGGER AS $$
+DECLARE
+    t tables = get_tables(NEW); -- gives the tables associated with the reservation
+    capacity INT = total_tables_capacity(t);
+BEGIN
+    IF NEW.status IN ('confirmed'::status_type, 'completed'::status_type)
+    AND NEW.number_of_guests > capacity
+    THEN
+        RAISE EXCEPTION 'Too many guests. Table capacity not suitable';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql security definer;
+
+DROP TRIGGER IF EXISTS tgv_reservation_table_capacity ON reservations;
+CREATE TRIGGER tgv_reservation_table_capacity
+    BEFORE INSERT OR UPDATE OF number_of_guests, status
+    ON reservations
+    FOR EACH ROW
+EXECUTE FUNCTION check_reservation_table_capacity();
+
+-- ##################
+-- RESERVATION TABLES
+-- ##################
+
+-- ######
+-- TABLES
+-- ######
+
+-- doc(99) https://sqldbaschool.com/course/learning-sql-tutorial-for-beginners/lessons/ternary-operator-in-sql/
+-- doc(98) https://dataschool.com/learn-sql/conditional-logic/
+CREATE OR REPLACE FUNCTION check_capacity_on_table_update()
+    RETURNS TRIGGER AS $$
+BEGIN
+    IF (NEW.capacity < OLD.capacity)
+        AND EXISTS (
+            SELECT 1
+            FROM get_reservations(NEW) r
+            WHERE r.status IN ('confirmed'::status_type, 'completed'::status_type)
+              AND r.number_of_guests > total_tables_capacity_allocated(r) - OLD.capacity
+        ) THEN
+        RAISE EXCEPTION
+            'BR-02 : You cannot reduced this reserved table''s capacity, otherwise guests would sit on the floor';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql security definer;
+
+DROP TRIGGER IF EXISTS tgv_capacity_on_table_update ON tables;
+CREATE TRIGGER tgv_capacity_on_table_update
+    BEFORE UPDATE OF capacity
+    ON tables
+    FOR EACH ROW
+EXECUTE FUNCTION check_capacity_on_table_update();
+
+
+-- doc(99) https://sqldbaschool.com/course/learning-sql-tutorial-for-beginners/lessons/ternary-operator-in-sql/
+-- doc(98) https://dataschool.com/learn-sql/conditional-logic/
+CREATE OR REPLACE FUNCTION check_capacity_on_table_delete()
+    RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM get_reservations(OLD) r
+        WHERE r.status IN ('confirmed'::status_type, 'completed'::status_type)
+        AND r.number_of_guests > total_tables_capacity_allocated(r) - OLD.capacity
+    )
+    THEN
+        RAISE EXCEPTION 'BR-02 : You cannot delete this reserved table, otherwise guests would sit on the floor';
+    END IF;
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql security definer;
+
+DROP TRIGGER IF EXISTS tgv_capacity_on_table_delete ON tables;
+CREATE TRIGGER tgv_capacity_on_table_delete
+    BEFORE DELETE
+    ON tables
+    FOR EACH ROW
+EXECUTE FUNCTION check_capacity_on_table_delete();

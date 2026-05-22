@@ -10,10 +10,10 @@
 CREATE OR REPLACE FUNCTION check_table_ownership()
     RETURNS TRIGGER AS $$
 DECLARE
-    reservation_restaurant INT = (get_reservation(NEW.reservation)).restaurant;
-    table_restaurant INT = (get_table(NEW.table)).restaurant;
+    the_reservation reservations = get_reservation(NEW.reservation);
+    the_table tables = get_table(NEW.table);
 BEGIN
-    IF (reservation_restaurant != table_restaurant) THEN
+    IF (the_reservation.restaurant != the_table.restaurant) THEN
         RAISE EXCEPTION 'BR-03: Selected table do not belong to the restaurant of the reservation';
     END IF;
 

@@ -13,15 +13,15 @@
 CREATE OR REPLACE FUNCTION check_new_table_reservation_overflow()
     RETURNS TRIGGER AS $$
 DECLARE
-    current_reservation reservations = get_reservation(NEW.reservation);
-    current_service services = get_service_from_reservation(current_reservation);
+    current_reservation reservations = get_reservation(NEW);
+    desired_table tables = get_table(NEW);
+    desired_table_reservations reservations = get_reservation(desired_table);
 BEGIN
     IF (current_reservation.status IN ('confirmed'::status_type))
     AND EXISTS(
         SELECT 1
-        FROM get_reservations_from_table_and_date(NEW.table, current_reservation.datetime) r
-
-        WHERE
+        FROM desired_table_reservations dtr
+        WHERE is_same_service_same_day(current_reservation, dtr)
     ) THEN
         RAISE EXCEPTION 'BR-06: This table is already reserved.';
     END IF;
