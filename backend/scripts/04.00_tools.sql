@@ -41,6 +41,18 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_reservations(restaurants);
 CREATE OR REPLACE FUNCTION get_reservations(
+    IN the_client users)
+    RETURNS SETOF reservations AS $$
+BEGIN
+    RETURN QUERY
+        SELECT r.*
+        FROM reservations r
+        WHERE r.client = the_client.id;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS get_reservations(restaurants);
+CREATE OR REPLACE FUNCTION get_reservations(
     IN rst restaurants)
     RETURNS SETOF reservations AS $$
 BEGIN
@@ -277,6 +289,28 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP FUNCTION IF EXISTS get_services(reservations);
+CREATE OR REPLACE FUNCTION get_services(
+    IN r reservations)
+    RETURNS SETOF services AS $$
+BEGIN
+    RETURN QUERY
+        SELECT s.* FROM services s
+        WHERE s.restaurant = r.restaurant
+          AND s.day_of_week = EXTRACT(ISODOW FROM r.datetime)
+          AND s.start_time <= r.datetime::time
+          AND s.end_time >= r.datetime::time;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS get_services(users);
+CREATE OR REPLACE FUNCTION get_services(IN the_user users) RETURNS SETOF services AS $$
+    SELECT s.*
+    FROM reservations r
+    LEFT JOIN services s ON s.restaurant = r.restaurant
+    WHERE r.client = the_user.id
+$$ LANGUAGE SQL;
+
 DROP FUNCTION IF EXISTS get_restaurant_service_at_timestamp(INT, TIMESTAMP);
 CREATE OR REPLACE FUNCTION get_restaurant_service_at_timestamp(
     IN restaurant_id INT,
@@ -398,6 +432,23 @@ BEGIN
             SELECT get_service(r1)
             INTERSECT
             SELECT get_service(r2)
+        );
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS is_same_service_same_day(reservations, restaurants, TIMESTAMP);
+CREATE OR REPLACE FUNCTION is_same_service_same_day(
+    IN the_reservation reservations,
+    IN the_restaurant restaurants,
+    IN date_time TIMESTAMP)
+    RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN
+        (the_reservation.datetime::date = date_time::date)
+        AND EXISTS(
+            SELECT get_service(the_reservation)
+            INTERSECT
+            SELECT get_service(the_restaurant, date_time)
         );
 END;
 $$ LANGUAGE plpgsql;
