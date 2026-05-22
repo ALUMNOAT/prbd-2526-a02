@@ -10,11 +10,11 @@
  */
 
 
-CREATE OR REPLACE FUNCTION check_new_table_reservation_overflow()
+CREATE OR REPLACE FUNCTION check_reservation_overflow()
     RETURNS TRIGGER AS $$
 DECLARE
-    current_reservation reservations = get_reservation(NEW);
-    desired_table tables = get_table(NEW);
+    current_reservation reservations = get_reservation(NEW.reservation);
+    desired_table tables = get_table(NEW.table);
     desired_table_reservations reservations = get_reservation(desired_table);
 BEGIN
     IF (current_reservation.status IN ('confirmed'::status_type))
@@ -30,8 +30,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql security definer;
 
-CREATE TRIGGER tgv_new_table_reservation_overflow
+CREATE TRIGGER tgv_reservation_overflow
     BEFORE INSERT
     ON reservation_tables
     FOR EACH ROW
-EXECUTE FUNCTION check_new_table_reservation_overflow();
+EXECUTE FUNCTION check_reservation_overflow();
