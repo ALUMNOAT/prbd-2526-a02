@@ -1,6 +1,7 @@
 /*
  (1) https://stackoverflow.com/questions/22423958/sql-function-return-type-table-vs-setof-records
  (2) https://stackoverflow.com/questions/36199437/how-to-access-record-elements-in-postgresql
+ (3) https://stackoverflow.com/questions/9614922/does-the-join-order-matter-in-sql
  */
 
 set search_path to public;
@@ -313,13 +314,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS get_table(reservations);
-CREATE OR REPLACE FUNCTION get_table(
+DROP FUNCTION IF EXISTS get_tables(reservation_tables);
+CREATE OR REPLACE FUNCTION get_tables(
+    IN given_rt reservation_tables)
+    RETURNS SETOF tables AS $$
+BEGIN
+    RETURN QUERY
+        SELECT t.*
+        FROM tables t
+        LEFT JOIN reservation_tables rt ON rt."table" = t.id
+        WHERE rt.reservation = given_rt.reservation;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS get_tables(reservations);
+CREATE OR REPLACE FUNCTION get_tables(
     IN r reservations)
     RETURNS SETOF tables AS $$
 BEGIN
     RETURN QUERY
-        SELECT t.* FROM tables t
+        SELECT t.*
+        FROM tables t
         LEFT JOIN reservation_tables rt ON rt."table" = t.id
         LEFT JOIN r ON r.id = rt.reservation;
 END;
@@ -374,3 +389,22 @@ BEGIN
         );
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- #######
+-- NUMBERS
+-- #######
+-- doc(N-1) https://stackoverflow.com/questions/24755468/language-sql-vs-language-plpgsql-in-postgresql-functions
+DROP FUNCTION IF EXISTS total_tables_capacity(tables);
+CREATE OR REPLACE FUNCTION total_tables_capacity(IN t tables) RETURNS INT AS $$
+    SELECT COALESCE(SUM(t.capacity), 0)
+$$ LANGUAGE SQL;
+
+DROP FUNCTION IF EXISTS total_tables_capacity_allocated(reservations);
+CREATE OR REPLACE FUNCTION total_tables_capacity_allocated(IN given_reservation reservations) RETURNS INT AS $$
+    SELECT COALESCE(SUM(t.capacity), 0)
+    FROM tables t
+    LEFT JOIN reservation_tables rt ON rt."table" = t.id
+    LEFT JOIN reservations r ON r.id = rt.reservation
+    WHERE r.id = given_reservation.id
+$$ LANGUAGE SQL;
