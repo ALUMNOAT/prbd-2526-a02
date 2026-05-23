@@ -17,11 +17,14 @@
 -- if the reservation fits into the restaurant's opening hours, then allow it.
 CREATE OR REPLACE FUNCTION check_new_reservation_timing()
     RETURNS TRIGGER AS $$
+DECLARE the_restaurant restaurants = get_restaurant(NEW.restaurant);
 BEGIN
     IF NEW.status IN ('pending'::status_type, 'confirmed'::status_type, 'completed'::status_type)
-    AND NOT EXISTS(      -- see doc(1)
+    AND NOT EXISTS(
         SELECT 1
-        FROM get_service(NEW.restaurant, NEW.datetime)
+        FROM services s
+        WHERE s.restaurant = NEW.restaurant
+        AND is_within_service(NEW.datetime, s)
     ) THEN
         RAISE EXCEPTION 'BR-04 : Timetable conflict for reservation';
     END IF;

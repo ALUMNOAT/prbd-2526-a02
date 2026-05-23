@@ -39,7 +39,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS get_reservations(restaurants);
+DROP FUNCTION IF EXISTS get_reservations_from_restaurant_id(INT);
+CREATE OR REPLACE FUNCTION get_reservations_from_restaurant_id(
+    IN rst_id INT)
+    RETURNS SETOF reservations AS $$
+    SELECT r.*
+    FROM reservations r
+    WHERE r.restaurant = rst_id;
+$$ LANGUAGE SQL;
+
+SELECT total_tables_capacity_allocated(get_reservations(get_restaurant(1)));
+
+
+DROP FUNCTION IF EXISTS get_reservations(users);
 CREATE OR REPLACE FUNCTION get_reservations(
     IN the_client users)
     RETURNS SETOF reservations AS $$
@@ -88,7 +100,7 @@ BEGIN
         SELECT r.*
         FROM reservations r
         LEFT JOIN reservation_tables rt ON rt.reservation = r.id
-        LEFT JOIN t ON t.id = rt."table";
+        WHERE rt."table" = t.id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -389,8 +401,7 @@ CREATE OR REPLACE FUNCTION get_tables(
     RETURNS SETOF tables AS $$
 BEGIN
     RETURN QUERY
-        SELECT t.*
-        FROM tables t
+        SELECT t.* FROM tables t
         LEFT JOIN reservation_tables rt ON rt."table" = t.id
         LEFT JOIN r ON r.id = rt.reservation;
 END;
@@ -462,6 +473,14 @@ BEGIN
         );
 END;
 $$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS is_within_service(TIMESTAMP, services);
+CREATE OR REPLACE FUNCTION is_within_service(IN datetime TIMESTAMP, IN s services) RETURNS BOOLEAN AS $$
+    SELECT
+        EXTRACT(ISODOW FROM datetime) = s.day_of_week
+    AND datetime::time >= s.start_time
+    AND datetime::time <= s.end_time
+$$ LANGUAGE SQL;
 
 
 -- #######
