@@ -72,14 +72,15 @@ EXECUTE FUNCTION check_guest_table_capacity();
 
 CREATE OR REPLACE FUNCTION check_reservation_table_capacity()
     RETURNS TRIGGER AS $$
-DECLARE
-    t tables = get_tables(NEW); -- gives the tables associated with the reservation
-    capacity INT = total_tables_capacity(t);
 BEGIN
     IF NEW.status IN ('confirmed'::status_type, 'completed'::status_type)
-    AND NEW.number_of_guests > capacity
-    THEN
-        RAISE EXCEPTION 'Too many guests. Table capacity not suitable';
+    AND NEW.number_of_guests > (
+        SELECT SUM(t.capacity)
+        FROM tables t
+        LEFT JOIN reservation_tables rt ON rt."table" = t.id
+        WHERE rt.reservation = NEW.id
+    ) THEN
+        RAISE EXCEPTION 'BR-02 : Too many guests. Table capacity not suitable';
     END IF;
 
     RETURN NEW;
@@ -107,14 +108,18 @@ CREATE OR REPLACE FUNCTION check_capacity_on_table_update()
     RETURNS TRIGGER AS $$
 BEGIN
     IF (NEW.capacity < OLD.capacity)
-        AND EXISTS (
-            SELECT 1
-            FROM get_reservations(NEW) r
-            WHERE r.status IN ('confirmed'::status_type, 'completed'::status_type)
-              AND r.number_of_guests > total_tables_capacity_allocated(r) - OLD.capacity
-        ) THEN
-        RAISE EXCEPTION
-            'BR-02 : You cannot reduced this reserved table''s capacity, otherwise guests would sit on the floor';
+    AND EXISTS (
+        SELECT 1
+        FROM reservations r
+            LEFT JOIN reservation_tables rt ON rt.reservation = r.id
+            LEFT JOIN tables t ON t.id = rt."table"
+        WHERE t.id = OLD.id
+        AND r.status IN ('confirmed'::status_type, 'completed'::status_type)
+        GROUP BY r.id, r.number_of_guests
+        HAVING r.number_of_guests > (SUM(t.capacity) + NEW.capacity - OLD.capacity)
+    ) THEN
+    RAISE EXCEPTION
+        'BR-02 : You cannot reduced this reserved table''s capacity, otherwise guests would sit on the floor';
     END IF;
 
     RETURN NEW;
@@ -136,11 +141,14 @@ CREATE OR REPLACE FUNCTION check_capacity_on_table_delete()
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM get_reservations(OLD) r
-        WHERE r.status IN ('confirmed'::status_type, 'completed'::status_type)
-        AND r.number_of_guests > total_tables_capacity_allocated(r) - OLD.capacity
-    )
-    THEN
+        FROM reservations r
+            LEFT JOIN reservation_tables rt ON rt.reservation = r.id
+            LEFT JOIN tables t ON t.id = rt."table"
+        WHERE t.id = OLD.id
+          AND r.status IN ('confirmed'::status_type, 'completed'::status_type)
+        GROUP BY r.id, r.number_of_guests
+        HAVING r.number_of_guests > (SUM(t.capacity) - OLD.capacity)
+    ) THEN
         RAISE EXCEPTION 'BR-02 : You cannot delete this reserved table, otherwise guests would sit on the floor';
     END IF;
 
