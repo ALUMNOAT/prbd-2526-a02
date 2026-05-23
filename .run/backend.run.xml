@@ -7,6 +7,7 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/04.00_restaurants.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.00_services.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.00_tables.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.00_tools.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.00_users.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.BR-00_checks.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.01_br_check_reservation_client_role.sql" />
