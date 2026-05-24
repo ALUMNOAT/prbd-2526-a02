@@ -13,6 +13,8 @@ DROP TRIGGER IF EXISTS reservations_client_no_modify
 -- Drop Functions
 DROP FUNCTION IF EXISTS reservations_restaurant_no_modify();
 DROP FUNCTION IF EXISTS reservations_client_no_modify();
+drop function if exists getclientreservations(int);
+drop function if exists clientannulerreservation(int);
 
 /* 1) Le statut d'une réservation doit être soit pending (en attente de confirmation),
  * confirmed (confirmée), cancelled (annulée)
@@ -77,3 +79,44 @@ CREATE TRIGGER reservations_client_no_modify
     BEFORE UPDATE ON reservations
     FOR EACH ROW
     EXECUTE FUNCTION reservations_client_no_modify();
+
+CREATE OR REPLACE FUNCTION getclientreservations(userid int)
+    RETURNS TABLE (
+                      id int,
+                      status text,
+                      resto_name text,
+                      resto_address text,
+                      city text,
+                      datetime timestamp,
+                      number_of_guests int,
+                      special_requests text,
+                      phone text
+                  ) AS $$
+BEGIN
+    RETURN QUERY
+        SELECT reserve.id::int, reserve.status::text, resto."name"::text, resto.address::text, resto.city::text, reserve.datetime::timestamp, reserve.number_of_guests::int, reserve.special_requests::text, resto.phone::text
+        FROM reservations as reserve, restaurants as resto
+        WHERE reserve.restaurant = resto.id
+        AND reserve.client = userid
+        ORDER BY reserve.datetime DESC;
+END
+$$
+    STABLE
+    SECURITY DEFINER
+    language plpgsql;
+
+GRANT EXECUTE ON FUNCTION getclientreservations(int) TO authenticated;
+
+create or replace function clientannulerreservation(_id int)
+returns void
+as
+$$
+begin
+    -- Use UPDATE to modify the existing record
+    update reservations
+    set status = 'cancelled'  -- Use single quotes for string/enum literals
+    where id = _id;           -- Use the parameter to target the specific row
+end
+$$ language plpgsql security definer;
+
+GRANT EXECUTE ON FUNCTION clientannulerreservation(int) TO authenticated;
