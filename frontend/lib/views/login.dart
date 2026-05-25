@@ -201,7 +201,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       ),
                     ],
-                  ),
+                  ),                  // CLIENTS
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -231,7 +231,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       ),
                     ],
-                  ),
+                  ),                  // MANAGERS
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,

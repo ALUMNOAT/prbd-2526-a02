@@ -8,7 +8,7 @@ import 'package:prbd_2526_a02/views/login.dart';
 import 'package:prbd_2526_a02/views/recherche_restaurants.dart';
 import '../providers/security_provider.dart';
 import '../views/mes_reservations.dart';
-import '../views/mes_restaurants.dart';
+import '../views/manager/my_restaurants.dart';
 import '../views/signup.dart';
 
 class MyApp extends ConsumerWidget {
