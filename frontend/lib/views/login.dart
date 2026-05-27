@@ -8,7 +8,7 @@ import 'package:prbd_2526_a02/models/security.dart';
 import '../core/tools/validating_text_editing_controller.dart';
 import '../core/widgets/dialog_box.dart';
 import '../models/user.dart';
-import '../providers/security_provider.dart';
+import '../providers/currentUserProvider.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   @override
@@ -277,14 +277,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       _emailController.isValid == true && _passwordController.isValid == true;
 
   void _login(BuildContext context, String mail, String password) async {
-    await ref.read(securityProvider.notifier).login(mail, password);
-    var securityState = ref.read(securityProvider);
+    await ref.read(currentUserProvider.notifier).login(mail, password);
+    var securityState = ref.read(currentUserProvider);
 
     if (!context.mounted) return;
 
     securityState.when(
       data: (_) {
-        final notifier = ref.read(securityProvider.notifier);
+        final notifier = ref.read(currentUserProvider.notifier);
         final isManager = notifier.isManager;
 
         if (isManager) {
@@ -321,7 +321,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     try {
       // 1. Call the reset
-      await ref.read(securityProvider.notifier).reset_database();
+      await ref.read(currentUserProvider.notifier).reset_database();
 
       if (!context.mounted) return;
 

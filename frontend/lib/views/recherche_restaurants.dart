@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/config/app_config.dart';
-import 'package:prbd_2526_a02/providers/security_provider.dart';
+import 'package:prbd_2526_a02/providers/currentUserProvider.dart';
 import 'package:prbd_2526_a02/views/mes_reservations.dart';
 
 import '../models/security.dart';
@@ -34,8 +34,8 @@ class _SearchRestaurantsPageState extends ConsumerState<SearchRestaurantsPage> {
   @override
   Widget build(BuildContext context) {
     // watch triggers rebuild on change
-    ref.watch(securityProvider);
-    final securityNotifier = ref.read(securityProvider.notifier);
+    ref.watch(currentUserProvider);
+    final securityNotifier = ref.read(currentUserProvider.notifier);
     final userID = securityNotifier.userID;
     final theme = Theme.of(context);
 

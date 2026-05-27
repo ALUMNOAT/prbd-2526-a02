@@ -1,11 +1,11 @@
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../core/tools/params.dart';
 import '../models/security.dart';
 
 
-final securityProvider = AsyncNotifierProvider<SecurityNotifier, String?>(
+final currentUserProvider = AsyncNotifierProvider<SecurityNotifier, String?>(
       () => SecurityNotifier(),
 );
 
@@ -92,13 +92,14 @@ class SecurityNotifier extends AsyncNotifier<String?> {
     required String password,
     String? phone,
   }) async {
-    state = const AsyncValue.loading();
+    state = const AsyncLoading();
     try {
-      await Security.signup(name: name, email: email, password: password, phone: phone);
+      await Security.signup(
+          name: name, email: email, password: password, phone: phone);
       await login(email, password);
-      state = AsyncValue.data(Params.getValue('token'));
+      state = AsyncData(Params.getValue('token'));
     } catch (e) {
-      state = AsyncValue.error("Signup failed", StackTrace.current);
+      state = AsyncError("Signup failed", StackTrace.current);
     }
   }
 
@@ -122,11 +123,9 @@ class SecurityNotifier extends AsyncNotifier<String?> {
       await Security.annuler_reservation(id: id);
     } catch (e) {
       state = AsyncError(
-          "Cancelling the reservation $id failed.",
-          StackTrace.current,
+        "Cancelling the reservation $id failed.",
+        StackTrace.current,
       );
     }
   }
-
-
 }

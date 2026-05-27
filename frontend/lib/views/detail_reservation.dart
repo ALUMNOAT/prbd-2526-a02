@@ -6,7 +6,7 @@ import 'package:prbd_2526_a02/core/widgets/dialog_action.dart';
 import 'package:prbd_2526_a02/views/mes_reservations.dart';
 
 import '../core/widgets/dialog_box.dart';
-import '../providers/security_provider.dart';
+import '../providers/currentUserProvider.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -31,7 +31,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(securityProvider);
+    ref.watch(currentUserProvider);
 
     // On récupère l'objet 'res' passé en argument de mes_reservations.dart (lors qu'on redirige)
     final res = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
@@ -290,7 +290,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
       /// This works whether the source is a String or an Int.
 
       final int id = int.parse(res['id'].toString());
-      await ref.read(securityProvider.notifier).annuler_reservation(id: id);
+      await ref.read(currentUserProvider.notifier).annuler_reservation(id: id);
 
       if (!context.mounted) return;
 
