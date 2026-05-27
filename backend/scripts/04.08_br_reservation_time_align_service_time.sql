@@ -6,36 +6,36 @@ CREATE OR REPLACE FUNCTION check_reservation_time_align_service_time()
     RETURNS TRIGGER AS $$
 DECLARE
     v_slot_duration INT;
-    v_minutes_since_midnight INT;
+    v_start_minutes INT;
+    v_reservation_minutes INT;
     v_service_exists BOOLEAN;
+    v_res_time TIME := date_trunc('minute', NEW.datetime::time); -- ARRONDIE À LA MINUTE
 BEGIN
-    -- 1. Récupérer la durée de créneau du restaurant
     SELECT slot_duration INTO v_slot_duration
     FROM public.restaurants
     WHERE id = NEW.restaurant;
 
-    -- 2. Vérifier l'alignement sur les créneaux (Multiple de slot_duration)
-    v_minutes_since_midnight := (EXTRACT(HOUR FROM NEW.datetime::time) * 60)
-        + EXTRACT(MINUTE FROM NEW.datetime::time);
+    -- 1. Alignement strict (Modulo sur les minutes depuis minuit)
+    v_reservation_minutes := (EXTRACT(HOUR FROM v_res_time) * 60) + EXTRACT(MINUTE FROM v_res_time);
 
-    IF (v_minutes_since_midnight % v_slot_duration) <> 0 THEN
-        RAISE EXCEPTION 'BR-08: L''heure de réservation (%) n''est pas alignée sur le créneau de % minutes.',
-            NEW.datetime::time, v_slot_duration;
+    IF (v_reservation_minutes % v_slot_duration) <> 0 THEN
+        RAISE EXCEPTION 'BR-08: L''heure (%) n''est pas alignée sur le créneau de % min.', v_res_time, v_slot_duration;
     END IF;
 
-    -- 3. Vérifier l'appartenance aux services
+    -- 2. Appartenance aux services (Comparaison textuelle ou par tranche de minutes)
+    -- On s'assure que le service existe ET que l'heure est bien dans la plage
     SELECT EXISTS (
         SELECT 1
         FROM public.services s
         WHERE s.restaurant = NEW.restaurant
           AND s.day_of_week = EXTRACT(ISODOW FROM NEW.datetime)
-          AND NEW.datetime::time >= s.start_time
-          AND NEW.datetime::time < s.end_time
+          -- Comparaison sur la valeur arrondie à la minute
+          AND v_res_time >= s.start_time
+          AND v_res_time < s.end_time
     ) INTO v_service_exists;
 
     IF NOT v_service_exists THEN
-        RAISE EXCEPTION 'BR-08: L''heure de réservation (%) n''est pas incluse dans un service actif.',
-            NEW.datetime::time;
+        RAISE EXCEPTION 'BR-08: L''heure (%) est hors service.', v_res_time;
     END IF;
 
     RETURN NEW;

@@ -13,51 +13,58 @@ CREATE OR REPLACE FUNCTION check_guest_table_capacity()
     RETURNS TRIGGER AS $$
 DECLARE
     v_reservation_id INT;
-    v_invalid_restaurant_exists BOOLEAN;
+    v_status status_type;
+    v_guest_count INT;
+    v_total_capacity INT;
+    v_table_count INT;
 BEGIN
-    -- Détermination de l'ID de réservation concerné selon la table qui déclenche
+    -- 1. Récupération de l'ID concerné
     IF TG_TABLE_NAME = 'reservations' THEN
         v_reservation_id := NEW.id;
     ELSIF TG_TABLE_NAME = 'reservation_tables' THEN
         v_reservation_id := COALESCE(NEW.reservation, OLD.reservation);
     END IF;
 
-    -- Si aucune réservation n'est ciblée (cas de suppression globale sur tables), on skip
-    IF v_reservation_id IS NULL THEN
-        RETURN NULL;
-    END IF;
+    IF v_reservation_id IS NULL THEN RETURN NULL; END IF;
 
-    -- VERIFICATION 1 : Correspondance du restaurant
-    SELECT EXISTS (
-        SELECT 1
+    -- 2. Récupération des infos de la réservation
+    SELECT status, number_of_guests INTO v_status, v_guest_count
+    FROM public.reservations WHERE id = v_reservation_id;
+
+    -- On ne vérifie que pour 'confirmed' ou 'completed'
+    IF v_status IN ('confirmed'::status_type, 'completed'::status_type) THEN
+
+        -- Calculer le nombre de tables et la capacité totale
+        SELECT COUNT(t.id), COALESCE(SUM(t.capacity), 0)
+        INTO v_table_count, v_total_capacity
         FROM public.reservation_tables rt
                  JOIN public.tables t ON t.id = rt.table
-                 JOIN public.reservations r ON r.id = rt.reservation
-        WHERE rt.reservation = v_reservation_id
-          AND t.restaurant <> r.restaurant
-    ) INTO v_invalid_restaurant_exists;
+        WHERE rt.reservation = v_reservation_id;
 
-    IF v_invalid_restaurant_exists THEN
-        RAISE EXCEPTION 'BR-02: Une table associée n''appartient pas au même restaurant que la réservation.';
+        -- RÈGLE : Doit avoir au moins une table
+        IF v_table_count = 0 THEN
+            RAISE EXCEPTION 'BR-02: Une réservation confirmée doit avoir au moins une table associée.';
+        END IF;
+
+        -- RÈGLE : Capacité suffisante
+        IF v_guest_count > v_total_capacity THEN
+            RAISE EXCEPTION 'BR-02: Capacité totale des tables insuffisante pour le nombre de convives.';
+        END IF;
     END IF;
 
-    -- VERIFICATION 2 : Capacité totale suffisante (Uniquement pour confirmed/completed)
+    -- Vérification restaurant (indépendant du statut)
     IF EXISTS (
-        SELECT r.id
-        FROM public.reservations r
-                 LEFT JOIN public.reservation_tables rt ON rt.reservation = r.id
-                 LEFT JOIN public.tables t ON t.id = rt.table
-        WHERE r.id = v_reservation_id
-          AND r.status IN ('confirmed'::status_type, 'completed'::status_type)
-        GROUP BY r.id, r.number_of_guests
-        HAVING r.number_of_guests > COALESCE(SUM(t.capacity), 0)
+        SELECT 1 FROM public.reservation_tables rt
+                          JOIN public.tables t ON t.id = rt.table
+                          JOIN public.reservations r ON r.id = rt.reservation
+        WHERE rt.reservation = v_reservation_id AND t.restaurant <> r.restaurant
     ) THEN
-        RAISE EXCEPTION 'BR-02: Too many guests. Table capacity not suitable';
+        RAISE EXCEPTION 'BR-02: Table non associée au bon restaurant.';
     END IF;
 
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql security definer;
+$$ LANGUAGE plpgsql;
 
 
 -- ============================================================================
