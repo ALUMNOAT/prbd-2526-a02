@@ -1,6 +1,6 @@
 -- CLEANUP
 DROP TRIGGER IF EXISTS trg_br12_no_table_for_pending_canceled ON reservation_tables;
-DROP FUNCTION IF EXISTS check_br12_reservation_status();
+DROP FUNCTION IF EXISTS check_br12_reservation_status() CASCADE;
 
 -- FUNCTION
 CREATE OR REPLACE FUNCTION check_br12_reservation_status()

@@ -1,6 +1,6 @@
 -- Nettoyage
 DROP TRIGGER IF EXISTS trigger_reservation_time_align_service_time ON reservations;
-DROP FUNCTION IF EXISTS check_reservation_time_align_service_time();
+DROP FUNCTION IF EXISTS check_reservation_time_align_service_time() CASCADE;
 
 -- Fonction de vérification
 CREATE OR REPLACE FUNCTION check_reservation_time_align_service_time()

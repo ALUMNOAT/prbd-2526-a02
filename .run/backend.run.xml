@@ -3,6 +3,25 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/01_init.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/02_security.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/03_tables_and_data.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.01_br_check_reservation_client_role.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.02_br_guest_table_capacity.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.03_br_tables_ownership.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.04_br_reservation_timing.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.05_br_slot.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.06_br_table_reservation_overflow.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.07_br_services_colliding.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.08_br_reservation_time_align_service_time.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.09_br_new_reservation.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.10_br_restaurant_has_one_manager.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.11_br_reservation_no_modify.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.12_br_reservation_tables_nomodify.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.13_br_reservation_shrodinger.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/04.14_br_reservation_temporal.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/reservations.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/restaurants.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/services.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/tables.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/users.sql" />
     <script-mode>FILE</script-mode>
     <data-source id="ddd41155-14fe-4d46-803f-8e70c582de08" />
     <method v="2" />

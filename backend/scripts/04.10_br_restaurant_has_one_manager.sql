@@ -28,7 +28,7 @@
 
 -- NETTOYAGE --
 DROP TRIGGER IF EXISTS trg_br10_restaurant_manager ON restaurant_managers;
-DROP FUNCTION IF EXISTS check_one_manager_restaurant();
+DROP FUNCTION IF EXISTS check_one_manager_restaurant() CASCADE;
 
 -- CREATION FONCTION --
 CREATE OR REPLACE FUNCTION check_one_manager_restaurant()
