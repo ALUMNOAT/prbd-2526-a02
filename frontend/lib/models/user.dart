@@ -1,6 +1,22 @@
 import 'package:prbd_2526_a02/models/security.dart';
 
+enum Role {
+  client, manager
+}
+
 class User {
+  final int _id;
+  final String _email;
+  final String _password;
+  final String _full_name;
+  final Role _role;
+  String? _phone;
+
+  User(this._id, this._email, this._password, this._full_name, this._role);
+
+  int get id => _id;
+
+
   static String? validateName(String? name) {
     final nameRegex = RegExp(
       r"^[A-Za-z]"
@@ -77,5 +93,4 @@ class User {
     }
     return null;
   }
-
 }

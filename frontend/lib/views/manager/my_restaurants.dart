@@ -35,113 +35,18 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mes restaurants'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Rafraîchir les données',
-            onPressed: () => Navigator.pushReplacementNamed(context, '/homeManager'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Déconnexion ($userName)',
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/login');
-              securityNotifier.logout();
-            },
-          ),
-        ],
-        elevation: 2,
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        surfaceTintColor: Colors.transparent,
-        flexibleSpace: Align(
-          alignment: Alignment.topCenter,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
-                'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+      appBar: MyAppBar(
+          userName: userName,
+          securityNotifier: securityNotifier,
+          theme: theme,
+          simulatedTime: simulatedTime
       ),
+
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                leading: const Icon(Icons.restaurant, size: 40),
-                title: const Text('Le Gourmet'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        const Text('Bruxelles'),
-                        const SizedBox(width: 12),
-                        const Icon(Icons.star, size: 14, color: Colors.amber),
-                        const SizedBox(width: 2),
-                        Text(
-                          '4.5',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          '€€€',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Dernière réservation: mer. 04/12/2024',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    const Row(
-                      children: [
-                        Icon(Icons.pending, size: 14, color: Colors.orange),
-                        SizedBox(width: 4),
-                        Text(
-                          '2 demandes en attente',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.orange,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {},
-              ),
-            ),
+            RestaurantCard(),
             Card(
               margin: const EdgeInsets.only(bottom: 8),
               child: ListTile(
@@ -240,3 +145,143 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
     );
   }
 }
+
+// (1) appBar in a Scaffold needs PreferredSizeWidget. See Smebes's answer.
+// https://stackoverflow.com/questions/52678469/the-appbardesign-cant-be-assigned-to-the-parameter-type-preferredsizewidget
+class MyAppBar extends StatelessWidget implements PreferredSizeWidget{  //(1)
+  const MyAppBar({
+    super.key,
+    required this.userName,
+    required this.securityNotifier,
+    required this.theme,
+    required this.simulatedTime,
+  });
+
+  final String? userName;
+  final SecurityNotifier securityNotifier;
+  final ThemeData theme;
+  final DateTime simulatedTime;
+
+  @override // (1)
+  Size get preferredSize => Size.fromHeight(AppBar().preferredSize.height);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      title: const Text('Mes restaurants'),
+      automaticallyImplyLeading: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          tooltip: 'Rafraîchir les données',
+          onPressed: () => Navigator.pushReplacementNamed(context, '/homeManager'),
+        ),
+        IconButton(
+          icon: const Icon(Icons.logout),
+          tooltip: 'Déconnexion ($userName)',
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/login');
+            securityNotifier.logout();
+          },
+        ),
+      ],
+
+      elevation: 2,
+      backgroundColor: theme.colorScheme.primary,
+      foregroundColor: theme.colorScheme.onPrimary,
+      surfaceTintColor: Colors.transparent,
+      flexibleSpace: Align(
+        alignment: Alignment.topCenter,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 2.0),
+            child: Tooltip(
+              message:
+              'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+              child: Text(
+                DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                    .format(simulatedTime),
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey[400],
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+class RestaurantCard extends StatelessWidget {
+  const RestaurantCard({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: const Icon(Icons.restaurant, size: 40),
+        title: const Text('Le Gourmet'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                const SizedBox(width: 4),
+                const Text('Bruxelles'),
+                const SizedBox(width: 12),
+                const Icon(Icons.star, size: 14, color: Colors.amber),
+                const SizedBox(width: 2),
+                Text(
+                  '4.5',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '€€€',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                const SizedBox(width: 4),
+                Text(
+                  'Dernière réservation: mer. 04/12/2024',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            const Row(
+              children: [
+                Icon(Icons.pending, size: 14, color: Colors.orange),
+                SizedBox(width: 4),
+                Text(
+                  '2 demandes en attente',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.orange,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {},
+      ),
+    );
+  }
+}
+
