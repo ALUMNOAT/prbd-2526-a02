@@ -405,11 +405,47 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
   }
 
   Future<void> _submitForm(BuildContext context) async {
+    // 1. Validation du formulaire
     if (!await _validateForm()) return;
-    await ref
-        .read(currentUserProvider.notifier);
-    if (context.mounted) {
-      Navigator.pushNamedAndRemoveUntil(context, '/homeClient', (route) => false);
+
+    // 2. Vérification de la sélection de l'heure
+    if (_selectedTime == null) return;
+
+    // 3. Récupération des données nécessaires
+    final res = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final securityNotifier = ref.read(currentUserProvider.notifier);
+    final userID = securityNotifier.userID;
+
+    if (userID == null) return;
+
+    // 4. Construction de la date complète
+    final fullDatetime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _selectedTime!.hour,
+      _selectedTime!.minute,
+    );
+
+    // 5. Appel à la méthode addReservation (vérifie que ton Notifier contient bien cette méthode)
+    try {
+      await ref.read(currentUserProvider.notifier).addReservation(
+        clientId: int.parse(userID),
+        restaurantId: res['id'],
+        datetime: fullDatetime,
+        nbConvives: _numConvives,
+        specialRequests: _demandeController.text,
+      );
+
+      if (context.mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/homeClient', (route) => false);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lors de la réservation : $e')),
+        );
+      }
     }
   }
 

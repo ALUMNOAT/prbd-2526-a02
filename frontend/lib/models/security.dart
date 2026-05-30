@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/core/services/api_client.dart';
 
 class Security {
@@ -124,6 +125,31 @@ class Security {
       return jsonDecode(response.body);
     } else {
       throw Exception('Failed to gather restaurant/reservations');
+    }
+  }
+
+  static Future<void> addReservation({
+    required int clientId,
+    required int restaurantId,
+    required DateTime datetime,
+    required int nbConvives,
+    String? specialRequests,
+  }) async {
+    final response = await ApiClient.post(
+      'add_reservation',
+      body: json.encode({
+        'p_client': clientId,
+        'p_restaurant': restaurantId,
+        'p_datetime': DateFormat('yyyy-MM-dd HH:mm:ss').format(datetime),
+        'p_guests': nbConvives,
+        'p_special_requests': (specialRequests == null || specialRequests.trim().isEmpty)
+            ? null
+            : specialRequests,
+      }),
+      anonymous: false,
+    );
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to add reservation');
     }
   }
 

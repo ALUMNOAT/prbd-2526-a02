@@ -128,4 +128,25 @@ class SecurityNotifier extends AsyncNotifier<String?> {
       );
     }
   }
+
+  Future<void> addReservation({
+    required int restaurantId,
+    required int clientId,
+    required DateTime datetime,
+    required int nbConvives,
+    String? specialRequests,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      await Security.addReservation(
+          clientId: clientId,
+          restaurantId: restaurantId,
+          datetime: datetime,
+          nbConvives: nbConvives,
+          specialRequests: specialRequests,
+      );
+    } catch (e) {
+      state = AsyncError("Adding the reservation failed", StackTrace.current);
+    }
+  }
 }
