@@ -21,7 +21,7 @@ GRANT EXECUTE ON FUNCTION get_restaurant_by_id TO authenticated;
 
 
 
-CREATE OR REPLACE FUNCTION get_restaurants_by_user(user_id INT)
+CREATE OR REPLACE FUNCTION get_restaurants_by_manager(user_id INT)
     RETURNS SETOF restaurants AS
 $$
 BEGIN

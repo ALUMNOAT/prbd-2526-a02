@@ -20,7 +20,7 @@ void main() async {
 
 class HomeManagerPage extends ConsumerStatefulWidget {
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _HomeManagerPageState();
+  ConsumerState<HomeManagerPage> createState() => _HomeManagerPageState();
 }
 
 class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
@@ -28,6 +28,7 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
   @override
   Widget build(BuildContext context) {
     ref.watch(securityProvider);
+    ref.watch(managerProvider);
     final securityNotifier = ref.read(securityProvider.notifier);
     final userName = securityNotifier.loggedUserName;
 

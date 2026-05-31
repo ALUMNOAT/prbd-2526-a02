@@ -3,32 +3,28 @@ import 'package:prbd_2526_a02/core/services/api_client.dart';
 import 'package:prbd_2526_a02/models/user.dart';
 
 class Restaurant {
-  late int _id;
-  late String _name;
-  late String _city;
-  late String _phone;
-  String? _description;
-  double? _rating;
-  int? _priceRange;
-  late int _slotDuration;
+  final int id;
+  final String name;
+  final String city;
+  final String phone;
+  String? description;
+  double? rating;
+  int? priceRange;
+  final int slotDuration;
 
   // (1) using private named parameters require a boilerplate :(
-  // only in dart 3.13 can this be bypassed...
+  // only in dart 3.13 can this be bypassed... so let's make 'em public :/
   // https://dart.dev/language/constructors#private-named-parameters
   Restaurant({
-    int id = 0,
-    String name = '',
-    String city = '',
-    String phone = '',
+    required this.id,
+    required this.name,
+    required this.city,
+    required this.phone,
     String? description,
     double? rating,
     int? priceRange,
-    int slotDuration = 0,
-  }) {
-    _id = id; _name = name; _city = city; _phone = phone;
-    _description = description; _rating = rating; _priceRange = priceRange;
-    _slotDuration = slotDuration;
-  }
+    required this.slotDuration,
+  });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
     return Restaurant(
@@ -43,31 +39,6 @@ class Restaurant {
     );
   }
 
-  // GET-SET
-  int get id => _id;
-  set id(int value) {_id = value;}
-
-  String get name => _name;
-  set name(String value) {_name = value;}
-
-  String get city => _city;
-  set city(String value) {_city = value;}
-
-  String get phone => _phone;
-  set phone(String value) {_phone = value;}
-
-  String get description => _description ?? "";
-  set description(String value) {_description = value;}
-
-  double get rating => _rating ?? 0;
-  set rating(double value) {_rating = value;}
-
-  int get priceRange => _priceRange ?? 0;
-  set priceRange(int value) {_priceRange = value;}
-
-  int get slotDuration => _slotDuration;
-  set slotDuration(int value) {_slotDuration = value;}
-
 
   /*
    * L'utilisation de runtimeType dans la surcharge de l'opérateur == permet de s'assurer
@@ -79,7 +50,7 @@ class Restaurant {
     other is Restaurant && runtimeType == other.runtimeType && id == other.id;
 
   @override
-  int get hashCode => _id.hashCode;
+  int get hashCode => id.hashCode;
 
   static Future<Restaurant> getRestaurantById(int id) async {
     final response = await ApiClient.post(
@@ -93,13 +64,14 @@ class Restaurant {
     }
   }
 
-  static Future<Restaurant> getRestaurantsByUser(User owner) async {
+  static Future<List<Restaurant>> getRestaurantsByManager(User owner) async {
     final response = await ApiClient.post(
-      'get_restaurants_by_user',
+      'get_restaurants_by_manager',
       body: json.encode({'user_id': owner.id}),
     );
     if (response.statusCode == 200) {
-      return Restaurant.fromJson(json.decode(response.body));
+      final List<dynamic> body = json.decode(response.body);
+      return body.map((dynamic item) => Restaurant.fromJson(item)).toList();
     } else {
       throw Exception('Failed to get restaurant from id');
     }

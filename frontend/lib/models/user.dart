@@ -5,17 +5,21 @@ enum Role {
 }
 
 class User {
-  final int _id;
-  final String _email;
-  final String _password;
-  final String _full_name;
-  final Role _role;
-  String? _phone;
+  final int id;
+  final String email;
+  final String password;
+  final String fullName;
+  final Role role;
+  String? phone;
 
-  User(this._id, this._email, this._password, this._full_name, this._role);
-
-  int get id => _id;
-
+  User({
+    required this.id,
+    required this.email,
+    required this.password,
+    required this.fullName,
+    required this.role,
+    this.phone
+  });
 
   static String? validateName(String? name) {
     final nameRegex = RegExp(
