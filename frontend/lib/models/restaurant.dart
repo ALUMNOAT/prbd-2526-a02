@@ -64,11 +64,8 @@ class Restaurant {
     }
   }
 
-  static Future<List<Restaurant>> getRestaurantsByManager(User owner) async {
-    final response = await ApiClient.post(
-      'get_restaurants_by_manager',
-      body: json.encode({'user_id': owner.id}),
-    );
+  static Future<List<Restaurant>> getRestaurantsByManager() async {
+    final response = await ApiClient.get('get_restaurants_by_manager');
     if (response.statusCode == 200) {
       final List<dynamic> body = json.decode(response.body);
       return body.map((dynamic item) => Restaurant.fromJson(item)).toList();

@@ -4,7 +4,7 @@ import 'package:prbd_2526_a02/providers/security_provider.dart';
 
 import '../models/user.dart';
 
-class RestaurantsNotifier extends AsyncNotifier<List<Restaurant>> {
+class RestaurantNotifier extends AsyncNotifier<List<Restaurant>> {
   @override
   Future<List<Restaurant>> build() async {
     ref.watch(securityProvider);

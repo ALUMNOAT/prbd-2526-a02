@@ -5,27 +5,24 @@ import 'package:prbd_2526_a02/providers/security_provider.dart';
 
 import '../models/user.dart';
 
-final managerProvider = AsyncNotifierProvider<ManagerNotifier, Manager?>(
+final managerProvider = AsyncNotifierProvider<ManagerNotifier, Manager>(
       () => ManagerNotifier(),
 );
 
-class ManagerNotifier extends AsyncNotifier<Manager?> {
+class ManagerNotifier extends AsyncNotifier<Manager> {
   @override
-  Future<Manager?> build() async {
+  Future<Manager> build() async {
     ref.watch(securityProvider);
-
-    state = AsyncData(null);
-    return null;
+    state = AsyncLoading();
+    return await Manager.getCurrentManager();
   }
 
-  Future<void> getAllRestaurants(User manager) async {
+  Future<void> getManagerRestaurants() async {
     state = const AsyncValue.loading();
     try {
-      final restaurants = List<Restaurant>.from(await Restaurant.getRestaurantsByManager(manager));
-      final manager
-      state = AsyncData(restaurants);
+      final restaurants = await Restaurant.getRestaurantsByManager();
+      state = AsyncData(favorites);
     } catch (e) {
-      print(e);
       state = AsyncValue.error(
         "Something went wrong!\nPlease try again later.",
         StackTrace.current,

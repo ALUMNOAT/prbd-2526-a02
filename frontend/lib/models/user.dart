@@ -9,7 +9,7 @@ enum Role {
 }
 
 
-abstract class User {
+class User {
   final int id;
   final String email;
   final String fullName;
@@ -25,27 +25,15 @@ abstract class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    if(Role.values.byName(json['role']) == Role.manager) {
-      return Manager(
-        id: json['id'],
-        email: json['email'],
-        fullName: json['full_name'],
-        // see Peter Gyarmati's answer :
-        // https://stackoverflow.com/questions/27673781/enum-from-string
-        role: Role.values.byName(json['role']),
-        phone: json['phone'],
-      );
-    } else {
-      return Client(
-        id: json['id'],
-        email: json['email'],
-        fullName: json['full_name'],
-        // see Peter Gyarmati's answer :
-        // https://stackoverflow.com/questions/27673781/enum-from-string
-        role: Role.values.byName(json['role']),
-        phone: json['phone'],
-      );
-    }
+    return User(
+      id: json['id'],
+      email: json['email'],
+      fullName: json['full_name'],
+      // see Peter Gyarmati's answer :
+      // https://stackoverflow.com/questions/27673781/enum-from-string
+      role: Role.values.byName(json['role']),
+      phone: json['phone'],
+    );
   }
 
   static Future<User> getCurrentUser() async {
@@ -57,8 +45,6 @@ abstract class User {
       throw Exception('Failed to get current user');
     }
   }
-
-
 
   // ###########
   // VALIDATIONS

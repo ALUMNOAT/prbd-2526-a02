@@ -4,6 +4,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/providers/security_provider.dart';
 
+import '../../providers/manager_provider.dart';
+
 void main() async {
   await initializeDateFormatting('fr_FR', null);
   runApp(
@@ -30,7 +32,11 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
     ref.watch(securityProvider);
     ref.watch(managerProvider);
     final securityNotifier = ref.read(securityProvider.notifier);
+    final managerNotifier = ref.read(managerProvider.notifier);
+
     final userName = securityNotifier.loggedUserName;
+    final managerName = managerNotifier.
+
 
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
