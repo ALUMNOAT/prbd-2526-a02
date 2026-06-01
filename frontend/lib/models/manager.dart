@@ -7,7 +7,6 @@ class Manager extends User {
   Manager({
     required super.id,
     required super.email,
-    required super.password,
     required super.fullName,
     required super.role,
     super.phone
