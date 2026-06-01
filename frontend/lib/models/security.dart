@@ -153,4 +153,27 @@ class Security {
     }
   }
 
+  static Future<void> editReservation({
+    required int id,
+    required DateTime datetime,
+    required int nbConvives,
+    String? specialRequests
+  }) async {
+    final response = await ApiClient.post(
+      'edit_reservation', // Correspond au nom de la fonction SQL créée
+      body: json.encode({
+        'p_id': id,
+        'p_datetime': DateFormat('yyyy-MM-dd HH:mm:ss').format(datetime),
+        'p_guests': nbConvives,
+        'p_special_requests': (specialRequests == null || specialRequests.trim().isEmpty)
+            ? null
+            : specialRequests,
+      }),
+      anonymous: false,
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to update reservation: ${response.body}');
+    }
+  }
 }

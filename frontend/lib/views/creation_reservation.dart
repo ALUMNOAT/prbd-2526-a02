@@ -34,6 +34,7 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
   late DateTime _selectedDate;
   TimeOfDay? _selectedTime;
   int _numConvives = 2;
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -59,15 +60,40 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      // On vérifie si on a bien reçu une réservation (mode édition)
+      if (args != null && args.containsKey('reservation')) {
+        final res = args['reservation'];
+        final DateTime dt = DateTime.parse(res['datetime']);
+        _selectedDate = dt;
+        _selectedTime = TimeOfDay(hour: dt.hour, minute: dt.minute);
+        _numConvives = res['number_of_guests'];
+        _demandeController.text = res['special_requests'] ?? '';
+      }
+      _isInitialized = true;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     ref.watch(currentUserProvider);
     final securityNotifier = ref.read(currentUserProvider.notifier);
     final userID = securityNotifier.userID;
 
-    // On récupère l'objet 'res' passé en argument de mes_reservations.dart (lors qu'on redirige)
-    final res = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    // 1. Récupération sécurisée des arguments
+    final Object? routeArgs = ModalRoute.of(context)?.settings.arguments;
+    final Map<String, dynamic> args = (routeArgs is Map<String, dynamic>) ? routeArgs : {};
 
-    final slots = _generateSlots(res);
+    final bool isEdit = args.containsKey('reservation');
+
+    // 2. Détermination propre des données du restaurant
+    // Si c'est une édition, on prend args['restaurant'], sinon on prend args directement
+    final restaurantData = isEdit ? args['restaurant'] : args;
+
+    final slots = _generateSlots(restaurantData);
 
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
@@ -80,7 +106,7 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
             Navigator.pop(context);
           },
         ),
-        title: const Text('Nouvelle réservation'),
+        title: Text(isEdit ? 'Modifier la réservation' : 'Nouvelle réservation'),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -89,7 +115,7 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
             onPressed: () => Navigator.pushReplacementNamed(
                 context,
                 '/creation_reservation',
-                arguments: res,
+                arguments: args,
             ),
           ),
         ],
@@ -128,7 +154,7 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  res['resto_name'],
+                  restaurantData['resto_name'] ?? 'Restaurant inconnu',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -366,12 +392,12 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
                 ElevatedButton.icon(
                   onPressed: (slots.isEmpty || _selectedTime == null)
                     ? null
-                    : () => _submitForm(context),
+                    : () => _submitForm(context, args, isEdit),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   icon: const Icon(Icons.add),
-                  label: const Text('Créer la réservation'),
+                  label: Text(isEdit ? 'Enregistrer les modifications' : 'Créer la réservation'),
                 ),
               ],
             ),
@@ -383,11 +409,18 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
 
   List<TimeOfDay> _generateSlots(Map<String, dynamic> res) {
     final List<TimeOfDay> allSlots = [];
-    final int dayOfWeek = _selectedDate.weekday; // 1 = Monday, 7 = Sunday
+
+    // 1. Sécurité : vérifie si 'services' existe et n'est pas null
+    final dynamic servicesData = res['services'];
+    if (servicesData == null || servicesData is! List) {
+      return []; // Retourne une liste vide si aucune donnée de service n'est trouvée
+    }
+
+    final int dayOfWeek = _selectedDate.weekday;
     final int slotDuration = res['slot_duration'] ?? 30;
 
-    // Filter services for the current day
-    final services = (res['services'] as List).where((s) => s['day_of_week'] == dayOfWeek).toList();
+    // 2. Filtrage sécurisé
+    final List services = servicesData.where((s) => s['day_of_week'] == dayOfWeek).toList();
 
     for (var service in services) {
       final startParts = service['start_time'].split(':');
@@ -404,39 +437,31 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
     return allSlots;
   }
 
-  Future<void> _submitForm(BuildContext context) async {
-    // 1. Validation du formulaire
-    if (!await _validateForm()) return;
+  Future<void> _submitForm(BuildContext context, Map<String, dynamic> args, bool isEdit) async {
+    if (!await _validateForm() || _selectedTime == null) return;
+    final notifier = ref.read(currentUserProvider.notifier);
 
-    // 2. Vérification de la sélection de l'heure
-    if (_selectedTime == null) return;
+    final fullDatetime = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, _selectedTime!.hour, _selectedTime!.minute);
 
-    // 3. Récupération des données nécessaires
-    final res = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    final securityNotifier = ref.read(currentUserProvider.notifier);
-    final userID = securityNotifier.userID;
-
-    if (userID == null) return;
-
-    // 4. Construction de la date complète
-    final fullDatetime = DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-      _selectedTime!.hour,
-      _selectedTime!.minute,
-    );
-
-    // 5. Appel à la méthode addReservation (vérifie que ton Notifier contient bien cette méthode)
     try {
-      await ref.read(currentUserProvider.notifier).addReservation(
-        clientId: int.parse(userID),
-        restaurantId: res['id'],
-        datetime: fullDatetime,
-        nbConvives: _numConvives,
-        specialRequests: _demandeController.text,
-      );
-
+      if (isEdit) {
+        // Appelle ta méthode de modification ici
+        await notifier.editReservation(
+          id: args['reservation']['id'],
+          datetime: fullDatetime,
+          nbConvives: _numConvives,
+          specialRequests: _demandeController.text,
+        );
+      } else {
+        // Ta méthode de création actuelle
+        await notifier.addReservation(
+          clientId: int.parse(notifier.userID!),
+          restaurantId: isEdit ? args['restaurant']['id'] : args['id'],
+          datetime: fullDatetime,
+          nbConvives: _numConvives,
+          specialRequests: _demandeController.text,
+        );
+      }
       if (context.mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/homeClient', (route) => false);
       }

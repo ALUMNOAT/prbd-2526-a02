@@ -4,9 +4,8 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import '../core/tools/params.dart';
 import '../models/security.dart';
 
-
 final currentUserProvider = AsyncNotifierProvider<SecurityNotifier, String?>(
-      () => SecurityNotifier(),
+  () => SecurityNotifier(),
 );
 
 class SecurityNotifier extends AsyncNotifier<String?> {
@@ -95,7 +94,11 @@ class SecurityNotifier extends AsyncNotifier<String?> {
     state = const AsyncLoading();
     try {
       await Security.signup(
-          name: name, email: email, password: password, phone: phone);
+        name: name,
+        email: email,
+        password: password,
+        phone: phone,
+      );
       await login(email, password);
       state = AsyncData(Params.getValue('token'));
     } catch (e) {
@@ -116,9 +119,7 @@ class SecurityNotifier extends AsyncNotifier<String?> {
     }
   }
 
-  Future<void> annuler_reservation({
-    required int id
-  }) async {
+  Future<void> annuler_reservation({required int id}) async {
     try {
       await Security.annuler_reservation(id: id);
     } catch (e) {
@@ -139,14 +140,33 @@ class SecurityNotifier extends AsyncNotifier<String?> {
     state = const AsyncLoading();
     try {
       await Security.addReservation(
-          clientId: clientId,
-          restaurantId: restaurantId,
-          datetime: datetime,
-          nbConvives: nbConvives,
-          specialRequests: specialRequests,
+        clientId: clientId,
+        restaurantId: restaurantId,
+        datetime: datetime,
+        nbConvives: nbConvives,
+        specialRequests: specialRequests,
       );
     } catch (e) {
       state = AsyncError("Adding the reservation failed", StackTrace.current);
+    }
+  }
+
+  Future<void> editReservation({
+    required int id,
+    required DateTime datetime,
+    required int nbConvives,
+    required String specialRequests,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      await Security.editReservation(
+        id: id,
+        datetime: datetime,
+        nbConvives: nbConvives,
+        specialRequests: specialRequests,
+      );
+    } catch (e) {
+      state = AsyncError("Editing the reservation failed", StackTrace.current);
     }
   }
 }
