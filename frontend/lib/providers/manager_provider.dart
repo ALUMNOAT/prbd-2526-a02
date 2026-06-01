@@ -16,17 +16,4 @@ class ManagerNotifier extends AsyncNotifier<Manager> {
     state = AsyncLoading();
     return await Manager.getCurrentManager();
   }
-
-  Future<void> getManagerRestaurants() async {
-    state = const AsyncValue.loading();
-    try {
-      final restaurants = await Restaurant.getRestaurantsByManager();
-      state = AsyncData(favorites);
-    } catch (e) {
-      state = AsyncValue.error(
-        "Something went wrong!\nPlease try again later.",
-        StackTrace.current,
-      );
-    }
-  }
 }

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/providers/security_provider.dart';
 
 import '../../providers/manager_provider.dart';
+import '../Widgets/restaurant_card.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -32,11 +34,10 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
     ref.watch(securityProvider);
     ref.watch(managerProvider);
     final securityNotifier = ref.read(securityProvider.notifier);
-    final managerNotifier = ref.read(managerProvider.notifier);
+    final managerNotifier = ref.watch(managerProvider);
 
     final userName = securityNotifier.loggedUserName;
-    final managerName = managerNotifier.
-
+    final manager = managerNotifier.value;
 
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
@@ -53,7 +54,10 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            RestaurantCard(),
+            //https://stackoverflow.com/questions/58471237/the-element-type-settext-cant-be-assigned-to-the-list-type-widget
+            for (var restaurant in manager!.restaurants)
+              RestaurantCard(restaurant : restaurant),
+            /*
             Card(
               margin: const EdgeInsets.only(bottom: 8),
               child: ListTile(
@@ -146,6 +150,7 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
                 onTap: () {},
               ),
             ),
+             */
           ],
         ),
       ),
@@ -221,74 +226,3 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget{  //(1)
     );
   }
 }
-
-
-class RestaurantCard extends StatelessWidget {
-  const RestaurantCard({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: const Icon(Icons.restaurant, size: 40),
-        title: const Text('Le Gourmet'),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                const SizedBox(width: 4),
-                const Text('Bruxelles'),
-                const SizedBox(width: 12),
-                const Icon(Icons.star, size: 14, color: Colors.amber),
-                const SizedBox(width: 2),
-                Text(
-                  '4.5',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  '€€€',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  'Dernière réservation: mer. 04/12/2024',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            const Row(
-              children: [
-                Icon(Icons.pending, size: 14, color: Colors.orange),
-                SizedBox(width: 4),
-                Text(
-                  '2 demandes en attente',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.orange,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {},
-      ),
-    );
-  }
-}
-

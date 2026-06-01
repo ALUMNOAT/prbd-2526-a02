@@ -36,7 +36,7 @@ class Manager extends User {
   }
 
   static Future<Manager> getCurrentManager() async {
-    final response = await ApiClient.get('get_current_manager');
+    final response = await ApiClient.get('get_current_user');
 
     if (response.statusCode == 200) {
       return Manager.fromJson(json.decode(response.body));

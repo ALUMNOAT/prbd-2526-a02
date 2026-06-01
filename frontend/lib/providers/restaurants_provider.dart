@@ -15,7 +15,7 @@ class RestaurantNotifier extends AsyncNotifier<List<Restaurant>> {
   Future<void> getAllRestaurants(User manager) async {
     state = const AsyncValue.loading();
     try {
-      final restaurants = List<Restaurant>.from(await Restaurant.getRestaurantsByManager(manager));
+      final restaurants = List<Restaurant>.from(await Restaurant.getRestaurantsByManager());
       state = AsyncData(restaurants);
     } catch (e) {
       print(e);

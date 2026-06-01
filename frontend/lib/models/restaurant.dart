@@ -39,6 +39,13 @@ class Restaurant {
     );
   }
 
+  //https://stackoverflow.com/questions/65343818/whats-the-meaning-of-arrow-in-dart-flutter
+  String get getPricing {
+    return priceRange == null
+        ? '?'
+        : '€' * priceRange!; // added '!' because we know it's not null here
+  }
+
 
   /*
    * L'utilisation de runtimeType dans la surcharge de l'opérateur == permet de s'assurer

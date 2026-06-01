@@ -26,13 +26,6 @@ class SecurityNotifier extends AsyncNotifier<String?> {
       Params.setValue('token', token);
       state = AsyncData(token);
 
-      var user = User(
-          id: userIdInt,
-          email: email,
-          fullName: loggedUserName ?? '',
-          role: isManager ? Role.manager : Role.client,
-      );
-
     } catch (e) {
       state = AsyncError(
         "Something went wrong!\nPlease try again later.",
