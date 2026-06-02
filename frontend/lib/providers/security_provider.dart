@@ -1,5 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:prbd_2526_a02/providers/manager_provider.dart';
+import 'package:prbd_2526_a02/providers/user_provider.dart';
 
 import '../core/tools/params.dart';
 import '../models/security.dart';
@@ -14,12 +16,16 @@ final securityProvider = AsyncNotifierProvider<SecurityNotifier, String?>(
 class SecurityNotifier extends AsyncNotifier<String?> {
   @override
   Future<String?> build() async {
+    ref.read(managerProvider);
+    ref.read(userProvider);
+
     // pour que le state soit initialisée de manière synchrone
     state = AsyncData(Params.getValue('token'));
     return state.value;
   }
 
   Future<void> login(String email, String password) async {
+    final user = null;
     state = const AsyncLoading();
     try {
       var token = await Security.login(email, password);
