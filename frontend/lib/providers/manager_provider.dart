@@ -1,19 +1,28 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prbd_2526_a02/models/manager.dart';
-import 'package:prbd_2526_a02/models/restaurant.dart';
-import 'package:prbd_2526_a02/providers/security_provider.dart';
+import 'package:prbd_2526_a02/providers/user_provider.dart';
 
 import '../models/user.dart';
 
-final managerProvider = AsyncNotifierProvider<ManagerNotifier, Manager>(
+final managerProvider = AsyncNotifierProvider<ManagerNotifier, Manager?>(
       () => ManagerNotifier(),
 );
 
-class ManagerNotifier extends AsyncNotifier<Manager> {
+class ManagerNotifier extends AsyncNotifier<Manager?> {
   @override
-  Future<Manager> build() async {
-    ref.watch(securityProvider);
+  Future<Manager?> build() async {
+    //not necessary, but not bad per se
     state = AsyncLoading();
-    return await Manager.getCurrentManager();
+
+    final user = ref.watch(userProvider).value;
+
+    if(user == null || user.role != Role.manager) {
+      return null;
+    }
+
+    return Manager(
+        user: user,
+        restaurants: await Manager.getRestaurantsByCurrentManager()
+    );
   }
 }

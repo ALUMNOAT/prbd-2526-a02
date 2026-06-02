@@ -1,4 +1,4 @@
- import 'dart:convert';
+import 'dart:convert';
 import 'package:prbd_2526_a02/models/manager.dart';
 import 'package:prbd_2526_a02/models/security.dart';
 import '../core/services/api_client.dart';

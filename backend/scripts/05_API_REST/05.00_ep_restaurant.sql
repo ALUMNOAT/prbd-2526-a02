@@ -21,7 +21,7 @@ GRANT EXECUTE ON FUNCTION get_restaurant_by_id TO authenticated;
 
 
 
-CREATE OR REPLACE FUNCTION get_restaurants_by_manager()
+CREATE OR REPLACE FUNCTION get_restaurants_by_current_manager()
     RETURNS SETOF restaurants AS
 $$
 BEGIN
@@ -29,11 +29,11 @@ BEGIN
     PERFORM auth.check_logged();
 
     RETURN QUERY
-        SELECT *
+        SELECT rst.*
         FROM restaurants rst
         LEFT JOIN restaurant_managers rstm ON rstm.restaurant = rst.id
         WHERE rstm.manager = auth.id();
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION get_restaurants_by_manager TO authenticated;
+GRANT EXECUTE ON FUNCTION get_restaurants_by_current_manager TO authenticated;
