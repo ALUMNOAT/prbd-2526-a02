@@ -2,9 +2,13 @@ CREATE OR REPLACE FUNCTION check_reservation_schrodinger()
     RETURNS TRIGGER AS $$
 DECLARE
     v_service_id_new INT;
-    v_service_id_old INT;
 BEGIN
     -- 1. Identifier le service de la nouvelle réservation
+    -- SI C'EST UNE ANNULATION, ON SORT IMMÉDIATEMENT
+    -- Si tu passes le status à 'cancelled', le trigger n'a pas besoin de vérifier les conflits
+    IF (TG_OP = 'UPDATE' AND NEW.status = 'cancelled'::status_type) THEN
+        RETURN NEW;
+    END IF;
     SELECT id INTO v_service_id_new
     FROM public.services s
     WHERE s.restaurant = NEW.restaurant
