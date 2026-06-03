@@ -35,13 +35,10 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
   Widget build(BuildContext context) {
     //https://stackoverflow.com/questions/71813090/flutter-riverpod-ref-read-vs-ref-listen-vs-ref-watch
     ref.watch(securityProvider);
-    ref.watch(managerProvider);
+    final managerAsync = ref.watch(managerProvider);
+
     final securityNotifier = ref.read(securityProvider.notifier);
-    final managerNotifier = ref.watch(managerProvider);
-
     final userName = securityNotifier.loggedUserName;
-    final manager = managerNotifier.value;
-
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
@@ -56,12 +53,29 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
       ),
 
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            //https://stackoverflow.com/questions/58471237/the-element-type-settext-cant-be-assigned-to-the-list-type-widget
-            for (var restaurant in manager!.restaurants)
-              RestaurantCard(restaurant : restaurant),
+        child: managerAsync.when(
+          data: (manager) {
+            // 1. Si le résultat de l'AsyncValue est null, on affiche un message
+            if (manager == null) {
+              return const Center(child: Text("Aucune donnée reçue"));
+            }
+
+            // 2. Si la liste est vide, on affiche un message
+            if (manager.restaurants.isEmpty) {
+              return const Center(child: Text("Aucun restaurant trouvé"));
+            }
+
+            return ListView(
+              padding: const EdgeInsets.all(16.0),
+                children: [
+                  //https://stackoverflow.com/questions/58471237/the-element-type-settext-cant-be-assigned-to-the-list-type-widget
+                  for (var restaurant in manager.restaurants)
+                    RestaurantCard(restaurant : restaurant),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(child: Text('Erreur: $err')),
             /*
             Card(
               margin: const EdgeInsets.only(bottom: 8),
@@ -156,7 +170,6 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
               ),
             ),
              */
-          ],
         ),
       ),
     );
