@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:prbd_2526_a02/providers/manager_provider.dart';
@@ -16,9 +18,7 @@ final securityProvider = AsyncNotifierProvider<SecurityNotifier, String?>(
 class SecurityNotifier extends AsyncNotifier<String?> {
   @override
   Future<String?> build() async {
-    ref.read(managerProvider);
-    ref.read(userProvider);
-
+    log("security_provider build() ->");
     // pour que le state soit initialisée de manière synchrone
     state = AsyncData(Params.getValue('token'));
     return state.value;

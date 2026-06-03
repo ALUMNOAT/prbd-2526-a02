@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/models/user.dart';
@@ -17,6 +18,8 @@ class Manager {
   });
 
   static Future<List<Restaurant>> getRestaurantsByCurrentManager() async {
+    log('manager.dart getRestaurantsByCurrentManager() ->');
+
     final response = await ApiClient.get(
       'get_restaurants_by_current_manager',
     );

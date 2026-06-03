@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/providers/security_provider.dart';
+import 'package:prbd_2526_a02/providers/user_provider.dart';
 
 import '../models/security.dart';
 
@@ -34,6 +37,10 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
     ref.watch(securityProvider);
     // On récupère le notifier pour accéder aux getters (userID, etc.)
     final securityNotifier = ref.read(securityProvider.notifier);
+    final user = ref.watch(userProvider).value;
+
+    //log(user?.fullName ?? 'no name, no user');
+
     final userName = securityNotifier.loggedUserName;
     final userID = securityNotifier.userID;
 

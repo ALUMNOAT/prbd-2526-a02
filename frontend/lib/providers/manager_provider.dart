@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prbd_2526_a02/models/manager.dart';
 import 'package:prbd_2526_a02/providers/user_provider.dart';
@@ -11,8 +13,9 @@ final managerProvider = AsyncNotifierProvider<ManagerNotifier, Manager?>(
 class ManagerNotifier extends AsyncNotifier<Manager?> {
   @override
   Future<Manager?> build() async {
+    log('manager_provider build() ->');
     //not necessary, but not bad per se
-    state = AsyncLoading();
+    //state = AsyncLoading();
 
     final user = ref.watch(userProvider).value;
 

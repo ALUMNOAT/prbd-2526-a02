@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:prbd_2526_a02/models/manager.dart';
 import 'package:prbd_2526_a02/models/security.dart';
 import '../core/services/api_client.dart';
@@ -25,6 +26,8 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    log('user.dart fromJson() ->');
+
     return User(
       id: json['id'],
       email: json['email'],
@@ -37,13 +40,20 @@ class User {
   }
 
   static Future<User> getCurrentUser() async {
-    final response = await ApiClient.get('get_current_user');
+    log('user.dart getCurrentUser() ->');
 
+    final response = await ApiClient.get('get_current_user');
     if (response.statusCode == 200) {
       return User.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to get current user');
     }
+  }
+
+  static Future<void> getTestApi() async {
+    log('user.dart getTestApi() ->');
+
+    final response = await ApiClient.get('test_api');
   }
 
   // ###########

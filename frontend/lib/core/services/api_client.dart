@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -18,6 +19,8 @@ class ApiClient {
         Map<String, String>? headers,
         bool anonymous = false,
       }) async {
+    log("api_client get() -> endpoint: $endpoint");
+
     await Future.delayed(throttleDuration);
     final Uri url = Uri.parse('$baseUrl/$endpoint');
     return await _client.get(
@@ -36,6 +39,8 @@ class ApiClient {
         dynamic body,
         bool anonymous = false,
       }) async {
+    log("api_client post() -> endpoint: $endpoint");
+
     await Future.delayed(throttleDuration);
     final Uri url = Uri.parse('$baseUrl/$endpoint');
     return await _client.post(

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:prbd_2526_a02/providers/security_provider.dart';
@@ -14,10 +15,11 @@ final userProvider = AsyncNotifierProvider<UserNotifier, User?>(
 class UserNotifier extends AsyncNotifier<User?> {
   @override
   Future<User?> build() async {
+    log('user_provider build() ->');
     // since the build() method is a promise (a Future user will be given), the
     // Riverpod library automatically puts the state in a loading state.
     // the following code is not necessary, but doesn't break anything.
-    state = AsyncLoading();
+    // state = AsyncLoading();
 
     // ref.watch(...) observes the securityProvider object from the
     // security_provider.dart file, and any changes triggers a rebuild
@@ -27,6 +29,13 @@ class UserNotifier extends AsyncNotifier<User?> {
     // 'token' is the JWT returned after login, and if its value is null, no
     // login occurred.
     final token = security.value;
+
+    log('-> user_provider attempting to return user now: ');
+    if(token == null) {
+      log('-> the token is null !');
+    } else {
+      log('-> calling User.getCurrentUser()');
+    }
 
     return token == null
       ? null
