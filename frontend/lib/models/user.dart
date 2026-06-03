@@ -47,6 +47,20 @@ class User {
     }
   }
 
+  static Future<User> getUserById(User user) async {
+    final response = await ApiClient.post(
+      'get_current_user',
+      body: json.encode({'id': user.id}),
+    );
+
+    if (response.statusCode == 200) {
+      return User.fromJson(json.decode(response.body));;
+    } else {
+      throw Exception('Failed to get current user');
+    }
+  }
+
+
   // ###########
   // VALIDATIONS
   // ###########
