@@ -145,6 +145,53 @@ $$ language plpgsql security definer;
 grant execute on function login to anon;
 
 /**************************************************************
+ Fonction qui permet de vérifier si un email est disponible
+ **************************************************************/
+
+create or replace function is_email_available(email text) returns boolean as
+$$
+begin
+    return not exists(select 1 from users where users.email = is_email_available.email);
+end
+$$ language plpgsql security definer;
+
+grant execute on function is_email_available to anon;
+
+/**************************************************************
+ Fonction qui permet de vérifier si un nom est disponible
+ **************************************************************/
+
+create or replace function is_name_available(name text) returns boolean as
+$$
+begin
+    return not exists(select 1 from users where users.full_name = is_name_available.name);
+end
+$$ language plpgsql security definer;
+
+grant execute on function is_name_available to anon;
+
+/**************************************************************
+ Fonction signup
+ **************************************************************/
+
+create or replace function signup(name text, email text, password text, phone text) returns void
+as
+$$
+begin
+    if not is_email_available(email) then
+        raise exception 'Email ''%'' existe déja', email;
+    end if;
+    if not is_name_available(name) then
+        raise exception 'Name ''%'' existe déja', name;
+    end if;
+    insert into users (email, password, full_name, phone)
+    values (signup.email, signup.password, signup.name, signup.phone);
+end
+$$ language plpgsql security definer;
+
+grant execute on function signup to anon;
+
+/**************************************************************
  Fonctions utilitaires vàv de la sécurité
  **************************************************************/
 

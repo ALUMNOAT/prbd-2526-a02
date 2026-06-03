@@ -1,0 +1,1 @@
+source postgrest-start.sh
