@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/core/widgets/dialog_action.dart';
+import 'package:prbd_2526_a02/models/reservation.dart';
 import 'package:prbd_2526_a02/views/mes_reservations.dart';
 
 import '../core/widgets/dialog_box.dart';
 import '../models/security.dart';
+import '../providers/clientStateProvider.dart';
 import '../providers/currentUserProvider.dart';
 
 void main() async {
@@ -259,7 +261,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
                         try {
                           // 1. Récupérer tous les restos pour trouver celui de la réservation
                           final userID = ref.read(currentUserProvider.notifier).userID;
-                          final allRestos = await Security.getAllClientRestaurantsReservations(userID!);
+                          final allRestos = await Reservation.getAllClientRestaurantsReservations(userID!);
 
                           // 2. Trouver le restaurant correspondant à cette réservation
                           final currentResto = allRestos.firstWhere(
@@ -328,15 +330,15 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
       /// int.parse(res['id'].toString())
       /// This works whether the source is a String or an Int.
 
+      // On effectue l'action métier
       final int id = int.parse(res['id'].toString());
-      await ref.read(currentUserProvider.notifier).annuler_reservation(id: id);
+      await ref.read(clientStateProvider.notifier).annuler_reservation(id: id);
 
+      // On vérifie si on est toujours sur la page avant de naviguer
       if (!context.mounted) return;
 
-      // Instead of replacing the route, we just tell the UI to update locally
-      setState(() {
-        res['status'] = 'cancelled';
-      });
+      // On ferme la page
+      Navigator.pop(context);
 
     } catch (e) {
       if (!context.mounted) return;

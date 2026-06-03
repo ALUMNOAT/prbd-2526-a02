@@ -4,11 +4,11 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import '../core/tools/params.dart';
 import '../models/security.dart';
 
-final currentUserProvider = AsyncNotifierProvider<SecurityNotifier, String?>(
-  () => SecurityNotifier(),
+final currentUserProvider = AsyncNotifierProvider<CurrentUserNotifier, String?>(
+  () => CurrentUserNotifier(),
 );
 
-class SecurityNotifier extends AsyncNotifier<String?> {
+class CurrentUserNotifier extends AsyncNotifier<String?> {
   @override
   Future<String?> build() async {
     // pour que le state soit initialisée de manière synchrone
@@ -75,6 +75,10 @@ class SecurityNotifier extends AsyncNotifier<String?> {
 
   String? get userID => _getIDFromToken(state.value);
 
+  static String? getUserIdFromToken(String? token) {
+    return _getIDFromToken(token);
+  }
+
   static String? _getIDFromToken(String? token) {
     if (token == null) return null;
     try {
@@ -116,57 +120,6 @@ class SecurityNotifier extends AsyncNotifier<String?> {
         "Something went wrong!\nPlease try again later.",
         StackTrace.current,
       );
-    }
-  }
-
-  Future<void> annuler_reservation({required int id}) async {
-    try {
-      await Security.annuler_reservation(id: id);
-    } catch (e) {
-      state = AsyncError(
-        "Cancelling the reservation $id failed.",
-        StackTrace.current,
-      );
-    }
-  }
-
-  Future<void> addReservation({
-    required int restaurantId,
-    required int clientId,
-    required DateTime datetime,
-    required int nbConvives,
-    String? specialRequests,
-  }) async {
-    state = const AsyncLoading();
-    try {
-      await Security.addReservation(
-        clientId: clientId,
-        restaurantId: restaurantId,
-        datetime: datetime,
-        nbConvives: nbConvives,
-        specialRequests: specialRequests,
-      );
-    } catch (e) {
-      state = AsyncError("Adding the reservation failed", StackTrace.current);
-    }
-  }
-
-  Future<void> editReservation({
-    required int id,
-    required DateTime datetime,
-    required int nbConvives,
-    required String specialRequests,
-  }) async {
-    state = const AsyncLoading();
-    try {
-      await Security.editReservation(
-        id: id,
-        datetime: datetime,
-        nbConvives: nbConvives,
-        specialRequests: specialRequests,
-      );
-    } catch (e) {
-      state = AsyncError("Editing the reservation failed", StackTrace.current);
     }
   }
 }

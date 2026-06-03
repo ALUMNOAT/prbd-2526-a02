@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/core/tools/validating_text_editing_controller.dart';
+import 'package:prbd_2526_a02/providers/clientStateProvider.dart';
 
 import '../models/reservation.dart';
 import '../providers/currentUserProvider.dart';
@@ -439,9 +440,16 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
 
   Future<void> _submitForm(BuildContext context, Map<String, dynamic> args, bool isEdit) async {
     if (!await _validateForm() || _selectedTime == null) return;
-    final notifier = ref.read(currentUserProvider.notifier);
 
-    final fullDatetime = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, _selectedTime!.hour, _selectedTime!.minute);
+    final notifier = ref.read(clientStateProvider.notifier);
+
+    final fullDatetime = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        _selectedTime!.hour,
+        _selectedTime!.minute
+    );
 
     try {
       if (isEdit) {
@@ -454,8 +462,9 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
         );
       } else {
         // Ta méthode de création actuelle
+        final userID = ref.read(currentUserProvider.notifier).userID;
         await notifier.addReservation(
-          clientId: int.parse(notifier.userID!),
+          clientId: int.parse(userID!),
           restaurantId: isEdit ? args['restaurant']['id'] : args['id'],
           datetime: fullDatetime,
           nbConvives: _numConvives,
