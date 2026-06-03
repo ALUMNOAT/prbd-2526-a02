@@ -1,24 +1,16 @@
 import 'dart:convert';
-import 'package:prbd_2526_a02/core/services/api_client.dart';
-import 'package:prbd_2526_a02/models/restaurant.dart';
-import 'package:prbd_2526_a02/models/user.dart';
-
-enum Status {
-  pending, confirmed, cancelled, completed
-}
+import 'package:intl/intl.dart';
+import '../core/services/api_client.dart';
 
 class Reservation {
   final int id;
-  final User client;
-  final Restaurant restaurant;
-  DateTime datetime;
-  int numberOfGuests;
-  Status status;
-  String? specialRequest;
+  final int client;
+  final int restaurant;
+  final DateTime datetime;
+  final int numberOfGuests;
+  final String status;
+  final String? specialRequests;
 
-  // (1) using private named parameters require a boilerplate :(
-  // only in dart 3.13 can this be bypassed... so let's make 'em public :/
-  // https://dart.dev/language/constructors#private-named-parameters
   Reservation({
     required this.id,
     required this.client,
@@ -26,56 +18,137 @@ class Reservation {
     required this.datetime,
     required this.numberOfGuests,
     required this.status,
-    this.specialRequest,
+    this.specialRequests,
   });
 
   factory Reservation.fromJson(Map<String, dynamic> json) {
+    if (json['client'] == null) {
+      print("ALERTE : Clé 'client' manquante ou nulle dans : $json");
+    }
     return Reservation(
-      id: json['id'],
-      client: json['client'], // welp, that won't do...
-      restaurant: json['restaurant'], //neither here
-      datetime: json['datetime'],
-      numberOfGuests: json['number_of_guests'],
-      status: Status.values.byName(json['status']),
-      specialRequest: json['special_requests'],
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      client: (json['client'] as num?)?.toInt() ?? 0,
+      restaurant: (json['restaurant'] as num?)?.toInt() ?? 0,
+      datetime: (json['datetime'] != null)
+          ? DateTime.tryParse(json['datetime'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+      numberOfGuests: (json['number_of_guests'] as num?)?.toInt() ?? 1,
+      status: json['status']?.toString() ?? 'pending',
+      specialRequests: json['special_requests']?.toString(),
     );
   }
 
+  static String? validateDemande(String? demande) {
+    // 1. Si demande est null ou vide (trim permet d'ignorer les espaces)
+    if (demande == null || demande.trim().isEmpty) {
+      return null; // Tout va bien, c'est optionnel
+    }
 
-  /*
-   * L'utilisation de runtimeType dans la surcharge de l'opérateur == permet de s'assurer
-   * que l'objet other est exactement de la même classe que this. Cela évite des comparaisons
-   * entre objets d'une classe dérivée ou d'un autre type qui aurait des propriétés similaires.
-   */
-  @override
-  bool operator == (Object other) => identical(this, other) ||
-      other is Restaurant && runtimeType == other.runtimeType && id == other.id;
+    // 2. Si le texte existe mais est trop court
+    if (demande.trim().length < 10) {
+      return 'Si vous précisez une demande, elle doit contenir au moins 10 caractères';
+    }
 
-  @override
-  int get hashCode => id.hashCode;
+    // 3. Sinon, c'est valide
+    return null;
+  }
 
-  static Future<Restaurant> getRestaurantById(int id) async {
-    final response = await ApiClient.post(
-      'get_restaurant_by_id',
-      body: json.encode({'id': id}),
+  /// Function returns a list
+  static Future<List<dynamic>> getClientReservations(String userID) async {
+    final response = await ApiClient.get(
+      'getclientreservations?userid=$userID',
+      anonymous: false,
     );
     if (response.statusCode == 200) {
-      return Restaurant.fromJson(json.decode(response.body));
+      return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to get restaurant from id');
+      throw Exception('Failed to gather reservations');
     }
   }
 
-  static Future<List<Restaurant>> getRestaurantsByManager(User owner) async {
+  /// Function returns void
+  static Future<void> annuler_reservation({
+    required int id
+  }) async {
     final response = await ApiClient.post(
-      'get_restaurants_by_manager',
-      body: json.encode({'user_id': owner.id}),
+      'clientannulerreservation',
+      body: json.encode({
+        '_id': id,
+      }),
+      anonymous: false,
+    );
+    if (response.statusCode != 204) {
+      throw Exception('Failed to cancel reservation\n\n${response.body}');
+    }
+  }
+
+  /// Function returns a list
+  static Future<List<dynamic>> getAllClientRestaurantsReservations(String userID) async {
+    final response = await ApiClient.get(
+      'getclientallrestaurantreservationsandservices?userid=$userID',
+      anonymous: false,
     );
     if (response.statusCode == 200) {
-      final List<dynamic> body = json.decode(response.body);
-      return body.map((dynamic item) => Restaurant.fromJson(item)).toList();
+      return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to get restaurant from id');
+      throw Exception('Failed to gather restaurant/reservations');
+    }
+  }
+
+  static Future<void> addReservation({
+    required int clientId,
+    required int restaurantId,
+    required DateTime datetime,
+    required int nbConvives,
+    String? specialRequests,
+  }) async {
+    final body = {
+      'p_client': clientId,
+      'p_restaurant': restaurantId,
+      'p_datetime': DateFormat('yyyy-MM-dd HH:mm:ss').format(datetime),
+      'p_guests': nbConvives,
+      'p_special_requests': (specialRequests == null || specialRequests.trim().isEmpty)
+          ? null
+          : specialRequests,
+    };
+
+    print("DEBUG: Envoi de la requête add_reservation avec body: $body");
+
+    final response = await ApiClient.post(
+      'add_reservation',
+      body: json.encode(body),
+      anonymous: false,
+    );
+
+    print("DEBUG: Réponse serveur: ${response.statusCode} - ${response.body}");
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      // AFFICHE LE BODY POUR VOIR L'ERREUR SQL (ex: contrainte violée)
+      throw Exception('Erreur ${response.statusCode}: ${response.body}');
+    }
+  }
+
+  static Future<void> editReservation({
+    required int id,
+    required DateTime datetime,
+    required int nbConvives,
+    String? specialRequests
+  }) async {
+    final response = await ApiClient.post(
+      'edit_reservation', // Correspond au nom de la fonction SQL créée
+      body: json.encode({
+        'p_id': id,
+        'p_datetime': DateFormat('yyyy-MM-dd HH:mm:ss').format(datetime),
+        'p_guests': nbConvives,
+        'p_special_requests': (specialRequests == null || specialRequests.trim().isEmpty)
+            ? null
+            : specialRequests,
+      }),
+      anonymous: false,
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to update reservation: ${response.body}');
     }
   }
 }

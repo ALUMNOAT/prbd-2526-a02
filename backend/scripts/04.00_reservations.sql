@@ -83,6 +83,7 @@ CREATE TRIGGER reservations_client_no_modify
 CREATE OR REPLACE FUNCTION getclientreservations(userid int)
     RETURNS TABLE (
                       id int,
+                      client int,
                       status text,
                       resto_name text,
                       resto_address text,
@@ -94,7 +95,7 @@ CREATE OR REPLACE FUNCTION getclientreservations(userid int)
                   ) AS $$
 BEGIN
     RETURN QUERY
-        SELECT reserve.id::int, reserve.status::text, resto."name"::text, resto.address::text, resto.city::text, reserve.datetime::timestamp, reserve.number_of_guests::int, reserve.special_requests::text, resto.phone::text
+        SELECT reserve.id::int, reserve.client::int, reserve.status::text, resto."name"::text, resto.address::text, resto.city::text, reserve.datetime::timestamp, reserve.number_of_guests::int, reserve.special_requests::text, resto.phone::text
         FROM reservations as reserve, restaurants as resto
         WHERE reserve.restaurant = resto.id
         AND reserve.client = userid

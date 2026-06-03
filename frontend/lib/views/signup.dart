@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../core/tools/validating_text_editing_controller.dart';
 import '../models/user.dart';
-import '../providers/security_provider.dart';
+import '../providers/currentUserProvider.dart';
 
 class SignupPage extends ConsumerStatefulWidget {
   @override
@@ -205,7 +205,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   Future<void> _submitForm(BuildContext context) async {
     if (!await _validateForm()) return;
     await ref
-        .read(securityProvider.notifier)
+        .read(currentUserProvider.notifier)
         .signup(
       name: _nameController.text.trim(),
       email: _emailController.text.trim(),

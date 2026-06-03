@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
-import '../providers/security_provider.dart';
+import '../providers/currentUserProvider.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -29,8 +29,8 @@ class _DetailRestaurantPageState extends ConsumerState<DetailRestaurantPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(securityProvider);
-    final securityNotifier = ref.read(securityProvider.notifier);
+    ref.watch(currentUserProvider);
+    final securityNotifier = ref.read(currentUserProvider.notifier);
     final userID = securityNotifier.userID;
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
@@ -318,7 +318,12 @@ class _DetailRestaurantPageState extends ConsumerState<DetailRestaurantPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => Navigator.pushReplacementNamed(
+                    context,
+                    '/creation_reservation',
+                    // Si on inclue pas argument lors du rechargement, il devient null = page plante
+                    arguments: res,
+                  ),
                   icon: const Icon(Icons.add),
                   label: const Text('Réserver'),
                   style: ElevatedButton.styleFrom(

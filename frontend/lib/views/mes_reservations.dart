@@ -1,12 +1,10 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_a02/providers/security_provider.dart';
-import 'package:prbd_2526_a02/providers/user_provider.dart';
+import 'package:prbd_2526_a02/providers/currentUserProvider.dart';
 
+import '../models/reservation.dart';
 import '../models/security.dart';
 
 void main() async {
@@ -34,13 +32,9 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(securityProvider);
+    ref.watch(currentUserProvider);
     // On récupère le notifier pour accéder aux getters (userID, etc.)
-    final securityNotifier = ref.read(securityProvider.notifier);
-    final user = ref.watch(userProvider).value;
-
-    //log(user?.fullName ?? 'no name, no user');
-
+    final securityNotifier = ref.read(currentUserProvider.notifier);
     final userName = securityNotifier.loggedUserName;
     final userID = securityNotifier.userID;
 
@@ -141,7 +135,7 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
                 ? const Center(child: CircularProgressIndicator())
                 : FutureBuilder<List<dynamic>>(
                 // On appelle ta fonction avec l'ID du notifier
-                future: Security.getClientReservations(userID),
+                future: Reservation.getClientReservations(userID),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return Center(child: Text('Erreur: ${snapshot.error}'));
@@ -276,7 +270,7 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () => Navigator.pushNamed(context, '/recherche_restaurants'),
         icon: const Icon(Icons.add),
         label: const Text('Nouvelle réservation'),
       ),

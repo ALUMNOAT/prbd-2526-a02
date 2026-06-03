@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/core/widgets/dialog_action.dart';
+import 'package:prbd_2526_a02/models/reservation.dart';
 import 'package:prbd_2526_a02/views/mes_reservations.dart';
 
 import '../core/widgets/dialog_box.dart';
-import '../providers/security_provider.dart';
+import '../models/security.dart';
+import '../providers/clientStateProvider.dart';
+import '../providers/currentUserProvider.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -31,7 +34,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(securityProvider);
+    ref.watch(currentUserProvider);
 
     // On récupère l'objet 'res' passé en argument de mes_reservations.dart (lors qu'on redirige)
     final res = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
@@ -245,10 +248,48 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
                   Expanded(
                     child: ElevatedButton.icon(
                       // Si confirmé, onPressed est null (bouton grisé), sinon il est actif
-                      onPressed: res['status'] == 'confirmed' ? null
-                        : () {
-                            print("Action : Modifier la réservation ${res['id']}");
-                        },
+                      onPressed: res['status'] == 'confirmed'
+                          ? null
+                          : () async {
+                        // Affiche un indicateur de chargement
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) => const Center(child: CircularProgressIndicator()),
+                        );
+
+                        try {
+                          // 1. Récupérer tous les restos pour trouver celui de la réservation
+                          final userID = ref.read(currentUserProvider.notifier).userID;
+                          final allRestos = await Reservation.getAllClientRestaurantsReservations(userID!);
+
+                          // 2. Trouver le restaurant correspondant à cette réservation
+                          final currentResto = allRestos.firstWhere(
+                                (r) => r['resto_name'] == res['resto_name'],
+                            orElse: () => throw Exception("Restaurant non trouvé"),
+                          );
+
+                          // 3. Fermer le chargement
+                          if (!context.mounted) return;
+                          Navigator.pop(context);
+
+                          // 4. Naviguer vers le formulaire de création/modification
+                          Navigator.pushNamed(
+                            context,
+                            '/creation_reservation',
+                            arguments: {
+                              'restaurant': currentResto,
+                              'reservation': res, // <--- C'est cet argument que tu vas récupérer dans ReservationFormPage
+                            },
+                          );
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          Navigator.pop(context); // Fermer le chargement
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Impossible de charger le formulaire.')),
+                          );
+                        }
+                      },
                       icon: const Icon(Icons.edit),
                       label: const Text('Modifier'),
                     ),
@@ -289,15 +330,15 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
       /// int.parse(res['id'].toString())
       /// This works whether the source is a String or an Int.
 
+      // On effectue l'action métier
       final int id = int.parse(res['id'].toString());
-      await ref.read(securityProvider.notifier).annuler_reservation(id: id);
+      await ref.read(clientStateProvider.notifier).annuler_reservation(id: id);
 
+      // On vérifie si on est toujours sur la page avant de naviguer
       if (!context.mounted) return;
 
-      // Instead of replacing the route, we just tell the UI to update locally
-      setState(() {
-        res['status'] = 'cancelled';
-      });
+      // On ferme la page
+      Navigator.pop(context);
 
     } catch (e) {
       if (!context.mounted) return;

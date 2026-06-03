@@ -12,3 +12,12 @@
 /data
 .DS_Store
 frontend/.hive
+
+# Script de lancement PostgREST perso d'Emilian
+scripts/start-clean.sh
+
+# Fichiers générés automatiquement
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugin_registrant.h
+windows/flutter/generated_plugin_registrant.cmake
+macos/Flutter/GeneratedPluginRegistrant.swift

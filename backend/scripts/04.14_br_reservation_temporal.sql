@@ -1,36 +1,40 @@
--- CLEANUP
-DROP TRIGGER IF EXISTS trg_br14_reservation_temporal ON reservations;
-DROP FUNCTION IF EXISTS get_current_logic_time();
-DROP FUNCTION IF EXISTS check_br14_reservation_temporal();
+-- ============================================================================
+-- NETTOYAGE
+-- ============================================================================
+DROP TRIGGER IF EXISTS trg_br14_reservation_temporal ON public.reservations;
+DROP FUNCTION IF EXISTS public.get_current_logic_time();
+DROP FUNCTION IF EXISTS public.check_br14_reservation_temporal() CASCADE;
 
--- FUNCTION
-
-/* Fonction (méthode de config) qui retourne/setup le temps du systeme
- * SET app.simulated_time = '2025-01-01 12:00:00'; (par exemple)
- * (Sans IA chaud de fou) */
-
-CREATE OR REPLACE FUNCTION get_current_logic_time()
-RETURNS TIMESTAMP AS $$
+-- ============================================================================
+-- 1. FONCTION : RÉCUPÉRATION DU TEMPS LOGIQUE
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.get_current_logic_time()
+    RETURNS TIMESTAMP AS $$
 DECLARE
-    sim_time TEXT;
+    v_simulated_time TIMESTAMP;
 BEGIN
-    -- On récupère la variable de session (renvoie NULL si non définie)
-    sim_time := current_setting('app.simulated_time', true);
-    IF sim_time IS NOT NULL AND sim_time <> '' THEN
-        RETURN sim_time::TIMESTAMP;
+    SELECT simulated_time INTO v_simulated_time
+    FROM public.system_time
+    LIMIT 1;
+
+    IF v_simulated_time IS NOT NULL THEN
+        RETURN v_simulated_time;
     END IF;
+
     RETURN CURRENT_TIMESTAMP;
 END;
 $$ LANGUAGE plpgsql;
 
-
-
-/* Fonction de check */
-CREATE OR REPLACE FUNCTION check_br14_reservation_temporal()
-RETURNS TRIGGER AS $$
+-- ============================================================================
+-- 2. FONCTION : TRIGGER DE VÉRIFICATION TEMPORELLE
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.check_br14_reservation_temporal()
+    RETURNS TRIGGER AS $$
 DECLARE
-    now_logic TIMESTAMP := get_current_logic_time();
+    now_logic TIMESTAMP;
 BEGIN
+    now_logic := public.get_current_logic_time();
+
     -- BR-14 : Interdiction de créer dans le passé (INSERT uniquement)
     IF (TG_OP = 'INSERT') THEN
         IF NEW.datetime < now_logic THEN
@@ -38,10 +42,9 @@ BEGIN
         END IF;
     END IF;
 
-    -- Règle de transition : confirmed -> pending
-    -- Autorisé uniquement si la réservation est dans le futur
+    -- Règle de transition : confirmed -> pending autorisée uniquement dans le futur
     IF (TG_OP = 'UPDATE') THEN
-        IF OLD.status = 'confirmed' AND NEW.status = 'pending' THEN
+        IF OLD.status = 'confirmed'::public.status_type AND NEW.status = 'pending'::public.status_type THEN
             IF OLD.datetime <= now_logic THEN
                 RAISE EXCEPTION 'Transition impossible : Vous ne pouvez repasser en "pending" qu''une réservation future.';
             END IF;
@@ -52,9 +55,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
--- TRIGGER
+-- ============================================================================
+-- 3. CRÉATION DU TRIGGER
+-- ============================================================================
 CREATE TRIGGER trg_br14_reservation_temporal
-    BEFORE INSERT OR UPDATE ON reservations
+    BEFORE INSERT OR UPDATE ON public.reservations
     FOR EACH ROW
-    EXECUTE FUNCTION check_br14_reservation_temporal();
+EXECUTE FUNCTION public.check_br14_reservation_temporal();
