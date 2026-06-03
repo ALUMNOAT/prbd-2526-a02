@@ -1,14 +1,20 @@
+DROP FUNCTION IF EXISTS get_current_user();
 CREATE OR REPLACE FUNCTION get_current_user()
-    RETURNS SETOF users AS
+    RETURNS users AS
 $$
+DECLARE
+    current_user users;
 BEGIN
     -- is a user currently connected ?
     PERFORM auth.check_logged();
 
-    RETURN QUERY
-        SELECT *
-        FROM users u
-        WHERE u.id = auth.id();
+    SELECT *
+    FROM users u
+    WHERE u.id = auth.id()
+    LIMIT 1
+    INTO current_user;
+
+    RETURN current_user;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

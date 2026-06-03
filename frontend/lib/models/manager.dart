@@ -9,7 +9,8 @@ import '../core/services/api_client.dart';
 class Manager {
   // composition is simpler than extension in this case, simply because we use
   // providers that can handle any user-related functions already.
-  final User? user;
+  // the user can't be null here, thanks GPT
+  final User user;
   final List<Restaurant> restaurants;
 
   Manager({

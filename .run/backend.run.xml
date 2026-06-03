@@ -24,6 +24,8 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/04.00_tables.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.00_services.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04.00_restaurants.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05.00_ep_user.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05.00_ep_restaurant.sql" />
     <script-mode>FILE</script-mode>
     <data-source id="ddd41155-14fe-4d46-803f-8e70c582de08" namespace="database/&quot;prbd-2526-a02&quot;/schema/&quot;public&quot;" />
     <method v="2" />

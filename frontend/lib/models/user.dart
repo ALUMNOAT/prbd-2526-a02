@@ -15,9 +15,9 @@ class User {
   final String email;
   final String fullName;
   final Role role;
-  String? phone;
+  final String? phone;
 
-  User({
+  const User({
     required this.id,
     required this.email,
     required this.fullName,
@@ -26,8 +26,6 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    log('user.dart fromJson() ->');
-
     return User(
       id: json['id'],
       email: json['email'],
@@ -40,20 +38,13 @@ class User {
   }
 
   static Future<User> getCurrentUser() async {
-    log('user.dart getCurrentUser() ->');
-
     final response = await ApiClient.get('get_current_user');
+
     if (response.statusCode == 200) {
-      return User.fromJson(json.decode(response.body));
+      return User.fromJson(json.decode(response.body));;
     } else {
       throw Exception('Failed to get current user');
     }
-  }
-
-  static Future<void> getTestApi() async {
-    log('user.dart getTestApi() ->');
-
-    final response = await ApiClient.get('test_api');
   }
 
   // ###########

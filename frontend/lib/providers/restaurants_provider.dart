@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
-import 'package:prbd_2526_a02/providers/security_provider.dart';
+import 'package:prbd_2526_a02/providers/currentUserProvider.dart';
 
 import '../models/user.dart';
 
 class RestaurantNotifier extends AsyncNotifier<List<Restaurant>> {
   @override
   Future<List<Restaurant>> build() async {
-    ref.watch(securityProvider);
+    ref.watch(currentUserProvider);
     state = AsyncData([]);
     return [];
   }
