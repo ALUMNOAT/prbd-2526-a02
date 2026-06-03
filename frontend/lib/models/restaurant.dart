@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:prbd_2526_a02/core/services/api_client.dart';
+import 'package:prbd_2526_a02/models/luca_reservation.dart';
+import 'package:prbd_2526_a02/models/reservation.dart';
 import 'package:prbd_2526_a02/models/user.dart';
 
 class Restaurant {
@@ -7,10 +9,11 @@ class Restaurant {
   final String name;
   final String city;
   final String phone;
-  String? description;
-  double? rating;
-  int? priceRange;
+  final String? description;
+  final double? rating;
+  final int? priceRange;
   final int slotDuration;
+  final List<Luca_Reservation> reservations;
 
   // (1) using private named parameters require a boilerplate :(
   // only in dart 3.13 can this be bypassed... so let's make 'em public :/
@@ -20,10 +23,11 @@ class Restaurant {
     required this.name,
     required this.city,
     required this.phone,
-    String? description,
-    double? rating,
-    int? priceRange,
+    this.description,
+    this.rating,
+    this.priceRange,
     required this.slotDuration,
+    this.reservations = const [],
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {

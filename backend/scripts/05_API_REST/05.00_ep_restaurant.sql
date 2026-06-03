@@ -2,18 +2,22 @@
 
 
 
-
+DROP FUNCTION IF EXISTS get_restaurant_by_id(id INT);
 CREATE OR REPLACE FUNCTION get_restaurant_by_id(id INT)
-    RETURNS SETOF restaurants AS
+    RETURNS restaurants AS
 $$
+DECLARE
+    restaurant restaurants;
 BEGIN
     -- is a user currently connected ?
     PERFORM auth.check_logged();
 
-    RETURN QUERY
-        SELECT *
-        FROM restaurants rst
-        WHERE rst.id = get_restaurant_by_id.id;
+    SELECT * FROM restaurants rst
+    WHERE rst.id = get_restaurant_by_id.id
+    LIMIT 1
+    INTO restaurant;
+
+    RETURN restaurant;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
