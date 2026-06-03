@@ -33,12 +33,13 @@ class UserNotifier extends AsyncNotifier<User?> {
     log('-> user_provider attempting to return user now: ');
     if(token == null) {
       log('-> the token is null !');
+      return null;
     } else {
       log('-> calling User.getCurrentUser()');
     }
 
-    return token == null
-      ? null
-      : await User.getCurrentUser();
+    final user = await User.getCurrentUser();
+
+    return user;
   }
 }

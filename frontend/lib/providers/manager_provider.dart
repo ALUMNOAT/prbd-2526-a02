@@ -19,6 +19,9 @@ class ManagerNotifier extends AsyncNotifier<Manager?> {
 
     final user = ref.watch(userProvider).value;
 
+    log('-> in the manager_provider, user name is  = ${user?.fullName}');
+
+
     if(user == null || user.role != Role.manager) {
       return null;
     }

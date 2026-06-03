@@ -25,7 +25,6 @@ class SecurityNotifier extends AsyncNotifier<String?> {
   }
 
   Future<void> login(String email, String password) async {
-    final user = null;
     state = const AsyncLoading();
     try {
       var token = await Security.login(email, password);
