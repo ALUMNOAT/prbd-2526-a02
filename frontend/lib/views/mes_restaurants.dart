@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_a02/providers/security_provider.dart';
+import 'package:prbd_2526_a02/providers/currentUserProvider.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -27,8 +27,8 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(securityProvider);
-    final securityNotifier = ref.read(securityProvider.notifier);
+    ref.watch(currentUserProvider);
+    final securityNotifier = ref.read(currentUserProvider.notifier);
     final userName = securityNotifier.loggedUserName;
 
     final theme = Theme.of(context);

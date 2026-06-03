@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/core/services/api_client.dart';
 
 class Security {
@@ -84,47 +85,4 @@ class Security {
       throw Exception('Failed to signup\n\n${response.body}');
     }
   }
-
-  /// Function returns a list
-  static Future<List<dynamic>> getClientReservations(String userID) async {
-    final response = await ApiClient.get(
-      'getclientreservations?userid=$userID',
-      anonymous: false,
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to gather reservations');
-    }
-  }
-
-  /// Function returns void
-  static Future<void> annuler_reservation ({
-    required int id
-}) async {
-    final response = await ApiClient.post(
-      'clientannulerreservation',
-      body: json.encode({
-        '_id': id,
-      }),
-      anonymous: false,
-    );
-    if (response.statusCode != 204) {
-      throw Exception('Failed to cancel reservation\n\n${response.body}');
-    }
-  }
-
-  /// Function returns a list
-  static Future<List<dynamic>> getAllClientRestaurantsReservations(String userID) async {
-    final response = await ApiClient.get(
-      'getclientallrestaurantreservationsandservices?userid=$userID',
-      anonymous: false,
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to gather restaurant/reservations');
-    }
-  }
-
 }

@@ -1,15 +1,14 @@
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../core/tools/params.dart';
 import '../models/security.dart';
 
-
-final securityProvider = AsyncNotifierProvider<SecurityNotifier, String?>(
-      () => SecurityNotifier(),
+final currentUserProvider = AsyncNotifierProvider<CurrentUserNotifier, String?>(
+  () => CurrentUserNotifier(),
 );
 
-class SecurityNotifier extends AsyncNotifier<String?> {
+class CurrentUserNotifier extends AsyncNotifier<String?> {
   @override
   Future<String?> build() async {
     // pour que le state soit initialisée de manière synchrone
@@ -76,6 +75,10 @@ class SecurityNotifier extends AsyncNotifier<String?> {
 
   String? get userID => _getIDFromToken(state.value);
 
+  static String? getUserIdFromToken(String? token) {
+    return _getIDFromToken(token);
+  }
+
   static String? _getIDFromToken(String? token) {
     if (token == null) return null;
     try {
@@ -92,13 +95,18 @@ class SecurityNotifier extends AsyncNotifier<String?> {
     required String password,
     String? phone,
   }) async {
-    state = const AsyncValue.loading();
+    state = const AsyncLoading();
     try {
-      await Security.signup(name: name, email: email, password: password, phone: phone);
+      await Security.signup(
+        name: name,
+        email: email,
+        password: password,
+        phone: phone,
+      );
       await login(email, password);
-      state = AsyncValue.data(Params.getValue('token'));
+      state = AsyncData(Params.getValue('token'));
     } catch (e) {
-      state = AsyncValue.error("Signup failed", StackTrace.current);
+      state = AsyncError("Signup failed", StackTrace.current);
     }
   }
 
@@ -114,19 +122,4 @@ class SecurityNotifier extends AsyncNotifier<String?> {
       );
     }
   }
-
-  Future<void> annuler_reservation({
-    required int id
-  }) async {
-    try {
-      await Security.annuler_reservation(id: id);
-    } catch (e) {
-      state = AsyncError(
-          "Cancelling the reservation $id failed.",
-          StackTrace.current,
-      );
-    }
-  }
-
-
 }

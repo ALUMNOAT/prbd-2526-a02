@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/config/app_config.dart';
-import 'package:prbd_2526_a02/providers/security_provider.dart';
+import 'package:prbd_2526_a02/providers/currentUserProvider.dart';
 import 'package:prbd_2526_a02/views/mes_reservations.dart';
 
+import '../models/reservation.dart';
 import '../models/security.dart';
 
 void main() async {
@@ -34,8 +35,8 @@ class _SearchRestaurantsPageState extends ConsumerState<SearchRestaurantsPage> {
   @override
   Widget build(BuildContext context) {
     // watch triggers rebuild on change
-    ref.watch(securityProvider);
-    final securityNotifier = ref.read(securityProvider.notifier);
+    ref.watch(currentUserProvider);
+    final securityNotifier = ref.read(currentUserProvider.notifier);
     final userID = securityNotifier.userID;
     final theme = Theme.of(context);
 
@@ -83,7 +84,7 @@ class _SearchRestaurantsPageState extends ConsumerState<SearchRestaurantsPage> {
               child: userID == null
                   ? const Center(child: CircularProgressIndicator())
                   : FutureBuilder<List<dynamic>>(
-                      future: Security.getAllClientRestaurantsReservations(
+                      future: Reservation.getAllClientRestaurantsReservations(
                         userID,
                       ),
                       builder: (context, snapshot) {
@@ -291,6 +292,3 @@ class _SearchRestaurantsPageState extends ConsumerState<SearchRestaurantsPage> {
     );
   }
 }
-
-///TODO: rajouter des méthodes au security provider. Pq ne rien ajouter change rien et tout marche de toute facon?
-///TODO: fixer la view dans mes_reservations. Je dois utiliser ListTile au lieu de InkWell
