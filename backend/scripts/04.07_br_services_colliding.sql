@@ -1,6 +1,6 @@
 -- NETTOYAGE --
 DROP TRIGGER IF EXISTS trigger_check_overlap ON services;
-DROP FUNCTION IF EXISTS check_service_overlap();
+DROP FUNCTION IF EXISTS check_service_overlap() CASCADE;
 
 -- CREATION FONCTION --
 CREATE OR REPLACE FUNCTION check_service_overlap()
