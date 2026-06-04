@@ -21,6 +21,10 @@ class RestaurantManagementReservations extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final managerState = ref.watch(manager_provider);
+    final securityNotifier = ref.watch(security_provider.notifier);
+    final restaurantNotifier = ref.watch(restaurant_provider.notifier);
+
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
