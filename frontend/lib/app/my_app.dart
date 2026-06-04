@@ -52,7 +52,7 @@ class MyApp extends ConsumerWidget {
         '/recherche_restaurants': (context) => SearchRestaurantsPage(),
         '/detail_restaurant': (context) => DetailRestaurantPage(),
         '/creation_reservation': (context) => ReservationFormPage(),
-        '/restaurant_management_reservations': (context) => RestaurantManagementReservations()
+        '/restaurant_management_reservations': (context) => RestaurantManagementReservationPage()
       },
     );
   }

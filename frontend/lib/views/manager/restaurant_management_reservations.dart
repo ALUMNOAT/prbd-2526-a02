@@ -2,6 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
+import 'package:prbd_2526_a02/models/luca_reservation.dart';
+import 'package:prbd_2526_a02/providers/luca_provider/restaurants_provider.dart';
+import 'package:prbd_2526_a02/providers/luca_provider/security_provider.dart';
+import 'dart:developer';
+
+import '../../models/manager.dart';
+import '../../providers/luca_provider/manager_provider.dart';
+import '../../providers/luca_provider/restaurant_provider.dart';
+import '../Widgets/restaurant_card.dart';
+
 void main() async {
   await initializeDateFormatting('fr_FR', null);
   runApp(
@@ -11,14 +25,18 @@ void main() async {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const RestaurantManagementReservations(),
+      home: /*const*/ RestaurantManagementReservationPage(),
     ),
   );
 }
 
-class RestaurantManagementReservations extends StatelessWidget {
-  const RestaurantManagementReservations({super.key});
+class RestaurantManagementReservationPage extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<RestaurantManagementReservationPage> createState() => _RestaurantManagementReservationState();
+}
 
+class _RestaurantManagementReservationState extends ConsumerState<RestaurantManagementReservationPage> {
+  /*const*/ //RestaurantManagementReservations({super.key});
   @override
   Widget build(BuildContext context) {
     final managerState = ref.watch(manager_provider);
@@ -112,132 +130,7 @@ class RestaurantManagementReservations extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.all(16.0),
                 children: [
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            const SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: Icon(Icons.pending, size: 32, color: Colors.orange),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Bruno Lacroix',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.restaurant, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Le Gourmet',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.access_time, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'dim. 24/11/2024 12:30',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Icon(Icons.people, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '2 convives',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            const SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: Icon(Icons.check_circle, size: 32, color: Colors.green),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Marc Michel',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.restaurant, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Le Gourmet',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.access_time, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'mer. 04/12/2024 12:30',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Icon(Icons.people, size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '2 convives',
-                                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  ReservationCard(),
                 ],
               ),
             ),
@@ -262,6 +155,82 @@ class RestaurantManagementReservations extends StatelessWidget {
             label: 'Tables',
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ReservationCard extends StatelessWidget {
+  const ReservationCard({
+    super.key,
+    required this.reservation,
+  });
+
+  final Luca_Reservation reservation;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: InkWell(
+        onTap: () {},
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              const SizedBox(
+                width: 32,
+                height: 32,
+                child: Icon(Icons.pending, size: 32, color: Colors.orange),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      reservation.client,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.restaurant, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Le Gourmet',
+                          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.access_time, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          'dim. 24/11/2024 12:30',
+                          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        ),
+                        const SizedBox(width: 12),
+                        const Icon(Icons.people, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          '2 convives',
+                          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
       ),
     );
   }
