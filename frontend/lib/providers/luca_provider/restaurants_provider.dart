@@ -9,6 +9,7 @@ final restaurants_provider = AsyncNotifierProvider<RestaurantsNotifier, List<Res
       () => RestaurantsNotifier(),
 );
 
+//https://riverpod.dev/docs/concepts2/family
 class RestaurantsNotifier extends AsyncNotifier<List<Restaurant>> {
   @override
   Future<List<Restaurant>> build() async {

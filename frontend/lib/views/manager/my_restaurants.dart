@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_a02/providers/luca_provider/restaurants_provider.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/security_provider.dart';
 import 'dart:developer';
 
 import '../../models/manager.dart';
 import '../../providers/luca_provider/manager_provider.dart';
+import '../../providers/luca_provider/restaurant_provider.dart';
 import '../Widgets/restaurant_card.dart';
 
 void main() async {
@@ -34,6 +36,7 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
     //https://stackoverflow.com/questions/71813090/flutter-riverpod-ref-read-vs-ref-listen-vs-ref-watch
     final managerState = ref.watch(manager_provider);
     final securityNotifier = ref.watch(security_provider.notifier);
+    final restaurantNotifier = ref.watch(restaurant_provider.notifier);
 
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
@@ -53,7 +56,12 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
               theme: theme,
               simulatedTime: simulatedTime
           ),
-          body: MyBody(managerState: manager),
+
+          body: MyBody(
+              managerState: manager,
+              restaurantNotifier: restaurantNotifier
+          ),
+
         );
       },
     );
@@ -134,9 +142,12 @@ class MyBody extends StatelessWidget {
   const MyBody({
     super.key,
     required this.managerState,
+    required this.restaurantNotifier
   });
 
   final Manager managerState;
+  final RestaurantNotifier restaurantNotifier;
+
 
   @override
   Widget build(BuildContext context) {
@@ -146,9 +157,13 @@ class MyBody extends StatelessWidget {
         children: [
           //https://stackoverflow.com/questions/58471237/the-element-type-settext-cant-be-assigned-to-the-list-type-widget
           for (var restaurant in managerState.restaurants)
-            RestaurantCard(restaurant : restaurant),
+            RestaurantCard(
+                restaurant : restaurant,
+                restaurantNotifier: restaurantNotifier,
+            ),
         ],
       ),
     );
   }
 }
+

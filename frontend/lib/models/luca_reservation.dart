@@ -7,8 +7,8 @@ import '../core/services/api_client.dart';
 
 class Luca_Reservation {
   final int id;
-  final User client;
-  final Restaurant restaurant;
+  final int client;
+  final int restaurant;
   final DateTime datetime;
   final int numberOfGuests;
   final Status status;
@@ -29,9 +29,9 @@ class Luca_Reservation {
       User client,
       Restaurant restaurant) {
     return Luca_Reservation(
-      id: (json['id']),
-      client: client,
-      restaurant: restaurant,
+      id: json['id'],
+      client: json['client'],
+      restaurant: json['restaurant'],
       datetime: (json['datetime'] != null)
           ? DateTime.tryParse(json['datetime'].toString()) ?? DateTime.now()
           : DateTime.now(),

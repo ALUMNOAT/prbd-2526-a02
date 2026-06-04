@@ -11,6 +11,7 @@ final manager_provider = AsyncNotifierProvider<ManagerNotifier, Manager?>(
       () => ManagerNotifier(),
 );
 
+//
 class ManagerNotifier extends AsyncNotifier<Manager?> {
   @override
   Future<Manager?> build() async {
