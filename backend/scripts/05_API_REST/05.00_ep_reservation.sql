@@ -14,3 +14,41 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_restaurant_reservations_by_id TO authenticated;
+
+
+
+
+
+DROP FUNCTION IF EXISTS complete_reservation(INT);
+CREATE OR REPLACE FUNCTION complete_reservation(id INT)
+    RETURNS void AS
+$$
+BEGIN
+    -- is a user currently connected ?
+    PERFORM auth.check_logged();
+
+    UPDATE reservations r SET status = 'completed'
+    WHERE r.id = complete_reservation.id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION complete_reservation TO authenticated;
+
+
+
+
+
+DROP FUNCTION IF EXISTS cancel_reservation(INT);
+CREATE OR REPLACE FUNCTION cancel_reservation(id INT)
+    RETURNS void AS
+$$
+BEGIN
+    -- is a user currently connected ?
+    PERFORM auth.check_logged();
+
+    UPDATE reservations r SET status = 'cancelled'
+    WHERE r.id = cancel_reservation.id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION cancel_reservation TO authenticated;

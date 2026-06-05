@@ -58,4 +58,30 @@ class Luca_Reservation {
   Future<void> setClient() async {
     client = await getClient();
   }
+
+  Future<void> complete_reservation() async {
+    log("luca_reservation complete_reservation() ->");
+
+    final response = await ApiClient.post(
+      'complete_reservation', // Correspond au nom de la fonction SQL créée
+      body: json.encode({'id': id}),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to update reservation: ${response.body}');
+    }
+  }
+
+  Future<void> cancel_reservation() async {
+    log("luca_reservation cancel_reservation() ->");
+
+    final response = await ApiClient.post(
+      'calcel_reservation', // Correspond au nom de la fonction SQL créée
+      body: json.encode({'id': id}),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to update reservation: ${response.body}');
+    }
+  }
 }

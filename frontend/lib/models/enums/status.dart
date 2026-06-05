@@ -4,16 +4,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 enum Status {
-  pending(icon: Icons.pending, color: Colors.orange),
-  confirmed(icon: Icons.check_circle, color: Colors.green),
-  cancelled(icon: Icons.cancel, color: Colors.red),
-  complete(icon: Icons.event_available, color: Colors.blue);
+  pending('En attente', Icons.pending, Colors.orange),
+  confirmed('Confirmé', Icons.check_circle, Colors.green),
+  cancelled('Annulée', Icons.cancel, Colors.red),
+  complete('Terminée', Icons.event_available, Colors.blue);
 
-  const Status({
-    required this.icon,
-    required this.color,
-  });
+  const Status(
+    this.french_name,
+    this.iconData,
+    this.color,
+  );
 
-  final IconData icon;
+  final String french_name;
+  final IconData iconData;
   final Color color;
 }

@@ -113,6 +113,7 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
                     icon: Icon(Icons.list, size: 24),
                     tooltip: 'Toutes',
                   ),
+
                   ButtonSegment(
                     value: 'pending',
                     icon: Icon(Icons.pending, size: 24, color: Colors.orange),

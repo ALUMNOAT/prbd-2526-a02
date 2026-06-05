@@ -49,7 +49,7 @@ class ReservationCard extends StatelessWidget {
             children: [
               Tooltip(
                 message: status.name,
-                child: Icon(status.icon, size: 32, color: status.color),
+                child: Icon(status.iconData, size: 32, color: status.color),
               ),
               const SizedBox(width: 16),
 

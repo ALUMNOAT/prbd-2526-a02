@@ -53,6 +53,7 @@ class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsMa
         }
 
         final client = luca_reservation.client!;
+        final status = luca_reservation.status;
 
         return Scaffold(
           appBar: AppBar(
@@ -106,6 +107,7 @@ class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsMa
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  //INFO CLIENT
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -151,14 +153,17 @@ class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsMa
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 16),
+
+                  //RESERVATION DETAILS
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+
+                          //TITLE
                           const Text(
                             'Détails de la réservation',
                             style: TextStyle(
@@ -167,13 +172,15 @@ class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsMa
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Row(
+
+                          //RESTAURANT NAME/INFO
+                          Row(
                             children: [
                               Icon(Icons.restaurant, size: 20),
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  'Le Gourmet',
+                                  luca_reservation.restaurant!.name,
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -183,56 +190,72 @@ class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsMa
                             ],
                           ),
                           const SizedBox(height: 16),
+
+                          //DIVIDER
                           const Divider(),
                           const SizedBox(height: 16),
+
+                          //DATE
                           Row(
                             children: [
                               const Icon(Icons.calendar_today, size: 20),
                               const SizedBox(width: 8),
                               Text(
-                                'Date: jeu. 21/11/2024',
+                                'Date : ${DateFormat('EEE dd/MM/yyyy', 'fr_FR').format(luca_reservation.datetime)}',
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
+
+                          //TIME
                           Row(
                             children: [
                               const Icon(Icons.access_time, size: 20),
                               const SizedBox(width: 8),
-                              const Text('Heure: 19:30'),
+                              Text(
+                                  'heure : ${DateFormat('HH:mm', 'fr_FR').format(luca_reservation.datetime)}'
+                              ),
                             ],
                           ),
                           const SizedBox(height: 8),
+
+                          //GUEST_COUNT
                           Row(
                             children: [
                               const Icon(Icons.people, size: 20),
                               const SizedBox(width: 8),
-                              const Text('Nombre de convives: 8'),
+                              Text('Nombre de convives: ${luca_reservation.numberOfGuests}'),
                             ],
                           ),
                           const SizedBox(height: 8),
+
+                          //STATUS
                           Row(
                             children: [
                               const Icon(Icons.info, size: 20),
                               const SizedBox(width: 8),
                               const Text('Statut: '),
                               Chip(
-                                label: const Text(
-                                  'Confirmée',
+                                label:  Text(
+                                  status.french_name,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.white,
                                   ),
                                 ),
-                                backgroundColor: const Color(0xFF4CAF50),
+                                backgroundColor: status.color,
                                 padding: EdgeInsets.zero,
                               ),
                             ],
                           ),
                           const SizedBox(height: 16),
+
+                          //DIVIDER
                           const Divider(),
                           const SizedBox(height: 8),
-                          const Text(
+
+                          //SPECIAL REQUESTS
+                          Text(
                             'Demandes spéciales',
                             style: TextStyle(
                               fontSize: 14,
@@ -240,15 +263,19 @@ class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsMa
                             ),
                           ),
                           const SizedBox(height: 4),
+
                           Text(
-                            'Célébration',
+                            '${luca_reservation.specialRequests}',
                             style: TextStyle(color: Colors.grey[700]),
                           ),
+
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
+
+                  //ASSIGNED TABLE
                   const Text(
                     'Tables assignées',
                     style: TextStyle(
@@ -257,6 +284,7 @@ class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsMa
                     ),
                   ),
                   const SizedBox(height: 8),
+
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -295,14 +323,21 @@ class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsMa
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  //BUTTONS
                   ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      luca_reservation.complete_reservation();
+                    },
                     icon: const Icon(Icons.check_circle),
                     label: const Text('Marquer comme terminée'),
                   ),
                   const SizedBox(height: 8),
+
                   OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      luca_reservation.cancel_reservation();
+                    },
                     icon: const Icon(Icons.cancel),
                     label: const Text('Annuler'),
                   ),
