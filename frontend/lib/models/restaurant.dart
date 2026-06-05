@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:prbd_2526_a02/core/services/api_client.dart';
 import 'package:prbd_2526_a02/models/luca_reservation.dart';
 import 'package:prbd_2526_a02/models/reservation.dart';
@@ -62,6 +63,22 @@ class Restaurant {
 
   @override
   int get hashCode => id.hashCode;
+
+  Future<List<Luca_Reservation>> getReservations() async {
+    log("restaurant getReservations() ->");
+
+    final response = await ApiClient.post(
+      'get_restaurant_reservations_by_id',
+      body: json.encode({'id': id}),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> body = json.decode(response.body);
+      return body.map((dynamic item) => Luca_Reservation.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to get restaurant reservations from restaurant id');
+    }
+  }
 
   static Future<Restaurant> getRestaurantById(int id) async {
     final response = await ApiClient.post(

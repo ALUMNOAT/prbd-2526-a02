@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
-import 'package:prbd_2526_a02/models/status.dart';
+import 'package:prbd_2526_a02/models/enums/status.dart';
 import 'package:prbd_2526_a02/models/user.dart';
 import '../core/services/api_client.dart';
 
@@ -24,10 +24,7 @@ class Luca_Reservation {
     this.specialRequests,
   });
 
-  factory Luca_Reservation.fromJson(
-      Map<String, dynamic> json,
-      User client,
-      Restaurant restaurant) {
+  factory Luca_Reservation.fromJson(Map<String, dynamic> json) {
     return Luca_Reservation(
       id: json['id'],
       client: json['client'],

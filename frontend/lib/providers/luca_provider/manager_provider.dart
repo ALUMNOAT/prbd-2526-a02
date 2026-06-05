@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prbd_2526_a02/models/manager.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/user_provider.dart';
 
+import '../../models/enums/role.dart';
 import '../../models/restaurant.dart';
 import '../../models/user.dart';
 

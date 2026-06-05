@@ -19,6 +19,8 @@ class RestaurantNotifier extends AsyncNotifier<Restaurant?> {
   }
 
   Future<void> set_current_restaurant(Restaurant restaurant) async {
+    log("restaurant_provider set_current_restaurant() ->");
+    await restaurant.getReservations();
     state = AsyncData(restaurant);
   }
 }

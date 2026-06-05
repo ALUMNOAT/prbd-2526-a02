@@ -3,11 +3,7 @@ import 'dart:developer';
 import 'package:prbd_2526_a02/models/manager.dart';
 import 'package:prbd_2526_a02/models/security.dart';
 import '../core/services/api_client.dart';
-
-
-enum Role {
-  client, manager
-}
+import 'enums/role.dart';
 
 
 class User {
