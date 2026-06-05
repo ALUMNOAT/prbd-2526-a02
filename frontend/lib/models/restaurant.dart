@@ -79,11 +79,15 @@ class Restaurant {
       body: json.encode({'restaurant_id': id}),
     );
 
-    log("-> json body: ${response.body} PPPPPPPPPPPPPPPPPPPPPPP");
-
     if (response.statusCode == 200) {
       final List<dynamic> body = json.decode(response.body);
-      return body.map((dynamic item) => Luca_Reservation.fromJson(item)).toList();
+      List<Luca_Reservation> reservations = body.map(
+              (dynamic item) => Luca_Reservation.fromJson(item, restaurant_obj: this)
+      ).toList();
+      reservations.forEach((reservation) async => await reservation.setClient());
+
+      return reservations;
+
     } else {
       throw Exception('${response.statusCode}: Failed to get restaurant reservations from restaurant id');
     }

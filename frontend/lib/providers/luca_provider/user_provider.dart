@@ -31,18 +31,12 @@ class UserNotifier extends AsyncNotifier<User?> {
     // login occurred.
     final token = security.value;
 
-    log('  -> user_provider attempting to return user now: ');
     if(token == null) {
-      log('    -> the token is null !');
       return null;
     } else {
-      log('    -> calling User.getCurrentUser()');
     }
-    log('@@@@@@@@@@@@@@@@@@@ this is reached ! @@@@@@@@@@@@@@@@@@@@@@@@@@');
 
     final user = await User.getCurrentUser();
-
-    log('################### this is never reached ? #######################');
 
     return user;
   }

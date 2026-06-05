@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/models/enums/status.dart';
@@ -7,34 +9,53 @@ import '../core/services/api_client.dart';
 
 class Luca_Reservation {
   final int id;
-  final int client;
-  final int restaurant;
+  final int client_id;
+  final int restaurant_id;
   final DateTime datetime;
   final int numberOfGuests;
   final Status status;
   final String? specialRequests;
+  User? client;
+  Restaurant? restaurant;
 
   Luca_Reservation({
     required this.id,
-    required this.client,
-    required this.restaurant,
+    required this.client_id,
+    required this.restaurant_id,
     required this.datetime,
     required this.numberOfGuests,
     required this.status,
     this.specialRequests,
+    this.client,
+    this.restaurant,
   });
 
-  factory Luca_Reservation.fromJson(Map<String, dynamic> json) {
+  factory Luca_Reservation.fromJson(
+      Map<String, dynamic> json,
+      {
+        User? client_obj,
+        Restaurant? restaurant_obj
+      }) {
     return Luca_Reservation(
       id: json['id'],
-      client: json['client'],
-      restaurant: json['restaurant'],
+      client_id: json['client'],
+      restaurant_id: json['restaurant'],
       datetime: (json['datetime'] != null)
           ? DateTime.tryParse(json['datetime'].toString()) ?? DateTime.now()
           : DateTime.now(),
       numberOfGuests: json['number_of_guests'],
       status: Status.values.byName(json['status']),
       specialRequests: json['special_requests'],
+      client: client_obj,
+      restaurant: restaurant_obj,
     );
+  }
+
+  Future<User> getClient() async {
+    return await User.getUserById(client_id);
+  }
+
+  Future<void> setClient() async {
+    client = await getClient();
   }
 }

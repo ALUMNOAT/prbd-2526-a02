@@ -29,7 +29,7 @@ class ReservationCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: () async {
-          log("******************* this should work *******************");
+          await luca_reservationNotifier.set_current_luca_reservation(luca_reservation);
           await Navigator.pushNamed(
             context,
             '/reservation_details_manager',

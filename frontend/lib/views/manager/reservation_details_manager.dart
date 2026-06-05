@@ -1,6 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+
+import '../../models/luca_reservation.dart';
+import '../../providers/luca_provider/luca_reservation_provider.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -11,26 +17,40 @@ void main() async {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const ReservationDetailsManagerPage(),
+      home: /*const*/ ReservationDetailsManagerPage(),
     ),
   );
 }
 
-class ReservationDetailsManagerPage extends StatelessWidget {
-  const ReservationDetailsManagerPage({super.key});
+class ReservationDetailsManagerPage extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<ReservationDetailsManagerPage> createState() => _ReservationDetailsManagerstate();
+}
 
+class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsManagerPage> {
   @override
   Widget build(BuildContext context) {
+    final luca_reservation_state = ref.watch(luca_reservation_provider).value;
+    log("--------------------------------------------------");
+    log(luca_reservation_state == null ? 'no reservation loaded' : 'reservation loaded');
+    final client = luca_reservation_state!.client;
+    final luca_reservationNotifier = ref.watch(luca_reservation_provider.notifier);
+
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
+    //final luca_reservation = ref.watch
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
+
         title: const Text('Détails de la réservation'),
+
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -65,6 +85,9 @@ class ReservationDetailsManagerPage extends StatelessWidget {
           ),
         ),
       ),
+
+
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -85,19 +108,20 @@ class ReservationDetailsManagerPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Row(
+
+                      Row(
                         children: [
                           Icon(Icons.person, size: 20),
                           SizedBox(width: 8),
-                          Text('Nom: Xavier'),
+                          Text('Nom: ${client!.fullName}'),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      const Row(
+                      Row(
                         children: [
                           Icon(Icons.email, size: 20),
                           SizedBox(width: 8),
-                          Text('Email: xapigeolet@epfc.eu'),
+                          Text('Email: ${client!.email}'),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -106,8 +130,10 @@ class ReservationDetailsManagerPage extends StatelessWidget {
                           const Icon(Icons.phone, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            'Téléphone: Non renseigné',
-                            style: TextStyle(color: Colors.grey[600]),
+                            client!.phone == null
+                                ? 'Téléphone: Non renseigné'
+                                : client!.phone!,
+                              style: TextStyle(color: Colors.grey[600]),
                           ),
                         ],
                       ),
@@ -115,6 +141,7 @@ class ReservationDetailsManagerPage extends StatelessWidget {
                   ),
                 ),
               ),
+
               const SizedBox(height: 16),
               Card(
                 child: Padding(

@@ -20,6 +20,36 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_current_user TO authenticated;
 
+
+
+
+
+DROP FUNCTION IF EXISTS get_user_by_id(id INT);
+CREATE OR REPLACE FUNCTION get_user_by_id(id INT)
+    RETURNS users AS
+$$
+DECLARE
+    user users;
+BEGIN
+    -- is a user currently connected ?
+    PERFORM auth.check_logged();
+
+    SELECT * FROM users u
+    WHERE u.id = get_user_by_id.id
+    LIMIT 1
+    INTO user;
+
+    RETURN user;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_user_by_id TO authenticated;
+
+
+
+
+
+
 CREATE OR REPLACE FUNCTION test_api()
     RETURNS int AS
 $$
