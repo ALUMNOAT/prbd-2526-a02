@@ -92,4 +92,19 @@ class Restaurant {
       throw Exception('${response.statusCode}: Failed to get restaurant reservations from restaurant id');
     }
   }
+
+  static Future<Restaurant?> getRestaurantById(int id) async {
+    log("restaurant getReservations() ->");
+
+    final response = await ApiClient.post(
+      'get_restaurant_by_id',
+      body: json.encode({'restaurant_id': id}),
+    );
+
+    if (response.statusCode == 200) {
+      return Restaurant.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('${response.statusCode}: Failed to get restaurant reservations from restaurant id');
+    }
+  }
 }

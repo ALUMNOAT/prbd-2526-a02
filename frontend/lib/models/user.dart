@@ -50,7 +50,7 @@ class User {
     );
 
     if (response.statusCode == 200) {
-      return User.fromJson(json.decode(response.body));;
+      return User.fromJson(json.decode(response.body));
     } else {
       throw Exception('${response.statusCode}: Failed to get current user');
     }
