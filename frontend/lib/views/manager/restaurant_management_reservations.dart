@@ -58,7 +58,9 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: const Text('Le Gourmet'),
         automaticallyImplyLeading: false,
@@ -95,6 +97,8 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
           ),
         ),
       ),
+
+
 
       body: SafeArea(
         child: Column(
@@ -157,6 +161,8 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
           ],
         ),
       ),
+
+
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 0,

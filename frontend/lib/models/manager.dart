@@ -27,7 +27,17 @@ class Manager {
 
     if (response.statusCode == 200) {
       final List<dynamic> body = json.decode(response.body);
-      return body.map((dynamic item) => Restaurant.fromJson(item)).toList();
+
+      List<Restaurant> restaurants = body.map(
+              (dynamic item) => Restaurant.fromJson(item)
+      ).toList();
+
+      restaurants.forEach(
+              (restaurant) async =>
+              restaurant.reservations = await restaurant.getReservations()
+      );
+
+      return restaurants;
     } else {
       throw Exception('Failed to get restaurants of current manager');
     }

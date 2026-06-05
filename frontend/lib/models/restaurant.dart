@@ -5,6 +5,8 @@ import 'package:prbd_2526_a02/models/luca_reservation.dart';
 import 'package:prbd_2526_a02/models/reservation.dart';
 import 'package:prbd_2526_a02/models/user.dart';
 
+import 'enums/status.dart';
+
 class Restaurant {
   final int id;
   final String name;
@@ -14,7 +16,7 @@ class Restaurant {
   final double? rating;
   final int? priceRange;
   final int slotDuration;
-  final List<Luca_Reservation> reservations;
+  List<Luca_Reservation> reservations;
 
   // (1) using private named parameters require a boilerplate :(
   // only in dart 3.13 can this be bypassed... so let's make 'em public :/
@@ -45,11 +47,16 @@ class Restaurant {
   }
 
   //https://stackoverflow.com/questions/65343818/whats-the-meaning-of-arrow-in-dart-flutter
-  String get getPricing {
+  String get euroPricing {
     return priceRange == null
         ? '?'
         : '€' * priceRange!; // added '!' because we know it's not null here
   }
+
+  //https://stackoverflow.com/questions/59423646/how-to-filter-a-list-with-condition-in-dart
+  int get pendingCount =>
+    reservations.where((reservation) => reservation.status == Status.pending).toList().length;
+
 
 
   /*
@@ -69,36 +76,16 @@ class Restaurant {
 
     final response = await ApiClient.post(
       'get_restaurant_reservations_by_id',
-      body: json.encode({'id': id}),
+      body: json.encode({'restaurant_id': id}),
     );
+
+    log("-> json body: ${response.body} PPPPPPPPPPPPPPPPPPPPPPP");
 
     if (response.statusCode == 200) {
       final List<dynamic> body = json.decode(response.body);
       return body.map((dynamic item) => Luca_Reservation.fromJson(item)).toList();
     } else {
-      throw Exception('Failed to get restaurant reservations from restaurant id');
-    }
-  }
-
-  static Future<Restaurant> getRestaurantById(int id) async {
-    final response = await ApiClient.post(
-      'get_restaurant_by_id',
-      body: json.encode({'id': id}),
-    );
-    if (response.statusCode == 200) {
-      return Restaurant.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to get restaurant from id');
-    }
-  }
-
-  static Future<List<Restaurant>> getRestaurantsByManager() async {
-    final response = await ApiClient.get('get_restaurants_by_manager');
-    if (response.statusCode == 200) {
-      final List<dynamic> body = json.decode(response.body);
-      return body.map((dynamic item) => Restaurant.fromJson(item)).toList();
-    } else {
-      throw Exception('Failed to get restaurant from id');
+      throw Exception('${response.statusCode}: Failed to get restaurant reservations from restaurant id');
     }
   }
 }

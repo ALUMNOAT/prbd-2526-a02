@@ -111,6 +111,8 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
           ),
         ),
       ),
+
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),

@@ -24,7 +24,7 @@ class ManagerNotifier extends AsyncNotifier<Manager?> {
 
     return Manager(
         user: user,
-        restaurants: await Manager.getRestaurantsByCurrentManager()
+        restaurants: await Manager.getRestaurantsByCurrentManager(),
     );
   }
 }

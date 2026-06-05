@@ -11,13 +11,13 @@ void main() async {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const ReservationDetailsManagerMockupScreen(),
+      home: const ReservationDetailsManagerPage(),
     ),
   );
 }
 
-class ReservationDetailsManagerMockupScreen extends StatelessWidget {
-  const ReservationDetailsManagerMockupScreen({super.key});
+class ReservationDetailsManagerPage extends StatelessWidget {
+  const ReservationDetailsManagerPage({super.key});
 
   @override
   Widget build(BuildContext context) {

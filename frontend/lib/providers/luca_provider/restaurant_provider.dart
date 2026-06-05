@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:prbd_2526_a02/models/luca_reservation.dart';
 import 'package:prbd_2526_a02/models/manager.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/user_provider.dart';
 
@@ -20,7 +21,6 @@ class RestaurantNotifier extends AsyncNotifier<Restaurant?> {
 
   Future<void> set_current_restaurant(Restaurant restaurant) async {
     log("restaurant_provider set_current_restaurant() ->");
-    await restaurant.getReservations();
     state = AsyncData(restaurant);
   }
 }

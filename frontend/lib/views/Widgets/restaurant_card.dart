@@ -38,7 +38,7 @@ class RestaurantCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  restaurant.getPricing,
+                  restaurant.euroPricing,
                   style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
@@ -55,12 +55,12 @@ class RestaurantCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            const Row(
+            Row(
               children: [
                 Icon(Icons.pending, size: 14, color: Colors.orange),
                 SizedBox(width: 4),
                 Text(
-                  '2 demandes en attente',
+                  '${restaurant.pendingCount} demandes en attente',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.orange,
@@ -72,8 +72,9 @@ class RestaurantCard extends StatelessWidget {
           ],
         ),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          restaurantNotifier.set_current_restaurant(restaurant);
+
+        onTap: () async {
+          await restaurantNotifier.set_current_restaurant(restaurant);
           Navigator.pushNamed(context, '/restaurant_management_reservations');
         },
       ),
