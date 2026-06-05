@@ -21,6 +21,7 @@ class Luca_ReservationNotifier extends AsyncNotifier<Luca_Reservation?> {
 
   Future<void> set_current_luca_reservation(Luca_Reservation luca_reservation) async {
     log("luca_reservation_provider set_current_luca_reservation() ->");
+    await luca_reservation.setClient();
     state = AsyncData(luca_reservation);
   }
 }

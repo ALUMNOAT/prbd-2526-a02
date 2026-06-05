@@ -30,276 +30,288 @@ class ReservationDetailsManagerPage extends ConsumerStatefulWidget {
 class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsManagerPage> {
   @override
   Widget build(BuildContext context) {
-    final luca_reservation_state = ref.watch(luca_reservation_provider).value;
+    final luca_reservation_state = ref.watch(luca_reservation_provider);
     log("--------------------------------------------------");
-    log(luca_reservation_state == null ? 'no reservation loaded' : 'reservation loaded');
-    final client = luca_reservation_state!.client;
+    log(luca_reservation_state.value == null ? 'no reservation loaded' : 'reservation loaded');
     final luca_reservationNotifier = ref.watch(luca_reservation_provider.notifier);
 
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
     //final luca_reservation = ref.watch
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+    return luca_reservation_state.when(
+      loading: () => const CircularProgressIndicator(),
+      error: (err, stack) => Text(err.toString()),
+        data: (luca_reservation) {
 
-        title: const Text('Détails de la réservation'),
+        if (luca_reservation == null) {
+          return const Text("luca_reservation is null");
+        }
 
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Rafraîchir les données',
-            onPressed: () {},
-          ),
-        ],
-        elevation: 2,
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        surfaceTintColor: Colors.transparent,
-        flexibleSpace: Align(
-          alignment: Alignment.topCenter,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 2.0),
-              child: Tooltip(
-                message:
+        if (luca_reservation.client == null) {
+          return const Text("luca_reservation has null client");
+        }
+
+        final client = luca_reservation.client!;
+
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+
+            title: const Text('Détails de la réservation'),
+
+            automaticallyImplyLeading: false,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Rafraîchir les données',
+                onPressed: () {},
+              ),
+            ],
+            elevation: 2,
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.onPrimary,
+            surfaceTintColor: Colors.transparent,
+            flexibleSpace: Align(
+              alignment: Alignment.topCenter,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 2.0),
+                  child: Tooltip(
+                    message:
                     'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                child: Text(
-                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                      .format(simulatedTime),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.normal,
+                    child: Text(
+                      DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                          .format(simulatedTime),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey[400],
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
 
-
-
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Informations client',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      Row(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.person, size: 20),
-                          SizedBox(width: 8),
-                          Text('Nom: ${client!.fullName}'),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.email, size: 20),
-                          SizedBox(width: 8),
-                          Text('Email: ${client!.email}'),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.phone, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            client!.phone == null
-                                ? 'Téléphone: Non renseigné'
-                                : client!.phone!,
-                              style: TextStyle(color: Colors.grey[600]),
+                          const Text(
+                            'Informations client',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+                          const SizedBox(height: 8),
 
-              const SizedBox(height: 16),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Détails de la réservation',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Row(
-                        children: [
-                          Icon(Icons.restaurant, size: 20),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Le Gourmet',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                          Row(
+                            children: [
+                              Icon(Icons.person, size: 20),
+                              SizedBox(width: 8),
+                              Text('Nom: ${client.fullName}'),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(Icons.email, size: 20),
+                              SizedBox(width: 8),
+                              Text('Email: ${client.email}'),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.phone, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                (client.phone == null ? 'null' : client.phone!),
+                                style: TextStyle(color: Colors.grey[600]),
                               ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Détails de la réservation',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      const Divider(),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          const Icon(Icons.calendar_today, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Date: jeu. 21/11/2024',
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.access_time, size: 20),
-                          const SizedBox(width: 8),
-                          const Text('Heure: 19:30'),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.people, size: 20),
-                          const SizedBox(width: 8),
-                          const Text('Nombre de convives: 8'),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.info, size: 20),
-                          const SizedBox(width: 8),
-                          const Text('Statut: '),
-                          Chip(
-                            label: const Text(
-                              'Confirmée',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white,
+                          const SizedBox(height: 8),
+                          const Row(
+                            children: [
+                              Icon(Icons.restaurant, size: 20),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Le Gourmet',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                            ),
-                            backgroundColor: const Color(0xFF4CAF50),
-                            padding: EdgeInsets.zero,
+                            ],
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      const Divider(),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Demandes spéciales',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Célébration',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Tables assignées',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.table_restaurant, size: 20),
-                            const SizedBox(width: 8),
-                            const Text('Table 2'),
-                            const SizedBox(width: 16),
-                            Text(
-                              '(4 places)',
-                              style: TextStyle(color: Colors.grey[600]),
+                          const SizedBox(height: 16),
+                          const Divider(),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              const Icon(Icons.calendar_today, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Date: jeu. 21/11/2024',
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.access_time, size: 20),
+                              const SizedBox(width: 8),
+                              const Text('Heure: 19:30'),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.people, size: 20),
+                              const SizedBox(width: 8),
+                              const Text('Nombre de convives: 8'),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.info, size: 20),
+                              const SizedBox(width: 8),
+                              const Text('Statut: '),
+                              Chip(
+                                label: const Text(
+                                  'Confirmée',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                backgroundColor: const Color(0xFF4CAF50),
+                                padding: EdgeInsets.zero,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          const Divider(),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Demandes spéciales',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          const Icon(Icons.table_restaurant, size: 20),
-                          const SizedBox(width: 8),
-                          const Text('Table 3'),
-                          const SizedBox(width: 16),
+                          ),
+                          const SizedBox(height: 4),
                           Text(
-                            '(6 places)',
-                            style: TextStyle(color: Colors.grey[600]),
+                            'Célébration',
+                            style: TextStyle(color: Colors.grey[700]),
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Tables assignées',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.table_restaurant, size: 20),
+                                const SizedBox(width: 8),
+                                const Text('Table 2'),
+                                const SizedBox(width: 16),
+                                Text(
+                                  '(4 places)',
+                                  style: TextStyle(color: Colors.grey[600]),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              const Icon(Icons.table_restaurant, size: 20),
+                              const SizedBox(width: 8),
+                              const Text('Table 3'),
+                              const SizedBox(width: 16),
+                              Text(
+                                '(6 places)',
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.check_circle),
+                    label: const Text('Marquer comme terminée'),
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.cancel),
+                    label: const Text('Annuler'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.check_circle),
-                label: const Text('Marquer comme terminée'),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.cancel),
-                label: const Text('Annuler'),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 }

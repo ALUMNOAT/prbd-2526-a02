@@ -45,14 +45,14 @@ class User {
 
   static Future<User> getUserById(int id) async {
     final response = await ApiClient.post(
-      'get_current_user',
+      'get_user_by_id',
       body: json.encode({'id': id}),
     );
 
     if (response.statusCode == 200) {
       return User.fromJson(json.decode(response.body));;
     } else {
-      throw Exception('Failed to get current user');
+      throw Exception('${response.statusCode}: Failed to get current user');
     }
   }
 
