@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
+import '../../models/enums/status.dart';
 import '../../models/luca_reservation.dart';
 import '../../providers/luca_provider/luca_reservation_provider.dart';
 
@@ -324,23 +325,41 @@ class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsMa
                   ),
                   const SizedBox(height: 24),
 
-                  //BUTTONS
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      luca_reservation.complete_reservation();
-                    },
-                    icon: const Icon(Icons.check_circle),
-                    label: const Text('Marquer comme terminée'),
-                  ),
-                  const SizedBox(height: 8),
+                  //BUTTON CONFIRM
+                  if(luca_reservation.status == Status.confirmed)
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        luca_reservation.complete_reservation();
+                      },
+                      icon: const Icon(Icons.check_circle),
+                      label: const Text('Marquer comme terminée'),
+                    ),
+                  if(luca_reservation.status == Status.confirmed)
+                    const SizedBox(height: 8),
 
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      luca_reservation.cancel_reservation();
-                    },
-                    icon: const Icon(Icons.cancel),
-                    label: const Text('Annuler'),
+                  //BUTTON CANCEL
+                  if(luca_reservation.status == Status.pending ||
+                      luca_reservation.status == Status.confirmed)
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        luca_reservation.cancel_reservation();
+                      },
+                      icon: const Icon(Icons.cancel),
+                      label: const Text('Annuler'),
                   ),
+                  if(luca_reservation.status == Status.pending ||
+                      luca_reservation.status == Status.confirmed)
+                    const SizedBox(height: 8),
+
+                  //BUTTON ASSIGN TABLES
+                  if(luca_reservation.status == Status.pending)
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/assign_table');
+                      },
+                      icon: const Icon(Icons.table_restaurant_rounded),
+                      label: const Text('Confirmer et assigner tables'),
+                    )
                 ],
               ),
             ),

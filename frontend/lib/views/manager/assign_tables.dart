@@ -11,13 +11,13 @@ void main() async {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const AssignTablesMockupScreen(),
+      home: const AssignTables(),
     ),
   );
 }
 
-class AssignTablesMockupScreen extends StatelessWidget {
-  const AssignTablesMockupScreen({super.key});
+class AssignTables extends StatelessWidget {
+  const AssignTables({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -9,6 +9,7 @@ import 'package:prbd_2526_a02/views/detail_restaurant.dart';
 import 'package:prbd_2526_a02/views/login.dart';
 import 'package:prbd_2526_a02/views/recherche_restaurants.dart';
 import '../providers/currentUserProvider.dart';
+import '../views/manager/assign_tables.dart';
 import '../views/manager/reservation_details_manager.dart';
 import '../views/manager/restaurant_management_reservations.dart';
 import '../views/mes_reservations.dart';
@@ -54,7 +55,8 @@ class MyApp extends ConsumerWidget {
         '/detail_restaurant': (context) => DetailRestaurantPage(),
         '/creation_reservation': (context) => ReservationFormPage(),
         '/restaurant_management_reservations': (context) => RestaurantManagementReservationPage(),
-        '/reservation_details_manager': (context) => ReservationDetailsManagerPage()
+        '/reservation_details_manager': (context) => ReservationDetailsManagerPage(),
+        '/assign_table': (context) => AssignTables()
       },
     );
   }
