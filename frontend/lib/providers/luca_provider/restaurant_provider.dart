@@ -1,22 +1,24 @@
 import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:prbd_2526_a02/models/luca_reservation.dart';
-import 'package:prbd_2526_a02/models/manager.dart';
-import 'package:prbd_2526_a02/providers/luca_provider/user_provider.dart';
 
 import '../../models/restaurant.dart';
 import '../../models/user.dart';
 
-final restaurant_provider = AsyncNotifierProvider<RestaurantNotifier, Restaurant?>(
-      () => RestaurantNotifier(),
+final restaurant_provider = AsyncNotifierProvider
+    .autoDispose.family<RestaurantNotifier, Restaurant, int>(
+    //https://riverpod.dev/docs/concepts2/family explaining families
+    RestaurantNotifier.new
 );
 
-//
-class RestaurantNotifier extends AsyncNotifier<Restaurant?> {
+class RestaurantNotifier extends AsyncNotifier<Restaurant> {
+  //https://riverpod.dev/docs/concepts2/family
+  RestaurantNotifier(this.id);
+  final int id;
+
   @override
-  Future<Restaurant?> build() async {
-    return null;
+  Future<Restaurant> build() async {
+    return Restaurant.getRestaurantById(id);
   }
 
   Future<void> set_current_restaurant(Restaurant restaurant) async {

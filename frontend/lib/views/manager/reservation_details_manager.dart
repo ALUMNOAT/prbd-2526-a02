@@ -7,6 +7,8 @@ import 'package:intl/intl.dart';
 
 import '../../models/enums/status.dart';
 import '../../models/luca_reservation.dart';
+import '../../models/restaurant.dart';
+import '../../models/user.dart';
 import '../../providers/luca_provider/luca_reservation_provider.dart';
 
 void main() async {
@@ -31,341 +33,349 @@ class ReservationDetailsManagerPage extends ConsumerStatefulWidget {
 class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsManagerPage> {
   @override
   Widget build(BuildContext context) {
-    final luca_reservation_state = ref.watch(luca_reservation_provider);
-    log("--------------------------------------------------");
-    log(luca_reservation_state.value == null ? 'no reservation loaded' : 'reservation loaded');
-    final luca_reservationNotifier = ref.watch(luca_reservation_provider.notifier);
-
+    final reservationId = ModalRoute
+        .of(context)!
+        .settings
+        .arguments as int;
+    final reservationState = ref.watch(
+        luca_reservation_provider(reservationId));
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
-    //final luca_reservation = ref.watch
 
-    return luca_reservation_state.when(
-      loading: () => const CircularProgressIndicator(),
+    return reservationState.when(
+      data: (reservation) => data(theme: theme, simulatedTime: simulatedTime, reservation: reservation,),
       error: (err, stack) => Text(err.toString()),
-        data: (luca_reservation) {
+      loading: () => const CircularProgressIndicator(),
+    );
+  }
+}
 
-        if (luca_reservation == null) {
-          return const Text("luca_reservation is null");
-        }
+class data extends StatelessWidget {
+  data({
+    super.key,
+    required this.theme,
+    required this.simulatedTime,
+    required this.reservation
+  });
 
-        if (luca_reservation.client == null) {
-          return const Text("luca_reservation has null client");
-        }
+  final ThemeData theme;
+  final DateTime simulatedTime;
+  final Luca_Reservation reservation;
 
-        final client = luca_reservation.client!;
-        final status = luca_reservation.status;
+  @override
+  Widget build(BuildContext context) {
+    final User client = reservation.client!;
+    final Restaurant restaurant = reservation.restaurant!;
+    final Status status = reservation.status;
 
-        return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
 
-            title: const Text('Détails de la réservation'),
+        title: const Text('Détails de la réservation'),
 
-            automaticallyImplyLeading: false,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                tooltip: 'Rafraîchir les données',
-                onPressed: () {},
-              ),
-            ],
-            elevation: 2,
-            backgroundColor: theme.colorScheme.primary,
-            foregroundColor: theme.colorScheme.onPrimary,
-            surfaceTintColor: Colors.transparent,
-            flexibleSpace: Align(
-              alignment: Alignment.topCenter,
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 2.0),
-                  child: Tooltip(
-                    message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
-                    child: Text(
-                      DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
-                          .format(simulatedTime),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey[400],
-                        fontWeight: FontWeight.normal,
-                      ),
-                    ),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Rafraîchir les données',
+            onPressed: () {},
+          ),
+        ],
+        elevation: 2,
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        surfaceTintColor: Colors.transparent,
+        flexibleSpace: Align(
+          alignment: Alignment.topCenter,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 2.0),
+              child: Tooltip(
+                message:
+                'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                child: Text(
+                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                      .format(simulatedTime),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey[400],
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ),
             ),
           ),
+        ),
+      ),
 
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  //INFO CLIENT
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              //INFO CLIENT
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Informations client',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      Row(
                         children: [
-                          const Text(
-                            'Informations client',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-
-                          Row(
-                            children: [
-                              Icon(Icons.person, size: 20),
-                              SizedBox(width: 8),
-                              Text('Nom: ${client.fullName}'),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(Icons.email, size: 20),
-                              SizedBox(width: 8),
-                              Text('Email: ${client.email}'),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(Icons.phone, size: 20),
-                              const SizedBox(width: 8),
-                              Text(
-                                (client.phone == null ? 'null' : client.phone!),
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
+                          Icon(Icons.person, size: 20),
+                          SizedBox(width: 8),
+                          Text('Nom: ${client.fullName}'),
                         ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  //RESERVATION DETAILS
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(height: 8),
+                      Row(
                         children: [
-
-                          //TITLE
-                          const Text(
-                            'Détails de la réservation',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-
-                          //RESTAURANT NAME/INFO
-                          Row(
-                            children: [
-                              Icon(Icons.restaurant, size: 20),
-                              SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  luca_reservation.restaurant!.name,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          //DIVIDER
-                          const Divider(),
-                          const SizedBox(height: 16),
-
-                          //DATE
-                          Row(
-                            children: [
-                              const Icon(Icons.calendar_today, size: 20),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Date : ${DateFormat('EEE dd/MM/yyyy', 'fr_FR').format(luca_reservation.datetime)}',
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-
-                          //TIME
-                          Row(
-                            children: [
-                              const Icon(Icons.access_time, size: 20),
-                              const SizedBox(width: 8),
-                              Text(
-                                  'heure : ${DateFormat('HH:mm', 'fr_FR').format(luca_reservation.datetime)}'
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-
-                          //GUEST_COUNT
-                          Row(
-                            children: [
-                              const Icon(Icons.people, size: 20),
-                              const SizedBox(width: 8),
-                              Text('Nombre de convives: ${luca_reservation.numberOfGuests}'),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-
-                          //STATUS
-                          Row(
-                            children: [
-                              const Icon(Icons.info, size: 20),
-                              const SizedBox(width: 8),
-                              const Text('Statut: '),
-                              Chip(
-                                label:  Text(
-                                  status.french_name,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                backgroundColor: status.color,
-                                padding: EdgeInsets.zero,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          //DIVIDER
-                          const Divider(),
-                          const SizedBox(height: 8),
-
-                          //SPECIAL REQUESTS
+                          Icon(Icons.email, size: 20),
+                          SizedBox(width: 8),
+                          Text('Email: ${client.email}'),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.phone, size: 20),
+                          const SizedBox(width: 8),
                           Text(
-                            'Demandes spéciales',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-
-                          Text(
-                            '${luca_reservation.specialRequests}',
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  //ASSIGNED TABLE
-                  const Text(
-                    'Tables assignées',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.table_restaurant, size: 20),
-                                const SizedBox(width: 8),
-                                const Text('Table 2'),
-                                const SizedBox(width: 16),
-                                Text(
-                                  '(4 places)',
-                                  style: TextStyle(color: Colors.grey[600]),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              const Icon(Icons.table_restaurant, size: 20),
-                              const SizedBox(width: 8),
-                              const Text('Table 3'),
-                              const SizedBox(width: 16),
-                              Text(
-                                '(6 places)',
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                            ],
+                            (client.phone == null ? 'null' : client.phone!),
+                            style: TextStyle(color: Colors.grey[600]),
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-
-                  //BUTTON CONFIRM
-                  if(luca_reservation.status == Status.confirmed)
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        luca_reservation.complete_reservation();
-                      },
-                      icon: const Icon(Icons.check_circle),
-                      label: const Text('Marquer comme terminée'),
-                    ),
-                  if(luca_reservation.status == Status.confirmed)
-                    const SizedBox(height: 8),
-
-                  //BUTTON CANCEL
-                  if(luca_reservation.status == Status.pending ||
-                      luca_reservation.status == Status.confirmed)
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        luca_reservation.cancel_reservation();
-                      },
-                      icon: const Icon(Icons.cancel),
-                      label: const Text('Annuler'),
-                  ),
-                  if(luca_reservation.status == Status.pending ||
-                      luca_reservation.status == Status.confirmed)
-                    const SizedBox(height: 8),
-
-                  //BUTTON ASSIGN TABLES
-                  if(luca_reservation.status == Status.pending)
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/assign_table');
-                      },
-                      icon: const Icon(Icons.table_restaurant_rounded),
-                      label: const Text('Confirmer et assigner tables'),
-                    )
-                ],
+                ),
               ),
-            ),
+              const SizedBox(height: 16),
+
+              //RESERVATION DETAILS
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+
+                      //TITLE
+                      const Text(
+                        'Détails de la réservation',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      //RESTAURANT NAME/INFO
+                      Row(
+                        children: [
+                          Icon(Icons.restaurant, size: 20),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              restaurant.name,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      //DIVIDER
+                      const Divider(),
+                      const SizedBox(height: 16),
+
+                      //DATE
+                      Row(
+                        children: [
+                          const Icon(Icons.calendar_today, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Date : ${DateFormat('EEE dd/MM/yyyy', 'fr_FR').format(reservation.datetime)}',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      //TIME
+                      Row(
+                        children: [
+                          const Icon(Icons.access_time, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                              'heure : ${DateFormat('HH:mm', 'fr_FR').format(reservation.datetime)}'
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      //GUEST_COUNT
+                      Row(
+                        children: [
+                          const Icon(Icons.people, size: 20),
+                          const SizedBox(width: 8),
+                          Text('Nombre de convives: ${reservation.numberOfGuests}'),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      //STATUS
+                      Row(
+                        children: [
+                          const Icon(Icons.info, size: 20),
+                          const SizedBox(width: 8),
+                          const Text('Statut: '),
+                          Chip(
+                            label:  Text(
+                              status.french_name,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white,
+                              ),
+                            ),
+                            backgroundColor: status.color,
+                            padding: EdgeInsets.zero,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      //DIVIDER
+                      const Divider(),
+                      const SizedBox(height: 8),
+
+                      //SPECIAL REQUESTS
+                      Text(
+                        'Demandes spéciales',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+
+                      Text(
+                        '${reservation.specialRequests}',
+                        style: TextStyle(color: Colors.grey[700]),
+                      ),
+
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              //ASSIGNED TABLE
+              const Text(
+                'Tables assignées',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.table_restaurant, size: 20),
+                            const SizedBox(width: 8),
+                            const Text('Table 2'),
+                            const SizedBox(width: 16),
+                            Text(
+                              '(4 places)',
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.table_restaurant, size: 20),
+                          const SizedBox(width: 8),
+                          const Text('Table 3'),
+                          const SizedBox(width: 16),
+                          Text(
+                            '(6 places)',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              //BUTTON CONFIRM
+              if(status == Status.confirmed)
+                ElevatedButton.icon(
+                  onPressed: () {
+                    reservation.complete_reservation();
+                  },
+                  icon: const Icon(Icons.check_circle),
+                  label: const Text('Marquer comme terminée'),
+                ),
+              if(status == Status.confirmed)
+                const SizedBox(height: 8),
+
+              //BUTTON CANCEL
+              if(status == Status.pending ||
+                  status == Status.confirmed)
+                OutlinedButton.icon(
+                  onPressed: () {
+                    reservation.cancel_reservation();
+                  },
+                  icon: const Icon(Icons.cancel),
+                  label: const Text('Annuler'),
+              ),
+              if(status == Status.pending ||
+                  status == Status.confirmed)
+                const SizedBox(height: 8),
+
+              //BUTTON ASSIGN TABLES
+              if(status == Status.pending)
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/assign_table');
+                  },
+                  icon: const Icon(Icons.table_restaurant_rounded),
+                  label: const Text('Confirmer et assigner tables'),
+                )
+            ],
           ),
-        );
-      }
+        ),
+      ),
     );
   }
 }

@@ -76,12 +76,32 @@ class Luca_Reservation {
     log("luca_reservation cancel_reservation() ->");
 
     final response = await ApiClient.post(
-      'calcel_reservation', // Correspond au nom de la fonction SQL créée
+      'cancel_reservation', // Correspond au nom de la fonction SQL créée
       body: json.encode({'id': id}),
     );
 
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception('Failed to update reservation: ${response.body}');
+    }
+  }
+
+  //STATIC
+  static Future<Luca_Reservation> getReservationFromId(int reservationId) async {
+    final response = await ApiClient.post(
+      'get_reservation_by_id',
+      body: json.encode({'reservation_id': reservationId}),
+    );
+
+    if (response.statusCode == 200) {
+      final reservation = Luca_Reservation.fromJson(json.decode(response.body));
+
+      // not optimal :
+      reservation.restaurant = await Restaurant.getRestaurantById(reservation.restaurant_id);
+      reservation.client = await User.getUserById(reservation.client_id);
+
+      return reservation;
+    } else {
+      throw Exception('${response.statusCode}: Failed to get restaurant from restaurant id');
     }
   }
 }

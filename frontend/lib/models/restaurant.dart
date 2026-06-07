@@ -57,8 +57,6 @@ class Restaurant {
   int get pendingCount =>
     reservations.where((reservation) => reservation.status == Status.pending).toList().length;
 
-
-
   /*
    * L'utilisation de runtimeType dans la surcharge de l'opérateur == permet de s'assurer
    * que l'objet other est exactement de la même classe que this. Cela évite des comparaisons
@@ -70,6 +68,8 @@ class Restaurant {
 
   @override
   int get hashCode => id.hashCode;
+
+
 
   Future<List<Luca_Reservation>> getReservations() async {
     log("restaurant getReservations() ->");
@@ -93,8 +93,12 @@ class Restaurant {
     }
   }
 
-  static Future<Restaurant?> getRestaurantById(int id) async {
-    log("restaurant getReservations() ->");
+  Future<void> setReservations() async {
+    reservations = await getReservations();
+  }
+
+  static Future<Restaurant> getRestaurantById(int id) async {
+    log("restaurant getRestaurantById() ->");
 
     final response = await ApiClient.post(
       'get_restaurant_by_id',
@@ -102,9 +106,11 @@ class Restaurant {
     );
 
     if (response.statusCode == 200) {
-      return Restaurant.fromJson(json.decode(response.body));
+      final restaurant = Restaurant.fromJson(json.decode(response.body));
+      await restaurant.setReservations();
+      return restaurant;
     } else {
-      throw Exception('${response.statusCode}: Failed to get restaurant reservations from restaurant id');
+      throw Exception('${response.statusCode}: Failed to get restaurant from restaurant id');
     }
   }
 }

@@ -2,8 +2,8 @@
 
 
 
-DROP FUNCTION IF EXISTS get_restaurant_by_id(id INT);
-CREATE OR REPLACE FUNCTION get_restaurant_by_id(id INT)
+DROP FUNCTION IF EXISTS get_restaurant_by_id(INT);
+CREATE OR REPLACE FUNCTION get_restaurant_by_id(restaurant_id INT)
     RETURNS restaurants AS
 $$
 DECLARE
@@ -13,7 +13,7 @@ BEGIN
     PERFORM auth.check_logged();
 
     SELECT * FROM restaurants rst
-    WHERE rst.id = get_restaurant_by_id.id
+    WHERE rst.id = restaurant_id
     LIMIT 1
     INTO restaurant;
 

@@ -63,3 +63,15 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION test_api TO authenticated;
 GRANT EXECUTE ON FUNCTION test_api TO anon;
+
+
+
+
+
+
+set search_path to "prbd-2526-a02", public;
+ALTER SYSTEM SET logging_collector = 'on';
+ALTER SYSTEM SET log_statement = 'all';
+SELECT pg_reload_conf();
+
+SELECT pg_current_logfile();

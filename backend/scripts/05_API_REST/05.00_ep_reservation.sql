@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION get_restaurant_reservations_by_id(restaurant_id INT)
 $$
 BEGIN
     -- is a user currently connected ?
-    -- PERFORM auth.check_logged();
+    PERFORM auth.check_logged();
 
     RETURN QUERY
         SELECT r.*
@@ -14,6 +14,28 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_restaurant_reservations_by_id TO authenticated;
+
+
+DROP FUNCTION IF EXISTS get_reservation_by_id(INT);
+CREATE OR REPLACE FUNCTION get_reservation_by_id(reservation_id INT)
+    RETURNS reservations AS
+$$
+DECLARE
+    reservation reservations;
+BEGIN
+    -- is a user currently connected ?
+    PERFORM auth.check_logged();
+
+    SELECT * FROM reservations r
+    WHERE r.id = reservation_id
+    LIMIT 1
+    INTO reservation;
+
+    RETURN reservation;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_reservation_by_id TO authenticated;
 
 
 

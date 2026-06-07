@@ -2,21 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/models/luca_reservation.dart';
+import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/luca_reservation_provider.dart';
-import 'package:prbd_2526_a02/providers/luca_provider/restaurants_provider.dart';
-import 'package:prbd_2526_a02/providers/luca_provider/security_provider.dart';
-import 'dart:developer';
 
-import '../../models/manager.dart';
-import '../../providers/luca_provider/manager_provider.dart';
 import '../../providers/luca_provider/restaurant_provider.dart';
 import '../Widgets/reservation_card.dart';
-import '../Widgets/restaurant_card.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -38,22 +30,36 @@ class RestaurantManagementReservationPage extends ConsumerStatefulWidget {
 }
 
 class _RestaurantManagementReservationState extends ConsumerState<RestaurantManagementReservationPage> {
-  /*const*/ //RestaurantManagementReservations({super.key});
   @override
   Widget build(BuildContext context) {
-    final managerState = ref.watch(manager_provider);
-    final restaurantState = ref.watch(restaurant_provider).value;
-
-    final securityNotifier = ref.watch(security_provider.notifier);
-    final restaurantNotifier = ref.watch(restaurant_provider.notifier);
-    final reservationNotifier = ref.watch(luca_reservation_provider.notifier);
-
+    final restaurantId = ModalRoute.of(context)!.settings.arguments as int;
+    final restaurantState = ref.watch(restaurant_provider(restaurantId));
 
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
+    return restaurantState.when(
+      data: (restaurant) => data(restaurant: restaurant, theme: theme, simulatedTime: simulatedTime, ),
+      error: (err, stack) => Text(err.toString()),
+      loading: () => const CircularProgressIndicator(),
+    );
+  }
+}
 
+class data extends StatelessWidget {
+  const data({
+    super.key,
+    required this.restaurant,
+    required this.theme,
+    required this.simulatedTime,
+  });
 
+  final Restaurant restaurant;
+  final ThemeData theme;
+  final DateTime simulatedTime;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       //BAR
       appBar: AppBar(
@@ -63,7 +69,7 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
             Navigator.pop(context);
           },
         ),
-        title: Text(restaurantState!.name),
+        title: Text(restaurant.name),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -99,7 +105,6 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
         ),
       ),
 
-
       //BODY
       body: SafeArea(
         child: Column(
@@ -114,7 +119,7 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
                     icon: Icon(Icons.list, size: 24),
                     tooltip: 'Toutes',
                   ),
-
+    
                   ButtonSegment(
                     value: 'pending',
                     icon: Icon(Icons.pending, size: 24, color: Colors.orange),
@@ -141,29 +146,25 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
               ),
             ),
             const SizedBox(height: 8),
-
+    
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.all(16.0),
                 children: [
-                  if(restaurantState == null)
-                    Text("No restaurant state")
-                  else if(restaurantState.reservations.isEmpty)
-                    Text("No reservations")
-                  else
-                    for (var luca_reservation in restaurantState.reservations)
-                      ReservationCard(
-                        luca_reservation: luca_reservation,
-                        luca_reservationNotifier: reservationNotifier,
-                        restaurant: restaurantState,
-                      ),
+                  if(restaurant.reservations.isEmpty)
+                  Text("No reservations")
+                else
+                  for (var reservation in restaurant.reservations)
+                    ReservationCard(
+                      reservation: reservation,
+                      restaurant: restaurant,
+                    ),
                 ],
               ),
             ),
           ],
         ),
       ),
-
 
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

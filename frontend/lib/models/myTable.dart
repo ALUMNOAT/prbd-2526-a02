@@ -8,7 +8,7 @@ import 'package:prbd_2526_a02/models/user.dart';
 
 import 'enums/status.dart';
 
-class Table {
+class MyTable {
   final int id;
   final int restaurant_id;
   final int table_number;
@@ -19,7 +19,7 @@ class Table {
   // (1) using private named parameters require a boilerplate :(
   // only in dart 3.13 can this be bypassed... so let's make 'em public :/
   // https://dart.dev/language/constructors#private-named-parameters
-  Table({
+  MyTable({
     required this.id,
     required this.restaurant_id,
     required this.table_number,
@@ -28,8 +28,8 @@ class Table {
     this.reservations = const [],
   });
 
-  factory Table.fromJson(Map<String, dynamic> json) {
-    return Table(
+  factory MyTable.fromJson(Map<String, dynamic> json) {
+    return MyTable(
       id: json['id'],
       restaurant_id: json['name'],
       table_number: json['city'],
@@ -39,13 +39,13 @@ class Table {
 
   @override
   bool operator == (Object other) => identical(this, other) ||
-      other is Table && runtimeType == other.runtimeType && id == other.id;
+      other is MyTable && runtimeType == other.runtimeType && id == other.id;
 
   @override
   int get hashCode => id.hashCode;
 
   Future<List<Luca_Reservation>> getReservations() async {
-    log("table getReservations() ->");
+    log("mytable getReservations() ->");
     final restaurant = await Restaurant.getRestaurantById(restaurant_id);
 
     final response = await ApiClient.post(

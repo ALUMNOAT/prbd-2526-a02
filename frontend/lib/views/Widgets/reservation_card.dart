@@ -12,35 +12,26 @@ import 'package:prbd_2526_a02/providers/luca_provider/restaurant_provider.dart';
 class ReservationCard extends StatelessWidget {
   const ReservationCard({
     super.key,
-    required this.luca_reservation,
-    required this.luca_reservationNotifier,
+    required this.reservation,
     required this.restaurant
   });
 
-  final Luca_Reservation luca_reservation;
-  final Luca_ReservationNotifier luca_reservationNotifier;
+  final Luca_Reservation reservation;
   final Restaurant restaurant;
 
   @override
   Widget build(BuildContext context) {
-    final Status status = luca_reservation.status;
+    final Status status = reservation.status;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: () async {
-          await luca_reservationNotifier.set_current_luca_reservation(luca_reservation);
           await Navigator.pushNamed(
             context,
             '/reservation_details_manager',
-            arguments: luca_reservation, // On passe l'objet 'res' complet à la page suivante
+            arguments: reservation.id, // On passe l'objet 'res' complet à la page suivante
           );
-
-
-          // si on retourne de detail_reservation, la view s'update
-          /*if (mounted) {
-            setState(() {});
-          }*/
         },
 
         child: Padding(
@@ -85,14 +76,14 @@ class ReservationCard extends StatelessWidget {
                         const Icon(Icons.access_time, size: 16),
                         const SizedBox(width: 4),
                         Text(
-                          DateFormat('EEE dd/MM/yyyy à HH:mm', 'fr_FR').format(luca_reservation.datetime),
+                          DateFormat('EEE dd/MM/yyyy à HH:mm', 'fr_FR').format(reservation.datetime),
                           style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                         ),
                         const SizedBox(width: 12),
                         const Icon(Icons.people, size: 16),
                         const SizedBox(width: 4),
                         Text(
-                          '${luca_reservation.numberOfGuests} convives', // Donnée dynamique
+                          '${reservation.numberOfGuests} convives', // Donnée dynamique
                           style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                         ),
                       ],

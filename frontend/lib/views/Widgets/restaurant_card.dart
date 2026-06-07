@@ -8,11 +8,9 @@ class RestaurantCard extends StatelessWidget {
   const RestaurantCard({
     super.key,
     required this.restaurant,
-    required this.restaurantNotifier
   });
 
   final Restaurant restaurant;
-  final RestaurantNotifier restaurantNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +72,10 @@ class RestaurantCard extends StatelessWidget {
         trailing: const Icon(Icons.chevron_right),
 
         onTap: () async {
-          await restaurantNotifier.set_current_restaurant(restaurant);
-          Navigator.pushNamed(context, '/restaurant_management_reservations');
+          Navigator.pushNamed(
+              context,
+              '/restaurant_management_reservations',
+              arguments: restaurant.id);
         },
       ),
     );

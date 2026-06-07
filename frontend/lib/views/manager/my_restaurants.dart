@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:prbd_2526_a02/providers/luca_provider/restaurants_provider.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/security_provider.dart';
 import 'dart:developer';
 
@@ -36,7 +35,6 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
     //https://stackoverflow.com/questions/71813090/flutter-riverpod-ref-read-vs-ref-listen-vs-ref-watch
     final managerState = ref.watch(manager_provider);
     final securityNotifier = ref.watch(security_provider.notifier);
-    final restaurantNotifier = ref.watch(restaurant_provider.notifier);
 
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
@@ -59,7 +57,6 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
 
           body: MyBody(
               managerState: manager,
-              restaurantNotifier: restaurantNotifier
           ),
 
         );
@@ -142,11 +139,9 @@ class MyBody extends StatelessWidget {
   const MyBody({
     super.key,
     required this.managerState,
-    required this.restaurantNotifier
   });
 
   final Manager managerState;
-  final RestaurantNotifier restaurantNotifier;
 
 
   @override
@@ -159,7 +154,6 @@ class MyBody extends StatelessWidget {
           for (var restaurant in managerState.restaurants)
             RestaurantCard(
                 restaurant : restaurant,
-                restaurantNotifier: restaurantNotifier,
             ),
         ],
       ),
