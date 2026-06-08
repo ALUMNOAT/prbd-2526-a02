@@ -7,7 +7,7 @@ enum Status {
   pending('En attente', Icons.pending, Colors.orange),
   confirmed('Confirmé', Icons.check_circle, Colors.green),
   cancelled('Annulée', Icons.cancel, Colors.red),
-  complete('Terminée', Icons.event_available, Colors.blue);
+  completed('Terminée', Icons.event_available, Colors.blue);
 
   const Status(
     this.french_name,

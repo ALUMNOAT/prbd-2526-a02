@@ -8,6 +8,8 @@ import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/luca_reservation_provider.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/restaurant_provider.dart';
 
+import '../../models/user.dart';
+
 
 class ReservationCard extends StatelessWidget {
   const ReservationCard({
@@ -22,6 +24,7 @@ class ReservationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Status status = reservation.status;
+    final User client = reservation.client!;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -50,7 +53,7 @@ class ReservationCard extends StatelessWidget {
                   children: [
 
                     Text(
-                      restaurant.name, // Donnée dynamique
+                      client.fullName, // Donnée dynamique
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
