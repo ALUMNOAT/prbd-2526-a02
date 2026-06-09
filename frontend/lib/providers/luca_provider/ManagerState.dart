@@ -5,14 +5,15 @@ import 'package:prbd_2526_a02/models/reservation.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/models/user.dart';
 
+import '../../models/MyReservation.dart';
 import '../../models/MyService.dart';
-import '../../models/myTable.dart';
+import '../../models/MyTable.dart';
 
 class ManagerState {
   final User user;
   final Map<int, Restaurant> restaurants;
   final Map<int, MyService> services;
-  final Map<int, Reservation> reservations;
+  final Map<int, MyReservation> reservations;
   final Map<int, User> clients;
   final Map<int, MyTable> tables;
 
@@ -27,11 +28,11 @@ class ManagerState {
 
   ManagerState copyWith({
     User? user,
-    final Map<int, Restaurant>? restaurants,
-    final Map<int, MyService>? services,
-    final Map<int, Reservation>? reservations,
-    final Map<int, User>? clients,
-    final Map<int, MyTable>? tables,
+    Map<int, Restaurant>? restaurants,
+    Map<int, MyService>? services,
+    Map<int, MyReservation>? reservations,
+    Map<int, User>? clients,
+    Map<int, MyTable>? tables,
   }) {
     return ManagerState(
       user: user ?? this.user,
@@ -42,5 +43,4 @@ class ManagerState {
       tables: tables ?? this.tables,
     );
   }
-
 }

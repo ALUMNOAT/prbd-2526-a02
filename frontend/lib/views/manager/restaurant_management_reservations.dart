@@ -3,7 +3,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:prbd_2526_a02/models/luca_reservation.dart';
+import 'package:prbd_2526_a02/models/MyReservation.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/luca_reservation_provider.dart';
 

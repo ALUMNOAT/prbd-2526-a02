@@ -6,7 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/enums/status.dart';
-import '../../models/luca_reservation.dart';
+import '../../models/MyReservation.dart';
 import '../../models/restaurant.dart';
 import '../../models/user.dart';
 import '../../providers/luca_provider/luca_reservation_provider.dart';
@@ -60,7 +60,7 @@ class data extends StatelessWidget {
 
   final ThemeData theme;
   final DateTime simulatedTime;
-  final Luca_Reservation reservation;
+  final MyReservation reservation;
 
   @override
   Widget build(BuildContext context) {

@@ -3,16 +3,16 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:prbd_2526_a02/models/enums/status.dart';
-import 'package:prbd_2526_a02/models/luca_reservation.dart';
+import 'package:prbd_2526_a02/models/MyReservation.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/models/user.dart';
-import 'package:prbd_2526_a02/models/myTable.dart';
+import 'package:prbd_2526_a02/models/MyTable.dart';
 
 
 import '../core/services/api_client.dart';
 
 class ReservationTables {
-  final Luca_Reservation reservation;
+  final MyReservation reservation;
   final List<MyTable>? tables;
 
   ReservationTables({

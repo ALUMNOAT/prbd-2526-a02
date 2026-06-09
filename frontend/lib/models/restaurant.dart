@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:prbd_2526_a02/core/services/api_client.dart';
-import 'package:prbd_2526_a02/models/luca_reservation.dart';
+import 'package:prbd_2526_a02/models/MyReservation.dart';
 import 'package:prbd_2526_a02/models/reservation.dart';
 import 'package:prbd_2526_a02/models/user.dart';
 
@@ -10,27 +10,24 @@ import 'enums/status.dart';
 class Restaurant {
   final int id;
   final String name;
+  final String address;
   final String city;
   final String phone;
   final String? description;
   final double? rating;
   final int? priceRange;
   final int slotDuration;
-  List<Luca_Reservation> reservations;
 
-  // (1) using private named parameters require a boilerplate :(
-  // only in dart 3.13 can this be bypassed... so let's make 'em public :/
-  // https://dart.dev/language/constructors#private-named-parameters
   Restaurant({
     required this.id,
     required this.name,
+    required this.address,
     required this.city,
     required this.phone,
     this.description,
     this.rating,
     this.priceRange,
     required this.slotDuration,
-    this.reservations = const [],
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) {
@@ -71,7 +68,7 @@ class Restaurant {
 
 
 
-  Future<List<Luca_Reservation>> getReservations() async {
+  Future<List<MyReservation>> getReservations() async {
     log("restaurant getReservations() ->");
 
     final response = await ApiClient.post(
@@ -81,8 +78,8 @@ class Restaurant {
 
     if (response.statusCode == 200) {
       final List<dynamic> body = json.decode(response.body);
-      List<Luca_Reservation> reservations = body.map(
-              (dynamic item) => Luca_Reservation.fromJson(item, restaurant_obj: this)
+      List<MyReservation> reservations = body.map(
+              (dynamic item) => MyReservation.fromJson(item, restaurant_obj: this)
       ).toList();
       reservations.forEach((reservation) async => await reservation.setClient());
 

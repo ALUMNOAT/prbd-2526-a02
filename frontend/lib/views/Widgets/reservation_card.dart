@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/models/enums/status.dart';
-import 'package:prbd_2526_a02/models/luca_reservation.dart';
+import 'package:prbd_2526_a02/models/MyReservation.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/luca_reservation_provider.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/restaurant_provider.dart';
@@ -18,7 +18,7 @@ class ReservationCard extends StatelessWidget {
     required this.restaurant
   });
 
-  final Luca_Reservation reservation;
+  final MyReservation reservation;
   final Restaurant restaurant;
 
   @override

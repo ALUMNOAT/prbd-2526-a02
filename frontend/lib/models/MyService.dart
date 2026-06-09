@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class MyService {
+  // ATTRIBUTES
   final int id;
   final int restaurantId;
   final int dayOfWeek;
   final TimeOfDay startTime;
   final TimeOfDay endTime;
 
+  // CONSTRUCTOR
   MyService({
     required this.id,
     required this.restaurantId,
@@ -15,6 +17,7 @@ class MyService {
     required this.endTime,
   });
 
+  // FACTORY
   factory MyService.fromJson(Map<String, dynamic> json, {
     colId = 'id',
     colRestaurantId = 'restaurant',
@@ -31,6 +34,23 @@ class MyService {
       dayOfWeek: json[colDayOfWeek], //<-- convert here
       startTime: json[colStartTime], //<-- convert here
       endTime: json[colEndTime],
+    );
+  }
+
+  // COPY WITH
+  MyService copyWith({
+    final int? id,
+    final int? restaurantId,
+    final int? dayOfWeek,
+    final TimeOfDay? startTime,
+    final TimeOfDay? endTime,
+  }) {
+    return MyService(
+      id: id ?? this.id,
+      restaurantId: restaurantId ?? this.restaurantId,
+      dayOfWeek: dayOfWeek ?? this.dayOfWeek,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
     );
   }
 
