@@ -70,6 +70,19 @@ class MyReservation {
     );
   }
 
+  // IS EQUAL
+  @override
+  bool operator == (Object other) => identical(this, other) ||
+      other is MyReservation && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
+
+
+
+
+
   Future<void> complete_reservation() async {
     log("luca_reservation complete_reservation() ->");
 

@@ -53,12 +53,17 @@ class MyTable {
     );
   }
 
+  // IS EQUAL
   @override
   bool operator == (Object other) => identical(this, other) ||
       other is MyTable && runtimeType == other.runtimeType && id == other.id;
 
   @override
   int get hashCode => id.hashCode;
+
+
+
+
 
   Future<List<MyReservation>> getReservations() async {
     log("mytable getReservations() ->");

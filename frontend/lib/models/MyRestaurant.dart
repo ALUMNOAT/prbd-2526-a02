@@ -83,22 +83,7 @@ class MyRestaurant {
     );
   }
 
-  //https://stackoverflow.com/questions/65343818/whats-the-meaning-of-arrow-in-dart-flutter
-  String get euroPricing {
-    return priceRange == null
-        ? '?'
-        : '€' * priceRange!; // added '!' because we know it's not null here
-  }
-
-  //https://stackoverflow.com/questions/59423646/how-to-filter-a-list-with-condition-in-dart
-  int get pendingCount =>
-      reservations.where((reservation) => reservation.status == Status.pending).toList().length;
-
-  /*
-   * L'utilisation de runtimeType dans la surcharge de l'opérateur == permet de s'assurer
-   * que l'objet other est exactement de la même classe que this. Cela évite des comparaisons
-   * entre objets d'une classe dérivée ou d'un autre type qui aurait des propriétés similaires.
-   */
+  // IS EQUAL
   @override
   bool operator == (Object other) => identical(this, other) ||
       other is MyRestaurant && runtimeType == other.runtimeType && id == other.id;
@@ -107,6 +92,24 @@ class MyRestaurant {
   int get hashCode => id.hashCode;
 
 
+
+
+
+  /*
+  //https://stackoverflow.com/questions/59423646/how-to-filter-a-list-with-condition-in-dart
+  int get pendingCount =>
+      reservations.where((reservation) => reservation.status == Status.pending).toList().length;
+    */
+
+  /*
+   * L'utilisation de runtimeType dans la surcharge de l'opérateur == permet de s'assurer
+   * que l'objet other est exactement de la même classe que this. Cela évite des comparaisons
+   * entre objets d'une classe dérivée ou d'un autre type qui aurait des propriétés similaires.
+   */
+
+  String get euroPricing => priceRange == null
+      ? '?'
+      : '€' * priceRange!;
 
   Future<List<MyReservation>> getReservations() async {
     log("restaurant getReservations() ->");
