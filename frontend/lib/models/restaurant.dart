@@ -113,4 +113,21 @@ class Restaurant {
       throw Exception('${response.statusCode}: Failed to get restaurant from restaurant id');
     }
   }
+
+  static Future<Restaurant> getManagerRestaurants(int managerId) async {
+    log("restaurant getRestaurantById() ->");
+
+    final response = await ApiClient.post(
+      'get_manager_restaurants',
+      body: json.encode({'manager_id': managerId}),
+    );
+
+    if (response.statusCode == 200) {
+      final restaurant = Restaurant.fromJson(json.decode(response.body));
+      await restaurant.setReservations();
+      return restaurant;
+    } else {
+      throw Exception('${response.statusCode}: Failed to get manager restaurants');
+    }
+  }
 }
