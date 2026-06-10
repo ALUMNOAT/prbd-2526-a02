@@ -125,7 +125,7 @@ class data extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           children: [
             //https://stackoverflow.com/questions/58471237/the-element-type-settext-cant-be-assigned-to-the-list-type-widget
-            for (var restaurant in manager.restaurants)
+            for (var restaurant in manager.getRestaurantsOrderByLastReservation())
               RestaurantCard(
                 manager : manager,
                 restaurant : restaurant,

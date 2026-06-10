@@ -56,6 +56,10 @@ class ManagerState {
       reservation.status == Status.pending
       ).toList().length;
 
+  String? getLastReservationDateFromRestaurant(int restaurantId) {
+    return getLastReservationFromRestaurant(restaurantId)?.datetime.toString();
+  }
+
   MyRestaurant getRestaurant(int restaurantId) =>
       restaurants.where(
               (restaurant) => restaurant.id == restaurantId
@@ -71,6 +75,19 @@ class ManagerState {
               (reservation) => reservation.id == reservationId
       ).toList()[0];
 
+  MyReservation? getLastReservationFromRestaurant(int restaurantId) {
+    var restaurantReservation = reservations.where(
+            (reservation) => reservation.id == restaurantId
+    ).toList();
+    restaurantReservation.sort((a, b) =>
+      a.datetime.isAfter(b.datetime) ? 1 : 0
+    );
+
+    return restaurantReservation.isNotEmpty
+        ? restaurantReservation[0]
+        : null;
+  }
+
   MyUser getClient(int clientId) =>
       clients.where(
               (client) => client.id == clientId
@@ -80,6 +97,19 @@ class ManagerState {
       clients.where(
               (client) => client.id == getReservation(reservationId).clientId
       ).toList()[0];
+
+  List<MyRestaurant> getRestaurantsOrderByLastReservation() {
+    restaurants.sort((a, b) {
+      var aLast = getLastReservationFromRestaurant(a.id);
+      var bLast = getLastReservationFromRestaurant(b.id);
+
+      if (aLast == null) {return 1;}
+      else if (bLast == null) {return 0;}
+      return aLast.datetime.isAfter(bLast.datetime) ? 1 : 0;
+    });
+
+    return restaurants;
+  }
 
   List<MyService> getRestaurantServices(int restaurantId) =>
       services.where(
@@ -107,11 +137,11 @@ class ManagerState {
     }
 
     //The calls are all called at the same time.
-    final restaurantsFuture = await MyRestaurant.getManagerRestaurants(user.id);
-    final servicesFuture = await MyService.getManagerServices(user.id);
-    final reservationsFuture = await MyReservation.getManagerReservations(user.id);
-    final clientsFuture = await MyUser.getManagerClients(user.id);
-    final tablesFuture = await MyTable.getManagerTables(user.id);
+    final restaurantsFuture = MyRestaurant.getManagerRestaurants(user.id);
+    final servicesFuture = MyService.getManagerServices(user.id);
+    final reservationsFuture = MyReservation.getManagerReservations(user.id);
+    final clientsFuture = MyUser.getManagerClients(user.id);
+    final tablesFuture = MyTable.getManagerTables(user.id);
 
     //the results are then awaited here
     final managerState = ManagerState(

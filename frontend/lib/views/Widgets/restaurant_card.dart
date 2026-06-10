@@ -49,7 +49,7 @@ class RestaurantCard extends StatelessWidget {
                 const Icon(Icons.access_time, size: 14, color: Colors.grey),
                 const SizedBox(width: 4),
                 Text(
-                  'Dernière réservation: mer. 04/12/2024',
+                  'Dernière réservation: ${manager.getLastReservationDateFromRestaurant(restaurant.id)}',
                   style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
