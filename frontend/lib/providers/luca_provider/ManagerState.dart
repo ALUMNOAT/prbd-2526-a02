@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 import 'package:prbd_2526_a02/models/reservation.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/models/user.dart';
@@ -10,6 +11,7 @@ import '../../models/MyService.dart';
 import '../../models/MyTable.dart';
 
 class ManagerState {
+  // ATTRIBUTES
   final User user;
   final Map<int, Restaurant> restaurants;
   final Map<int, MyService> services;
@@ -17,6 +19,7 @@ class ManagerState {
   final Map<int, User> clients;
   final Map<int, MyTable> tables;
 
+  // CONSTRUCTOR
   ManagerState({
     required this.user,
     required this.restaurants,
@@ -26,6 +29,7 @@ class ManagerState {
     required this.tables,
   });
 
+  // COPY WITH
   ManagerState copyWith({
     User? user,
     Map<int, Restaurant>? restaurants,
@@ -42,5 +46,11 @@ class ManagerState {
       clients: clients ?? this.clients,
       tables: tables ?? this.tables,
     );
+  }
+
+  static ManagerState? setupManagerState() async {
+    final user = await User.getCurrentUser();
+    final restaurant = await MyRestaurant.getManagerRestaurants(user.id);
+    final services = await MyService.getManagerServices(user.id);
   }
 }

@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+
+import '../core/services/api_client.dart';
 
 class MyService {
   // ATTRIBUTES
@@ -64,5 +68,22 @@ class MyService {
 
 
 
+  // STATIC FUNCTIONS
+  static Future<List<MyService>> getManagerServices(int managerId) async {
+    final response = await ApiClient.post(
+      'get_manager_services',
+      body: json.encode({'manager_id': managerId}),
+    );
 
+    if (response.statusCode != 200) {
+      throw Exception('${response.statusCode}: Failed to get manager services');
+    }
+
+    final List<dynamic> body = json.decode(response.body);
+    List<MyService> services = body.map((dynamic item) =>
+        MyService.fromJson(item)
+    ).toList();
+
+    return services;
+  }
 }

@@ -93,81 +93,29 @@ class MyRestaurant {
 
 
 
-
-
-  /*
-  //https://stackoverflow.com/questions/59423646/how-to-filter-a-list-with-condition-in-dart
-  int get pendingCount =>
-      reservations.where((reservation) => reservation.status == Status.pending).toList().length;
-    */
-
-  /*
-   * L'utilisation de runtimeType dans la surcharge de l'opérateur == permet de s'assurer
-   * que l'objet other est exactement de la même classe que this. Cela évite des comparaisons
-   * entre objets d'une classe dérivée ou d'un autre type qui aurait des propriétés similaires.
-   */
-
+  // GETS
   String get euroPricing => priceRange == null
       ? '?'
       : '€' * priceRange!;
 
-  Future<List<MyReservation>> getReservations() async {
-    log("restaurant getReservations() ->");
 
-    final response = await ApiClient.post(
-      'get_restaurant_reservations_by_id',
-      body: json.encode({'restaurant_id': id}),
-    );
 
-    if (response.statusCode == 200) {
-      final List<dynamic> body = json.decode(response.body);
-      List<MyReservation> reservations = body.map(
-              (dynamic item) => MyReservation.fromJson(item, restaurant_obj: this)
-      ).toList();
-      reservations.forEach((reservation) async => await reservation.setClient());
-
-      return reservations;
-
-    } else {
-      throw Exception('${response.statusCode}: Failed to get restaurant reservations from restaurant id');
-    }
-  }
-
-  Future<void> setReservations() async {
-    reservations = await getReservations();
-  }
-
-  static Future<MyRestaurant> getRestaurantById(int id) async {
-    log("restaurant getRestaurantById() ->");
-
-    final response = await ApiClient.post(
-      'get_restaurant_by_id',
-      body: json.encode({'restaurant_id': id}),
-    );
-
-    if (response.statusCode == 200) {
-      final restaurant = MyRestaurant.fromJson(json.decode(response.body));
-      await restaurant.setReservations();
-      return restaurant;
-    } else {
-      throw Exception('${response.statusCode}: Failed to get restaurant from restaurant id');
-    }
-  }
-
-  static Future<MyRestaurant> getManagerRestaurants(int managerId) async {
-    log("restaurant getRestaurantById() ->");
-
+  // STATIC FUNCTIONS
+  static Future<List<MyRestaurant>> getManagerRestaurants(int managerId) async {
     final response = await ApiClient.post(
       'get_manager_restaurants',
       body: json.encode({'manager_id': managerId}),
     );
 
-    if (response.statusCode == 200) {
-      final restaurant = MyRestaurant.fromJson(json.decode(response.body));
-      await restaurant.setReservations();
-      return restaurant;
-    } else {
+    if (response.statusCode != 200) {
       throw Exception('${response.statusCode}: Failed to get manager restaurants');
     }
+
+    final List<dynamic> body = json.decode(response.body);
+    List<MyRestaurant> restaurants = body.map((dynamic item) =>
+        MyRestaurant.fromJson(item)
+    ).toList();
+
+    return restaurants;
   }
 }

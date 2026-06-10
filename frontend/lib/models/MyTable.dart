@@ -63,29 +63,22 @@ class MyTable {
 
 
 
-
-
-  Future<List<MyReservation>> getReservations() async {
-    log("mytable getReservations() ->");
-    final restaurant = await Restaurant.getRestaurantById(restaurantId);
-
+  // STATIC FUNCTIONS
+  static Future<List<MyTable>> getManagerTables(int managerId) async {
     final response = await ApiClient.post(
-      'get_table_reservations_by_id',
-      body: json.encode({'id': id}),
+      'get_manager_tables',
+      body: json.encode({'manager_id': managerId}),
     );
 
-    if (response.statusCode == 200) {
-      final List<dynamic> body = json.decode(response.body);
-      List<MyReservation> reservations = body.map(
-              (dynamic item) => MyReservation.fromJson(item)
-      ).toList();
-
-      reservations.forEach((reservation) async => await reservation.setClient());
-
-      return reservations;
-
-    } else {
-      throw Exception('${response.statusCode}: Failed to get restaurant reservations from restaurant id');
+    if (response.statusCode != 200) {
+      throw Exception('${response.statusCode}: Failed to get manager tables');
     }
+
+    final List<dynamic> body = json.decode(response.body);
+    List<MyTable> tables = body.map((dynamic item) =>
+        MyTable.fromJson(item)
+    ).toList();
+
+    return tables;
   }
 }

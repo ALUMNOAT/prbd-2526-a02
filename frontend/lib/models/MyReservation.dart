@@ -108,4 +108,23 @@ class MyReservation {
       throw Exception('Failed to update reservation: ${response.body}');
     }
   }
+
+  // STATIC FUNCTIONS
+  static Future<List<MyReservation>> getManagerReservations(int managerId) async {
+    final response = await ApiClient.post(
+      'get_manager_reservations',
+      body: json.encode({'manager_id': managerId}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('${response.statusCode}: Failed to get manager reservations');
+    }
+
+    final List<dynamic> body = json.decode(response.body);
+    List<MyReservation> reservations = body.map((dynamic item) =>
+        MyReservation.fromJson(item)
+    ).toList();
+
+    return reservations;
+  }
 }
