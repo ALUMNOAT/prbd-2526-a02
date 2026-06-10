@@ -59,6 +59,11 @@ class ManagerState {
               (restaurant) => restaurant.id == restaurantId
       ).toList()[0];
 
+  MyRestaurant getRestaurantFromReservation(int reservationId) =>
+      restaurants.where(
+              (restaurant) => restaurant.id == getReservation(reservationId).restaurantId
+      ).toList()[0];
+
   MyReservation getReservation(int reservationId) =>
       reservations.where(
               (reservation) => reservation.id == reservationId
@@ -67,6 +72,11 @@ class ManagerState {
   MyUser getClient(int clientId) =>
       clients.where(
               (client) => client.id == clientId
+      ).toList()[0];
+
+  MyUser getClientFromReservation(int reservationId) =>
+      clients.where(
+              (client) => client.id == getReservation(reservationId).clientId
       ).toList()[0];
 
   List<MyService> getRestaurantServices(int restaurantId) =>
