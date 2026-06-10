@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/security_provider.dart';
 
@@ -16,7 +18,6 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState?> {
     //TODO: implement manager state build(), which hopefully is only called once !
     final security = ref.watch(security_provider);
     final token = security.value;
-
 
     if(token == null) {
       return null;

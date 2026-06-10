@@ -19,7 +19,7 @@ class ApiClient {
         Map<String, String>? headers,
         bool anonymous = false,
       }) async {
-    log("api_client get() -> endpoint: $endpoint");
+    log("api_client get() -> endpoint: $endpoint()");
 
     await Future.delayed(throttleDuration);
     final Uri url = Uri.parse('$baseUrl/$endpoint');
@@ -39,7 +39,10 @@ class ApiClient {
         dynamic body,
         bool anonymous = false,
       }) async {
-    log("api_client post() -> endpoint: $endpoint");
+    log("api_client post() -> endpoint: $endpoint()");
+    headers?.values.forEach((value) => {
+      log("test")
+    });
 
     await Future.delayed(throttleDuration);
     final Uri url = Uri.parse('$baseUrl/$endpoint');

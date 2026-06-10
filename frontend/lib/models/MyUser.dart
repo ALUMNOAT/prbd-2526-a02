@@ -1,13 +1,6 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:prbd_2526_a02/core/services/api_client.dart';
-import 'package:prbd_2526_a02/models/MyReservation.dart';
 import 'package:prbd_2526_a02/models/enums/role.dart';
-import 'package:prbd_2526_a02/models/reservation.dart';
-import 'package:prbd_2526_a02/models/restaurant.dart';
-import 'package:prbd_2526_a02/models/user.dart';
-
-import 'enums/status.dart';
 
 class MyUser {
   // ATTRIBUTES

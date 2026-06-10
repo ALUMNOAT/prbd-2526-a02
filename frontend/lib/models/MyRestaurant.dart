@@ -1,13 +1,8 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:prbd_2526_a02/core/services/api_client.dart';
 import 'package:prbd_2526_a02/models/MyReservation.dart';
 import 'package:prbd_2526_a02/models/MyService.dart';
 import 'package:prbd_2526_a02/models/MyTable.dart';
-import 'package:prbd_2526_a02/models/reservation.dart';
-import 'package:prbd_2526_a02/models/user.dart';
-
-import 'enums/status.dart';
 
 class MyRestaurant {
   // ATTRIBUTES
@@ -122,7 +117,7 @@ class MyRestaurant {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('${response.statusCode}: Failed to get manager restaurants');
+      throw Exception('${response.statusCode}: Failed to get manager restaurants with id $managerId');
     }
 
     final List<dynamic> body = json.decode(response.body);

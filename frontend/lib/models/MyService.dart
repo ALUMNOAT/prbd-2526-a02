@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 
 import '../core/services/api_client.dart';
@@ -34,15 +35,12 @@ class MyService {
     colStartTime = 'start_time',
     colEndTime = 'end_time'
   }) {
-    //https://stackoverflow.com/questions/53382971/how-to-convert-string-to-timeofday-in-flutter
-    // ^how to convert time string into TimeOfDay
-    // TODO: convert !
     return MyService(
       id: json[colId],
       restaurantId: json[colRestaurantId],
-      dayOfWeek: json[colDayOfWeek], //<-- convert here
-      startTime: json[colStartTime], //<-- convert here
-      endTime: json[colEndTime],
+      dayOfWeek: json[colDayOfWeek],
+      startTime: stringToTimeOfDay(json[colStartTime]),
+      endTime: stringToTimeOfDay(json[colEndTime]),
     );
   }
 
@@ -93,5 +91,14 @@ class MyService {
     ).toList();
 
     return services;
+  }
+
+  static TimeOfDay stringToTimeOfDay(String tod) {
+    //https://stackoverflow.com/questions/53382971/how-to-convert-string-to-timeofday-in-flutter
+    final timeList = tod.split(":");
+    return TimeOfDay(
+        hour: int.parse(timeList[0]),
+        minute: int.parse(timeList[1])
+    );
   }
 }

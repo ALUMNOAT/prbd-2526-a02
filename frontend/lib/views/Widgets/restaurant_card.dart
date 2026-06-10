@@ -1,8 +1,4 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:prbd_2526_a02/models/restaurant.dart';
-import 'package:prbd_2526_a02/providers/luca_provider/restaurant_provider.dart';
 
 import '../../models/MyRestaurant.dart';
 import '../../providers/luca_provider/ManagerState.dart';

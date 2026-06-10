@@ -6,6 +6,43 @@
 
 set search_path to public;
 
+DROP FUNCTION IF EXISTS get_restaurant(INT);
+CREATE OR REPLACE FUNCTION get_restaurant(
+    IN restaurant_id INT)
+    RETURNS SETOF restaurants AS $$
+BEGIN
+    RETURN QUERY
+        SELECT * FROM restaurants r
+        WHERE r.id = restaurant_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Tools: The given restaurant id was not associated with any restaurant';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+DROP FUNCTION IF EXISTS get_reservations(restaurants);
+CREATE OR REPLACE FUNCTION get_reservations(
+    IN rst restaurants)
+    RETURNS SETOF reservations AS $$
+BEGIN
+    RETURN QUERY
+        SELECT r.*
+        FROM reservations r
+        WHERE r.restaurant = rst.id;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS total_tables_capacity_allocated(reservations);
+CREATE OR REPLACE FUNCTION total_tables_capacity_allocated(IN given_reservation reservations) RETURNS INT AS $$
+SELECT COALESCE(SUM(t.capacity), 0)
+FROM tables t
+         LEFT JOIN reservation_tables rt ON rt."table" = t.id
+         LEFT JOIN reservations r ON r.id = rt.reservation
+WHERE r.id = given_reservation.id
+$$ LANGUAGE SQL;
+
 -- ############
 -- RESERVATIONS
 -- ############

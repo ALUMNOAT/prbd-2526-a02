@@ -16,11 +16,8 @@ $$
 BEGIN
     -- is a user currently connected ?
     PERFORM auth.check_logged();
-    -- is the user a manager ?
-    IF (auth.role() != 'manager'::role_type) THEN
-        RAISE EXCEPTION 'User id ''%'' does not have access to this resource', manager_id;
     -- is the user the one currently connected ?
-    ELSEIF (auth.id() != manager_id) THEN
+    IF (auth.id() != manager_id) THEN
         RAISE EXCEPTION 'User id ''%'' is not connected', manager_id;
     END IF;
 
@@ -43,11 +40,8 @@ $$
 BEGIN
     -- is a user currently connected ?
     PERFORM auth.check_logged();
-    -- is the user a manager ?
-    IF (auth.role() != 'manager'::role_type) THEN
-        RAISE EXCEPTION 'User id ''%'' does not have access to this resource', manager_id;
-        -- is the user the one currently connected ?
-    ELSEIF (auth.id() != manager_id) THEN
+    -- is the user the one currently connected ?
+    IF (auth.id() != manager_id) THEN
         RAISE EXCEPTION 'User id ''%'' is not connected', manager_id;
     END IF;
 
@@ -70,11 +64,8 @@ $$
 BEGIN
     -- is a user currently connected ?
     PERFORM auth.check_logged();
-    -- is the user a manager ?
-    IF (auth.role() != 'manager'::role_type) THEN
-        RAISE EXCEPTION 'User id ''%'' does not have access to this resource', manager_id;
-        -- is the user the one currently connected ?
-    ELSEIF (auth.id() != manager_id) THEN
+    -- is the user the one currently connected ?
+    IF (auth.id() != manager_id) THEN
         RAISE EXCEPTION 'User id ''%'' is not connected', manager_id;
     END IF;
 
@@ -97,11 +88,9 @@ $$
 BEGIN
     -- is a user currently connected ?
     PERFORM auth.check_logged();
-    -- is the user a manager ?
-    IF (auth.role() != 'manager'::role_type) THEN
-        RAISE EXCEPTION 'User id ''%'' does not have access to this resource', manager_id;
-        -- is the user the one currently connected ?
-    ELSEIF (auth.id() != manager_id) THEN
+
+    -- is the user the one currently connected ?
+    IF (auth.id() != manager_id) THEN
         RAISE EXCEPTION 'User id ''%'' is not connected', manager_id;
     END IF;
 
@@ -114,3 +103,28 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION get_manager_clients TO authenticated;
+
+
+
+-- CLIENTS
+DROP FUNCTION IF EXISTS get_manager_tables(INT);
+CREATE OR REPLACE FUNCTION get_manager_tables(manager_id INT)
+    RETURNS SETOF tables AS
+$$
+BEGIN
+    -- is a user currently connected ?
+    PERFORM auth.check_logged();
+
+    -- is the user the one currently connected ?
+    IF (auth.id() != manager_id) THEN
+        RAISE EXCEPTION 'User id ''%'' is not connected', manager_id;
+    END IF;
+
+    RETURN QUERY
+        SELECT t.*
+        FROM tables t
+            LEFT JOIN restaurant_managers rstm ON rstm.restaurant = t.restaurant
+        WHERE rstm.manager = manager_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+GRANT EXECUTE ON FUNCTION get_manager_tables TO authenticated;

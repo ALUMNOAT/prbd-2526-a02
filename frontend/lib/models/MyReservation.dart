@@ -1,12 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:http/http.dart';
-import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 import 'package:prbd_2526_a02/models/MyTable.dart';
-import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/models/enums/status.dart';
-import 'package:prbd_2526_a02/models/user.dart';
 import '../core/services/api_client.dart';
 import 'MyUser.dart';
 
@@ -97,8 +93,6 @@ class MyReservation {
 
 
   Future<void> complete_reservation() async {
-    log("luca_reservation complete_reservation() ->");
-
     final response = await ApiClient.post(
       'complete_reservation', // Correspond au nom de la fonction SQL créée
       body: json.encode({'id': id}),
@@ -110,8 +104,6 @@ class MyReservation {
   }
 
   Future<void> cancel_reservation() async {
-    log("luca_reservation cancel_reservation() ->");
-
     final response = await ApiClient.post(
       'cancel_reservation', // Correspond au nom de la fonction SQL créée
       body: json.encode({'id': id}),

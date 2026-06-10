@@ -19,8 +19,6 @@ class Manager {
   });
 
   static Future<List<Restaurant>> getRestaurantsByCurrentManager() async {
-    log('manager.dart getRestaurantsByCurrentManager() ->');
-
     final response = await ApiClient.get(
       'get_restaurants_by_current_manager',
     );
@@ -32,10 +30,10 @@ class Manager {
               (dynamic item) => Restaurant.fromJson(item)
       ).toList();
 
-      restaurants.forEach(
+      /*restaurants.forEach(
               (restaurant) async =>
               restaurant.reservations = await restaurant.getReservations()
-      );
+      );*/
 
       return restaurants;
     } else {

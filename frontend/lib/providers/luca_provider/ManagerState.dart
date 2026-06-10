@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 import 'package:prbd_2526_a02/models/MyUser.dart';
+import '../../core/services/api_client.dart';
 import '../../models/MyReservation.dart';
 import '../../models/MyService.dart';
 import '../../models/MyTable.dart';
@@ -105,11 +107,11 @@ class ManagerState {
     }
 
     //The calls are all called at the same time.
-    final restaurantsFuture = MyRestaurant.getManagerRestaurants(user.id);
-    final servicesFuture = MyService.getManagerServices(user.id);
-    final reservationsFuture = MyReservation.getManagerReservations(user.id);
-    final clientsFuture = MyUser.getManagerClients(user.id);
-    final tablesFuture = MyTable.getManagerTables(user.id);
+    final restaurantsFuture = await MyRestaurant.getManagerRestaurants(user.id);
+    final servicesFuture = await MyService.getManagerServices(user.id);
+    final reservationsFuture = await MyReservation.getManagerReservations(user.id);
+    final clientsFuture = await MyUser.getManagerClients(user.id);
+    final tablesFuture = await MyTable.getManagerTables(user.id);
 
     //the results are then awaited here
     final managerState = ManagerState(

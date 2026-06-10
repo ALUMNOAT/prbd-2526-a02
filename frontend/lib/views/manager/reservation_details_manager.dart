@@ -7,11 +7,10 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerState.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerStateProvider.dart';
 
+import '../../models/MyRestaurant.dart';
+import '../../models/MyUser.dart';
 import '../../models/enums/status.dart';
 import '../../models/MyReservation.dart';
-import '../../models/restaurant.dart';
-import '../../models/user.dart';
-import '../../providers/luca_provider/luca_reservation_provider.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -37,6 +36,7 @@ class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsMa
   Widget build(BuildContext context) {
     final reservationId = ModalRoute.of(context)!.settings.arguments as int;
     final managerState = ref.watch(managerStateProvider);
+
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
@@ -69,8 +69,8 @@ class data extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final User client = reservation.client!;
-    final Restaurant restaurant = reservation.restaurant!;
+    final MyUser client = manager.getClientFromReservation(reservation.id);
+    final MyRestaurant restaurant = manager.getRestaurantFromReservation(reservation.id);
     final Status status = reservation.status;
 
     return Scaffold(

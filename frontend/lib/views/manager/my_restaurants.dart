@@ -4,12 +4,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerStateProvider.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/security_provider.dart';
-import 'dart:developer';
 
-import '../../models/manager.dart';
 import '../../providers/luca_provider/ManagerState.dart';
-import '../../providers/luca_provider/manager_provider.dart';
-import '../../providers/luca_provider/restaurant_provider.dart';
 import '../Widgets/restaurant_card.dart';
 
 void main() async {

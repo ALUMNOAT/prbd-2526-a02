@@ -7,8 +7,7 @@ import 'package:prbd_2526_a02/core/services/api_client.dart';
 class Security {
   /// Function returns a JWT token (string)
   static Future<String?> login(String email, String password) async {
-    log('security.dart login() ->');
-
+    log("security login($email, $password) ->");
     final response = await ApiClient.post(
       'login',
       body: json.encode( /// Function has 2 parameters

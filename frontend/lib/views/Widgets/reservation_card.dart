@@ -5,12 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 import 'package:prbd_2526_a02/models/enums/status.dart';
 import 'package:prbd_2526_a02/models/MyReservation.dart';
-import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerState.dart';
-import 'package:prbd_2526_a02/providers/luca_provider/luca_reservation_provider.dart';
-import 'package:prbd_2526_a02/providers/luca_provider/restaurant_provider.dart';
 
-import '../../models/user.dart';
+import '../../models/MyUser.dart';
 
 
 class ReservationCard extends StatelessWidget {
@@ -28,7 +25,7 @@ class ReservationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Status status = reservation.status;
-    final User client = reservation.client!;
+    final MyUser client = manager.getClientFromReservation(reservation.id);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),

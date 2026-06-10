@@ -34,6 +34,7 @@ class Restaurant {
     return Restaurant(
       id: json['id'],
       name: json['name'],
+      address: json['address'],
       city: json['city'],
       phone: json['phone'],
       description: json['description'],
@@ -51,8 +52,8 @@ class Restaurant {
   }
 
   //https://stackoverflow.com/questions/59423646/how-to-filter-a-list-with-condition-in-dart
-  int get pendingCount =>
-    reservations.where((reservation) => reservation.status == Status.pending).toList().length;
+  /*int get pendingCount =>
+    reservations.where((reservation) => reservation.status == Status.pending).toList().length;*/
 
   /*
    * L'utilisation de runtimeType dans la surcharge de l'opérateur == permet de s'assurer
@@ -68,9 +69,7 @@ class Restaurant {
 
 
 
-  Future<List<MyReservation>> getReservations() async {
-    log("restaurant getReservations() ->");
-
+  /*Future<List<MyReservation>> getReservations() async {
     final response = await ApiClient.post(
       'get_restaurant_reservations_by_id',
       body: json.encode({'restaurant_id': id}),
@@ -88,15 +87,13 @@ class Restaurant {
     } else {
       throw Exception('${response.statusCode}: Failed to get restaurant reservations from restaurant id');
     }
-  }
+  }*/
 
-  Future<void> setReservations() async {
+  /*Future<void> setReservations() async {
     reservations = await getReservations();
   }
 
   static Future<Restaurant> getRestaurantById(int id) async {
-    log("restaurant getRestaurantById() ->");
-
     final response = await ApiClient.post(
       'get_restaurant_by_id',
       body: json.encode({'restaurant_id': id}),
@@ -109,11 +106,9 @@ class Restaurant {
     } else {
       throw Exception('${response.statusCode}: Failed to get restaurant from restaurant id');
     }
-  }
+  }*/
 
-  static Future<Restaurant> getManagerRestaurants(int managerId) async {
-    log("restaurant getRestaurantById() ->");
-
+  /*static Future<Restaurant> getManagerRestaurants(int managerId) async {
     final response = await ApiClient.post(
       'get_manager_restaurants',
       body: json.encode({'manager_id': managerId}),
@@ -126,5 +121,5 @@ class Restaurant {
     } else {
       throw Exception('${response.statusCode}: Failed to get manager restaurants');
     }
-  }
+  }*/
 }
