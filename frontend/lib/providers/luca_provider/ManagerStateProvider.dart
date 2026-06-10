@@ -1,13 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:prbd_2526_a02/models/manager.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/security_provider.dart';
-import 'package:prbd_2526_a02/providers/luca_provider/user_provider.dart';
 
+import '../../models/MyUser.dart';
 import '../../models/enums/role.dart';
-import '../../models/restaurant.dart';
-import '../../models/user.dart';
 import 'ManagerState.dart';
 
 final managerStateProvider = AsyncNotifierProvider<ManagerStateNotifier, ManagerState?>(
@@ -23,15 +18,16 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState?> {
     final token = security.value;
 
 
-    if(token != null) {
-      final user = await User.getCurrentUser();
-      if(user.role == Role.manager) {
-
-      }
+    if(token == null) {
+      return null;
     }
 
-    final user = await User.getCurrentUser();
+    final user = await MyUser.getCurrentUser();
 
-    return null;
+    if(user.role != Role.manager) {
+      return null;
+    }
+
+    return await ManagerState.setupManagerState(givenUser: user);
   }
 }

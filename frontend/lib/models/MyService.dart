@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 
 import '../core/services/api_client.dart';
 
@@ -11,6 +12,9 @@ class MyService {
   final int dayOfWeek;
   final TimeOfDay startTime;
   final TimeOfDay endTime;
+  // OBJECT ATTRIBUTES
+  final MyRestaurant? restaurant;
+
 
   // CONSTRUCTOR
   MyService({
@@ -19,6 +23,7 @@ class MyService {
     required this.dayOfWeek,
     required this.startTime,
     required this.endTime,
+    this.restaurant,
   });
 
   // FACTORY
@@ -48,13 +53,16 @@ class MyService {
     final int? dayOfWeek,
     final TimeOfDay? startTime,
     final TimeOfDay? endTime,
+    final MyRestaurant? restaurant,
+
   }) {
     return MyService(
-      id: id ?? this.id,
-      restaurantId: restaurantId ?? this.restaurantId,
-      dayOfWeek: dayOfWeek ?? this.dayOfWeek,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
+        id: id ?? this.id,
+        restaurantId: restaurantId ?? this.restaurantId,
+        dayOfWeek: dayOfWeek ?? this.dayOfWeek,
+        startTime: startTime ?? this.startTime,
+        endTime: endTime ?? this.endTime,
+        restaurant: restaurant ?? this.restaurant,
     );
   }
 

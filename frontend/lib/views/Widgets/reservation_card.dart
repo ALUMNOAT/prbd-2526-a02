@@ -2,9 +2,11 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 import 'package:prbd_2526_a02/models/enums/status.dart';
 import 'package:prbd_2526_a02/models/MyReservation.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
+import 'package:prbd_2526_a02/providers/luca_provider/ManagerState.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/luca_reservation_provider.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/restaurant_provider.dart';
 
@@ -14,12 +16,14 @@ import '../../models/user.dart';
 class ReservationCard extends StatelessWidget {
   const ReservationCard({
     super.key,
+    required this.manager,
     required this.reservation,
     required this.restaurant
   });
 
+  final ManagerState manager;
   final MyReservation reservation;
-  final Restaurant restaurant;
+  final MyRestaurant restaurant;
 
   @override
   Widget build(BuildContext context) {

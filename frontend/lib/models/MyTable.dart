@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:prbd_2526_a02/core/services/api_client.dart';
 import 'package:prbd_2526_a02/models/MyReservation.dart';
+import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 import 'package:prbd_2526_a02/models/reservation.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/models/user.dart';
@@ -14,6 +15,8 @@ class MyTable {
   final int restaurantId;
   final int tableNumber;
   final int capacity;
+  // OBJECT ATTRIBUTES
+  final MyRestaurant? restaurant;
 
   // CONSTRUCTOR
   MyTable({
@@ -21,6 +24,7 @@ class MyTable {
     required this.restaurantId,
     required this.tableNumber,
     required this.capacity,
+    this.restaurant,
   });
 
   // FACTORY
@@ -44,12 +48,14 @@ class MyTable {
     int? restaurantId,
     int? tableNumber,
     int? capacity,
+    MyRestaurant? restaurant,
   }) {
     return MyTable(
-      id: id ?? this.id,
-      restaurantId: restaurantId ?? this.restaurantId,
-      tableNumber: tableNumber ?? this.tableNumber,
-      capacity: capacity ?? this.capacity,
+        id: id ?? this.id,
+        restaurantId: restaurantId ?? this.restaurantId,
+        tableNumber: tableNumber ?? this.tableNumber,
+        capacity: capacity ?? this.capacity,
+        restaurant: restaurant ?? this.restaurant
     );
   }
 

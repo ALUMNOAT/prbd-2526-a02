@@ -4,13 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/restaurant_provider.dart';
 
+import '../../models/MyRestaurant.dart';
+import '../../providers/luca_provider/ManagerState.dart';
+
 class RestaurantCard extends StatelessWidget {
   const RestaurantCard({
     super.key,
     required this.restaurant,
+    required this.manager,
   });
 
-  final Restaurant restaurant;
+  final MyRestaurant restaurant;
+  final ManagerState manager;
+
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +64,7 @@ class RestaurantCard extends StatelessWidget {
                 Icon(Icons.pending, size: 14, color: Colors.orange),
                 SizedBox(width: 4),
                 Text(
-                  '${restaurant.pendingCount} demandes en attente',
+                  '${manager.pendingCount(restaurant.id)} demandes en attente',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.orange,
@@ -75,7 +81,7 @@ class RestaurantCard extends StatelessWidget {
           Navigator.pushNamed(
               context,
               '/restaurant_management_reservations',
-              arguments: restaurant.id);
+              arguments: {restaurant.id, manager});
         },
       ),
     );

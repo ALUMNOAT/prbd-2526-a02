@@ -16,6 +16,8 @@ class MyUser {
   final String fullName;
   final Role role;
   final String? phone;
+  // OBJECT ATTRIBUTES
+
 
   // CONSTRUCTOR
   MyUser({
@@ -71,6 +73,16 @@ class MyUser {
 
 
   // STATIC FUNCTIONS
+  static Future<MyUser> getCurrentUser() async {
+    final response = await ApiClient.get('get_current_user');
+
+    if (response.statusCode == 200) {
+      return MyUser.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to get current user');
+    }
+  }
+
   static Future<List<MyUser>> getManagerClients(int managerId) async {
     final response = await ApiClient.post(
       'get_manager_clients',

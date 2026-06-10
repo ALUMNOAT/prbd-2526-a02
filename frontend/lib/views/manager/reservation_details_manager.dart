@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_a02/providers/luca_provider/ManagerState.dart';
+import 'package:prbd_2526_a02/providers/luca_provider/ManagerStateProvider.dart';
 
 import '../../models/enums/status.dart';
 import '../../models/MyReservation.dart';
@@ -33,19 +35,20 @@ class ReservationDetailsManagerPage extends ConsumerStatefulWidget {
 class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsManagerPage> {
   @override
   Widget build(BuildContext context) {
-    final reservationId = ModalRoute
-        .of(context)!
-        .settings
-        .arguments as int;
-    final reservationState = ref.watch(
-        luca_reservation_provider(reservationId));
+    final reservationId = ModalRoute.of(context)!.settings.arguments as int;
+    final managerState = ref.watch(managerStateProvider);
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
-    return reservationState.when(
-      data: (reservation) => data(theme: theme, simulatedTime: simulatedTime, reservation: reservation,),
+    return managerState.when(
       error: (err, stack) => Text(err.toString()),
       loading: () => const CircularProgressIndicator(),
+      data: (manager) => data(
+        theme: theme,
+        simulatedTime: simulatedTime,
+        manager: manager!,
+        reservation: manager.getReservation(reservationId),
+      ),
     );
   }
 }
@@ -55,11 +58,13 @@ class data extends StatelessWidget {
     super.key,
     required this.theme,
     required this.simulatedTime,
+    required this.manager,
     required this.reservation
   });
 
   final ThemeData theme;
   final DateTime simulatedTime;
+  final ManagerState manager;
   final MyReservation reservation;
 
   @override

@@ -1,23 +1,22 @@
-import 'dart:convert';
-import 'dart:developer';
+import 'dart:async';
 
 import 'package:prbd_2526_a02/models/MyRestaurant.dart';
-import 'package:prbd_2526_a02/models/reservation.dart';
-import 'package:prbd_2526_a02/models/restaurant.dart';
-import 'package:prbd_2526_a02/models/user.dart';
-
+import 'package:prbd_2526_a02/models/MyUser.dart';
 import '../../models/MyReservation.dart';
 import '../../models/MyService.dart';
 import '../../models/MyTable.dart';
+import '../../models/enums/role.dart';
+import '../../models/enums/status.dart';
+
 
 class ManagerState {
-  // ATTRIBUTES
-  final User user;
-  final Map<int, Restaurant> restaurants;
-  final Map<int, MyService> services;
-  final Map<int, MyReservation> reservations;
-  final Map<int, User> clients;
-  final Map<int, MyTable> tables;
+  // OBJECT ATTRIBUTES
+  final MyUser user;
+  final List<MyRestaurant> restaurants;
+  final List<MyService> services;
+  final List<MyReservation> reservations;
+  final List<MyUser> clients;
+  final List<MyTable> tables;
 
   // CONSTRUCTOR
   ManagerState({
@@ -31,12 +30,12 @@ class ManagerState {
 
   // COPY WITH
   ManagerState copyWith({
-    User? user,
-    Map<int, Restaurant>? restaurants,
-    Map<int, MyService>? services,
-    Map<int, MyReservation>? reservations,
-    Map<int, User>? clients,
-    Map<int, MyTable>? tables,
+    MyUser? user,
+    List<MyRestaurant>? restaurants,
+    List<MyService>? services,
+    List<MyReservation>? reservations,
+    List<MyUser>? clients,
+    List<MyTable>? tables,
   }) {
     return ManagerState(
       user: user ?? this.user,
@@ -48,9 +47,70 @@ class ManagerState {
     );
   }
 
-  static ManagerState? setupManagerState() async {
-    final user = await User.getCurrentUser();
-    final restaurant = await MyRestaurant.getManagerRestaurants(user.id);
-    final services = await MyService.getManagerServices(user.id);
+  // GETS
+  int pendingCount(int restaurantId) =>
+      reservations.where((reservation) =>
+      reservation.restaurantId == restaurantId &&
+      reservation.status == Status.pending
+      ).toList().length;
+
+  MyRestaurant getRestaurant(int restaurantId) =>
+      restaurants.where(
+              (restaurant) => restaurant.id == restaurantId
+      ).toList()[0];
+
+  MyReservation getReservation(int reservationId) =>
+      reservations.where(
+              (reservation) => reservation.id == reservationId
+      ).toList()[0];
+
+  MyUser getClient(int clientId) =>
+      clients.where(
+              (client) => client.id == clientId
+      ).toList()[0];
+
+  List<MyService> getRestaurantServices(int restaurantId) =>
+      services.where(
+              (service) => service.restaurantId == restaurantId
+      ).toList();
+
+  List<MyReservation> getRestaurantReservations(int restaurantId) =>
+      reservations.where(
+              (reservation) => reservation.restaurantId == restaurantId
+      ).toList();
+
+  List<MyTable> getRestaurantTables(int restaurantId) =>
+      tables.where(
+          (table) => table.restaurantId == restaurantId
+      ).toList();
+
+
+
+  // STATIC
+  static Future<ManagerState?> setupManagerState({MyUser? givenUser}) async {
+    final user = givenUser ?? await MyUser.getCurrentUser();
+
+    if(user.role != Role.manager) {
+      return null;
+    }
+
+    //The calls are all called at the same time.
+    final restaurantsFuture = MyRestaurant.getManagerRestaurants(user.id);
+    final servicesFuture = MyService.getManagerServices(user.id);
+    final reservationsFuture = MyReservation.getManagerReservations(user.id);
+    final clientsFuture = MyUser.getManagerClients(user.id);
+    final tablesFuture = MyTable.getManagerTables(user.id);
+
+    //the results are then awaited here
+    final managerState = ManagerState(
+        user: user,
+        restaurants: await restaurantsFuture,
+        services: await servicesFuture,
+        reservations: await reservationsFuture,
+        clients: await clientsFuture,
+        tables: await tablesFuture
+    );
+
+    return managerState;
   }
 }

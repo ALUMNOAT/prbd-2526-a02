@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_a02/models/MyRestaurant.dart';
+import 'package:prbd_2526_a02/models/MyTable.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/models/enums/status.dart';
 import 'package:prbd_2526_a02/models/user.dart';
 import '../core/services/api_client.dart';
+import 'MyUser.dart';
 
 class MyReservation {
   // ATTRIBUTES
@@ -16,6 +19,11 @@ class MyReservation {
   final int numberOfGuests;
   final Status status;
   final String? specialRequests;
+  // OBJECT ATTRIBUTES
+  final MyUser? client;
+  final MyRestaurant? restaurant;
+  final List<MyTable>? tables;
+
 
   // CONSTRUCTOR
   MyReservation({
@@ -26,6 +34,9 @@ class MyReservation {
     required this.numberOfGuests,
     required this.status,
     this.specialRequests,
+    this.client,
+    this.restaurant,
+    this.tables = const [],
   });
 
   // FACTORY
@@ -58,15 +69,21 @@ class MyReservation {
     int? numberOfGuests,
     Status? status,
     String? specialRequests,
+    MyUser? client,
+    MyRestaurant? restaurant,
+    List<MyTable>? tables,
   }) {
     return MyReservation(
-        id: id ?? this.id,
-        clientId: clientId ?? this.clientId,
-        restaurantId: restaurantId ?? this.restaurantId,
-        datetime: datetime ?? this.datetime,
-        numberOfGuests: numberOfGuests ?? this.numberOfGuests,
-        status: status ?? this.status,
-        specialRequests: specialRequests ?? this.specialRequests
+      id: id ?? this.id,
+      clientId: clientId ?? this.clientId,
+      restaurantId: restaurantId ?? this.restaurantId,
+      datetime: datetime ?? this.datetime,
+      numberOfGuests: numberOfGuests ?? this.numberOfGuests,
+      status: status ?? this.status,
+      specialRequests: specialRequests ?? this.specialRequests,
+      client: client ?? this.client,
+      restaurant: restaurant ?? this.restaurant,
+      tables: tables ?? this.tables,
     );
   }
 
@@ -77,10 +94,6 @@ class MyReservation {
 
   @override
   int get hashCode => id.hashCode;
-
-
-
-
 
 
   Future<void> complete_reservation() async {

@@ -5,8 +5,11 @@ import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prbd_2526_a02/models/MyReservation.dart';
 import 'package:prbd_2526_a02/models/restaurant.dart';
+import 'package:prbd_2526_a02/providers/luca_provider/ManagerState.dart';
+import 'package:prbd_2526_a02/providers/luca_provider/ManagerStateProvider.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/luca_reservation_provider.dart';
 
+import '../../models/MyRestaurant.dart';
 import '../../providers/luca_provider/restaurant_provider.dart';
 import '../Widgets/reservation_card.dart';
 
@@ -33,15 +36,20 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
   @override
   Widget build(BuildContext context) {
     final restaurantId = ModalRoute.of(context)!.settings.arguments as int;
-    final restaurantState = ref.watch(restaurant_provider(restaurantId));
+    final managerState = ref.watch(managerStateProvider);
 
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
-    return restaurantState.when(
-      data: (restaurant) => data(restaurant: restaurant, theme: theme, simulatedTime: simulatedTime, ),
+    return managerState.when(
       error: (err, stack) => Text(err.toString()),
       loading: () => const CircularProgressIndicator(),
+      data: (manager) => data(
+        manager: manager!,
+        restaurant: manager.getRestaurant(restaurantId),
+        theme: theme,
+        simulatedTime: simulatedTime, ),
+
     );
   }
 }
@@ -49,12 +57,14 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
 class data extends StatelessWidget {
   const data({
     super.key,
+    required this.manager,
     required this.restaurant,
     required this.theme,
     required this.simulatedTime,
   });
 
-  final Restaurant restaurant;
+  final ManagerState manager;
+  final MyRestaurant restaurant;
   final ThemeData theme;
   final DateTime simulatedTime;
 
@@ -154,8 +164,9 @@ class data extends StatelessWidget {
                   if(restaurant.reservations.isEmpty)
                   Text("No reservations")
                 else
-                  for (var reservation in restaurant.reservations)
+                  for (var reservation in manager.reservations)
                     ReservationCard(
+                      manager: manager,
                       reservation: reservation,
                       restaurant: restaurant,
                     ),

@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:prbd_2526_a02/core/services/api_client.dart';
 import 'package:prbd_2526_a02/models/MyReservation.dart';
+import 'package:prbd_2526_a02/models/MyService.dart';
+import 'package:prbd_2526_a02/models/MyTable.dart';
 import 'package:prbd_2526_a02/models/reservation.dart';
 import 'package:prbd_2526_a02/models/user.dart';
 
@@ -18,6 +20,10 @@ class MyRestaurant {
   final double? rating;
   final int? priceRange;
   final int slotDuration;
+  // OBJECT ATTRIBUTES
+  final List<MyService> services;
+  final List<MyReservation> reservations;
+  final List<MyTable> tables;
 
   // CONSTRUCTOR
   MyRestaurant({
@@ -30,6 +36,9 @@ class MyRestaurant {
     this.rating,
     this.priceRange,
     required this.slotDuration,
+    this.services = const [],
+    this.reservations = const [],
+    this.tables = const [],
   });
 
   // FACTORY
@@ -68,6 +77,9 @@ class MyRestaurant {
     double? rating,
     int? priceRange,
     int? slotDuration,
+    List<MyService>? services,
+    List<MyReservation>? reservations,
+    List<MyTable>? tables,
   }) {
     return MyRestaurant(
       id: id ?? this.id,
@@ -79,7 +91,9 @@ class MyRestaurant {
       rating: rating ?? this.rating,
       priceRange: priceRange ?? this.priceRange,
       slotDuration: slotDuration ?? this.slotDuration,
-
+      services: services ?? this.services,
+      reservations: reservations ?? this.reservations,
+      tables: tables ?? this.tables,
     );
   }
 

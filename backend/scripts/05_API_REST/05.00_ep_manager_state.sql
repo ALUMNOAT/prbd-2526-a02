@@ -34,6 +34,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION get_manager_restaurants TO authenticated;
 
 
+
 -- SERVICES
 DROP FUNCTION IF EXISTS get_manager_services(INT);
 CREATE OR REPLACE FUNCTION get_manager_services(manager_id INT)
@@ -58,6 +59,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION get_manager_services TO authenticated;
+
 
 
 -- RESERVATIONS
