@@ -80,4 +80,25 @@ class MyTable {
 
     return tables;
   }
+
+  static Future<Map<int, List<int>>>getManagerReservationTables(int managerId) async {
+    final response = await ApiClient.post(
+      'get_manager_reservation_tables',
+      body: json.encode({'manager_id': managerId}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('${response.statusCode}: Failed to get manager reservations tables');
+    }
+
+    final List<dynamic> body = json.decode(response.body);
+    //https://api.dart.dev/dart-core/Map/putIfAbsent.html
+    Map<int, List<int>> reservationTables = {};
+
+    for(var json in body) {
+      reservationTables.putIfAbsent(json['reservation'], () => [json['table'] as int]);
+    }
+
+    return reservationTables;
+  }
 }

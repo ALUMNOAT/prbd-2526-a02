@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:prbd_2526_a02/models/MyTable.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerState.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerStateProvider.dart';
 
@@ -72,6 +73,7 @@ class data extends StatelessWidget {
     final MyUser client = manager.getClientFromReservation(reservation.id);
     final MyRestaurant restaurant = manager.getRestaurantFromReservation(reservation.id);
     final Status status = reservation.status;
+    final List<MyTable> tables = manager.getReservationTables(reservation.id);
 
     return Scaffold(
       appBar: AppBar(
@@ -309,33 +311,8 @@ class data extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.table_restaurant, size: 20),
-                            const SizedBox(width: 8),
-                            const Text('Table 2'),
-                            const SizedBox(width: 16),
-                            Text(
-                              '(4 places)',
-                              style: TextStyle(color: Colors.grey[600]),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          const Icon(Icons.table_restaurant, size: 20),
-                          const SizedBox(width: 8),
-                          const Text('Table 3'),
-                          const SizedBox(width: 16),
-                          Text(
-                            '(6 places)',
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
-                        ],
-                      ),
+                      for(MyTable table in tables)
+                        tableRow(table),
                     ],
                   ),
                 ),
@@ -380,6 +357,24 @@ class data extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Padding tableRow(MyTable table) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        children: [
+          const Icon(Icons.table_restaurant, size: 20),
+          const SizedBox(width: 8),
+          Text('Table ${table.tableNumber}'),
+          const SizedBox(width: 16),
+          Text(
+            '(${table.capacity} places)',
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+        ],
       ),
     );
   }

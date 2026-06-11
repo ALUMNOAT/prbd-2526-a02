@@ -128,3 +128,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION get_manager_tables TO authenticated;
+
+
+
+-- RESERVATION TABLES
+DROP FUNCTION IF EXISTS get_manager_reservation_tables(INT);
+CREATE OR REPLACE FUNCTION get_manager_reservation_tables(manager_id INT)
+    RETURNS SETOF reservation_tables AS
+$$
+BEGIN
+    -- is a user currently connected ?
+    PERFORM auth.check_logged();
+
+    -- is the user the one currently connected ?
+    IF (auth.id() != manager_id) THEN
+        RAISE EXCEPTION 'User id ''%'' is not connected', manager_id;
+    END IF;
+
+    RETURN QUERY
+        SELECT DISTINCT rt.*
+        FROM reservation_tables rt
+        LEFT JOIN tables t ON t.id = rt."table"
+        LEFT JOIN restaurants rst ON rst.id = t.restaurant
+        LEFT JOIN restaurant_managers rstm ON rstm.restaurant = rst.id
+        WHERE rstm.manager = manager_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+GRANT EXECUTE ON FUNCTION get_manager_reservation_tables TO authenticated;

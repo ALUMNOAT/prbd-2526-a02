@@ -60,20 +60,21 @@ class RestaurantCard extends StatelessWidget {
             const SizedBox(height: 4),
 
             //PENDING RESERVATION COUNT
-            Row(
-              children: [
-                Icon(Icons.pending, size: 14, color: Colors.orange),
-                SizedBox(width: 4),
-                Text(
-                  '${manager.pendingCount(restaurant.id)} demandes en attente',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.orange,
-                    fontWeight: FontWeight.w500,
+            if(manager.pendingCount(restaurant.id) > 0)
+              Row(
+                children: [
+                  Icon(Icons.pending, size: 14, color: Colors.orange),
+                  SizedBox(width: 4),
+                  Text(
+                    '${manager.pendingCount(restaurant.id)} demandes en attente',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
           ],
         ),
 

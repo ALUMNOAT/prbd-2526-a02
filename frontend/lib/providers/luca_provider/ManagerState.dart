@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 import 'package:prbd_2526_a02/models/MyUser.dart';
-import '../../core/services/api_client.dart';
 import '../../models/MyReservation.dart';
 import '../../models/MyService.dart';
 import '../../models/MyTable.dart';
@@ -19,6 +17,8 @@ class ManagerState {
   final List<MyReservation> reservations;
   final List<MyUser> clients;
   final List<MyTable> tables;
+  final Map<int, List<int>> reservationTables;
+
 
   // CONSTRUCTOR
   ManagerState({
@@ -28,6 +28,7 @@ class ManagerState {
     required this.reservations,
     required this.clients,
     required this.tables,
+    required this.reservationTables,
   });
 
   // COPY WITH
@@ -38,6 +39,7 @@ class ManagerState {
     List<MyReservation>? reservations,
     List<MyUser>? clients,
     List<MyTable>? tables,
+    Map<int, List<int>>? reservationTables,
   }) {
     return ManagerState(
       user: user ?? this.user,
@@ -46,6 +48,7 @@ class ManagerState {
       reservations: reservations ?? this.reservations,
       clients: clients ?? this.clients,
       tables: tables ?? this.tables,
+      reservationTables: reservationTables ?? this.reservationTables,
     );
   }
 
@@ -127,6 +130,18 @@ class ManagerState {
           (table) => table.restaurantId == restaurantId
       ).toList();
 
+  List<MyTable> getReservationTables(int reservationId) {
+    final List<MyTable> tables_ = [];
+
+    if(reservationTables[reservationId] != null) {
+      for(int tablesId in reservationTables[reservationId]!) {
+        tables_.add(tables[tablesId]);
+      }
+    }
+
+    return tables_;
+  }
+
 
 
   // STATIC
@@ -143,6 +158,7 @@ class ManagerState {
     final reservationsFuture = MyReservation.getManagerReservations(user.id);
     final clientsFuture = MyUser.getManagerClients(user.id);
     final tablesFuture = MyTable.getManagerTables(user.id);
+    final reservationTablesFuture = MyTable.getManagerReservationTables(user.id);
 
     //the results are then awaited here
     final managerState = ManagerState(
@@ -151,7 +167,8 @@ class ManagerState {
         services: await servicesFuture,
         reservations: await reservationsFuture,
         clients: await clientsFuture,
-        tables: await tablesFuture
+        tables: await tablesFuture,
+        reservationTables: await reservationTablesFuture
     );
 
     return managerState;

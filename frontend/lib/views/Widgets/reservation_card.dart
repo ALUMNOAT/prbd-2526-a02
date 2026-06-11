@@ -42,25 +42,26 @@ class ReservationCard extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
+              //HOVERING DATA
               Tooltip(
                 message: status.name,
                 child: Icon(status.iconData, size: 32, color: status.color),
               ),
               const SizedBox(width: 16),
 
+              //DATA
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
+                    //CLIENT NAME
                     Text(
                       client.fullName, // Donnée dynamique
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
 
-
-
+                    //LOCATION
                     Row(
                       children: [
                         const Icon(Icons.location_on, size: 14),
@@ -73,8 +74,7 @@ class ReservationCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
 
-
-
+                    //TIME AND GUEST COUNT
                     Row(
                       children: [
                         const Icon(Icons.access_time, size: 16),
@@ -95,6 +95,8 @@ class ReservationCard extends StatelessWidget {
                   ],
                 ),
               ),
+
+              //END ICON
               const Icon(Icons.chevron_right),
             ],
           ),
