@@ -45,8 +45,8 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
         manager: manager!,
         restaurant: manager.getRestaurant(restaurantId),
         theme: theme,
-        simulatedTime: simulatedTime, ),
-
+        simulatedTime: simulatedTime,
+      ),
     );
   }
 }
@@ -67,6 +67,7 @@ class data extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reservations = manager.getRestaurantReservations(restaurant.id);
     return Scaffold(
       //BAR
       appBar: AppBar(
@@ -116,6 +117,7 @@ class data extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
+            //RESERVATIONS FILTER
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
               child: SegmentedButton<String>(
@@ -153,15 +155,16 @@ class data extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-    
+
+            //RESERVATIONS
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.all(16.0),
                 children: [
-                  if(restaurant.reservations.isEmpty)
+                  if(reservations.isEmpty)
                   Text("No reservations")
                 else
-                  for (var reservation in manager.reservations)
+                  for (var reservation in reservations)
                     ReservationCard(
                       manager: manager,
                       reservation: reservation,

@@ -24,6 +24,7 @@ class RestaurantCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            //RESTAURANT INFO
             Row(
               children: [
                 const Icon(Icons.location_on, size: 14, color: Colors.grey),
@@ -44,6 +45,8 @@ class RestaurantCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
+
+            //LAST RESERVATION
             Row(
               children: [
                 const Icon(Icons.access_time, size: 14, color: Colors.grey),
@@ -55,6 +58,8 @@ class RestaurantCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
+
+            //PENDING RESERVATION COUNT
             Row(
               children: [
                 Icon(Icons.pending, size: 14, color: Colors.orange),
@@ -71,13 +76,15 @@ class RestaurantCard extends StatelessWidget {
             ),
           ],
         ),
+
         trailing: const Icon(Icons.chevron_right),
 
+        //ONTAP REDIRECTION
         onTap: () async {
           Navigator.pushNamed(
               context,
               '/restaurant_management_reservations',
-              arguments: {restaurant.id, manager});
+              arguments: restaurant.id);
         },
       ),
     );
