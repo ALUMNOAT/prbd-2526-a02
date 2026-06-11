@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:prbd_2526_a02/models/MyReservation.dart';
 import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 
 import '../core/services/api_client.dart';
@@ -71,6 +71,15 @@ class MyService {
 
   @override
   int get hashCode => id.hashCode;
+
+  // GETS
+  bool isReservationInService(MyReservation reservation) {
+    //https://api.flutter.dev/flutter/material/TimeOfDay/compareTo.html
+    TimeOfDay reservationTime = TimeOfDay.fromDateTime(reservation.datetime);
+    return reservation.datetime.weekday == dayOfWeek &&
+        reservationTime.compareTo(startTime) >= 0 && //at or after startTime
+        reservationTime.compareTo(endTime) <= 0;     //at or before endTime
+  }
 
 
 

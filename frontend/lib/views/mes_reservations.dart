@@ -93,6 +93,7 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
       body: SafeArea(
         child: Column(
           children: [
+            //RESERVATION FILTER
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
               child: SegmentedButton<String>(
@@ -133,6 +134,8 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
               ),
             ),
             const SizedBox(height: 8),
+
+
             Expanded(
               // Si non connecté, alors le rond tourne, sinon, on fetch
               child: userID == null
@@ -273,6 +276,8 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
           ],
         ),
       ),
+
+
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.pushNamed(context, '/recherche_restaurants'),
         icon: const Icon(Icons.add),

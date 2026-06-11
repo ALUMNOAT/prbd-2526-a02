@@ -56,7 +56,7 @@ class MyApp extends ConsumerWidget {
         '/creation_reservation': (context) => ReservationFormPage(),
         '/restaurant_management_reservations': (context) => RestaurantManagementReservationPage(),
         '/reservation_details_manager': (context) => ReservationDetailsManagerPage(),
-        '/assign_table': (context) => AssignTables()
+        '/assign_table': (context) => AssignTablesPage()
       },
     );
   }

@@ -22,20 +22,20 @@ void main() async {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: /*const*/ ReservationDetailsManagerPage(),
+      home: ReservationDetailsManagerPage(),
     ),
   );
 }
 
 class ReservationDetailsManagerPage extends ConsumerStatefulWidget {
   @override
-  ConsumerState<ReservationDetailsManagerPage> createState() => _ReservationDetailsManagerstate();
+  ConsumerState<ReservationDetailsManagerPage> createState() => _ReservationDetailsManagerState();
 }
 
-class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsManagerPage> {
+class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsManagerPage> {
   @override
   Widget build(BuildContext context) {
-    final reservationId = ModalRoute.of(context)!.settings.arguments as int;
+    final reservation = ModalRoute.of(context)!.settings.arguments as MyReservation;
     final managerState = ref.watch(managerStateProvider);
 
     final theme = Theme.of(context);
@@ -48,7 +48,7 @@ class _ReservationDetailsManagerstate extends ConsumerState<ReservationDetailsMa
         theme: theme,
         simulatedTime: simulatedTime,
         manager: manager!,
-        reservation: manager.getReservation(reservationId),
+        reservation: reservation,
       ),
     );
   }
@@ -349,7 +349,10 @@ class data extends StatelessWidget {
               if(status == Status.pending)
                 OutlinedButton.icon(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/assign_table');
+                    Navigator.pushNamed(
+                        context, '/assign_table',
+                        arguments: reservation
+                    );
                   },
                   icon: const Icon(Icons.table_restaurant_rounded),
                   label: const Text('Confirmer et assigner tables'),

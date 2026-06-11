@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:core';
 
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 import 'package:prbd_2526_a02/models/MyUser.dart';
 import '../../models/MyReservation.dart';
@@ -60,7 +63,22 @@ class ManagerState {
       ).toList().length;
 
   String? getLastReservationDateFromRestaurant(int restaurantId) {
-    return getLastReservationFromRestaurant(restaurantId)?.datetime.toString();
+    return getLastReservationFromRestaurant(restaurantId) == null
+        ? "Aucune réservations"
+        : DateFormat('EEE dd/MM/yyyy à HH:mm', 'fr_FR')
+        .format(getLastReservationFromRestaurant(restaurantId)!.datetime);
+  }
+
+  bool isTableOccupied(MyTable table, MyService service, DateTime dateTime) {
+    final reservations_ = getServiceReservationsOnDateTime(service, dateTime);
+    for(var reservation in reservations_) {
+      final tables = getReservationTables(reservation.id);
+      if(tables.contains(table)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   MyRestaurant getRestaurant(int restaurantId) =>
@@ -120,10 +138,42 @@ class ManagerState {
               (service) => service.restaurantId == restaurantId
       ).toList();
 
+  List<MyService> getReservationServices(MyReservation reservation) {
+    final services_ = services.where((service) =>
+    service.restaurantId == reservation.restaurantId &&
+        service.isReservationInService(reservation)
+    ).toList();
+
+    return services_;
+  }
+
   List<MyReservation> getRestaurantReservations(int restaurantId) =>
       reservations.where(
               (reservation) => reservation.restaurantId == restaurantId
       ).toList();
+
+  List<MyReservation> getServiceReservationsOnDateTime(MyService service, DateTime dateTime) =>
+  //https://stackoverflow.com/questions/52978195/comparing-only-dates-of-datetimes-in-dart
+      reservations.where((reservation) =>
+      reservation.restaurantId == service.restaurantId &&
+          DateUtils.isSameDay(reservation.datetime, dateTime) &&
+          service.isReservationInService(reservation)
+      ).toList();
+
+  List<MyReservation> getConcurrentReservations(MyReservation reservation) {
+    final services_ = getReservationServices(reservation);
+    final List<MyReservation> concurrentReservations = [];
+
+    for(MyService service in services_) {
+      concurrentReservations.addAll(reservations.where((otherReservation) =>
+      otherReservation.restaurantId == reservation.restaurantId &&
+          DateUtils.isSameDay(otherReservation.datetime, reservation.datetime) &&
+          service.isReservationInService(otherReservation)
+      ));
+    }
+
+    return concurrentReservations;
+  }
 
   List<MyTable> getRestaurantTables(int restaurantId) =>
       tables.where(
@@ -141,6 +191,30 @@ class ManagerState {
 
     return tables_;
   }
+
+  List<MyTable> getOccupiedTablesForReservation(MyReservation reservation) {
+    final concurrentReservations = getConcurrentReservations(reservation);
+    final List<MyTable> tables_ = [];
+    for(MyReservation concurrentReservation in concurrentReservations) {
+      tables_.addAll(getReservationTables(concurrentReservation.id));
+    }
+    return tables_;
+  }
+
+  List<MyTable> getAvailableTablesForReservation(int reservationId) {
+    final reservation = getReservation(reservationId);
+    final services = getRestaurantServices(reservation.restaurantId);
+    final List<MyTable> tables_ = getRestaurantTables(reservation.restaurantId);
+
+    if(reservationTables[reservationId] != null) {
+      for(int tablesId in reservationTables[reservationId]!) {
+        tables_.add(tables[tablesId]);
+      }
+    }
+
+    return tables_;
+  }
+
 
 
 

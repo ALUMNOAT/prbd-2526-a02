@@ -34,7 +34,7 @@ class ReservationCard extends StatelessWidget {
           await Navigator.pushNamed(
             context,
             '/reservation_details_manager',
-            arguments: reservation.id, // On passe l'objet 'res' complet à la page suivante
+            arguments: reservation,
           );
         },
 
