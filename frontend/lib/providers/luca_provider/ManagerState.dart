@@ -77,10 +77,11 @@ class ManagerState {
 
   MyReservation? getLastReservationFromRestaurant(int restaurantId) {
     var restaurantReservation = reservations.where(
-            (reservation) => reservation.id == restaurantId
+            (reservation) => reservation.restaurantId == restaurantId
     ).toList();
+
     restaurantReservation.sort((a, b) =>
-      a.datetime.isAfter(b.datetime) ? 1 : 0
+      a.datetime.isAfter(b.datetime) ? 0 : 1
     );
 
     return restaurantReservation.isNotEmpty
@@ -105,7 +106,7 @@ class ManagerState {
 
       if (aLast == null) {return 1;}
       else if (bLast == null) {return 0;}
-      return aLast.datetime.isAfter(bLast.datetime) ? 1 : 0;
+      return aLast.datetime.isAfter(bLast.datetime) ? 0 : 1;
     });
 
     return restaurants;
