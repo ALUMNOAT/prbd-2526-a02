@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:core';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -185,7 +186,9 @@ class ManagerState {
 
     if(reservationTables[reservationId] != null) {
       for(int tablesId in reservationTables[reservationId]!) {
-        tables_.add(tables[tablesId]);
+        tables_.addAll(tables.where((table) =>
+            table.id == tablesId
+        ));
       }
     }
 
@@ -214,7 +217,6 @@ class ManagerState {
 
     return tables_;
   }
-
 
 
 

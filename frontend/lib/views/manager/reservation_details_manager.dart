@@ -37,6 +37,8 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
   Widget build(BuildContext context) {
     final reservation = ModalRoute.of(context)!.settings.arguments as MyReservation;
     final managerState = ref.watch(managerStateProvider);
+    final managerStateNotifier = ref.watch(managerStateProvider.notifier);
+
 
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
@@ -49,6 +51,7 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
         simulatedTime: simulatedTime,
         manager: manager!,
         reservation: reservation,
+        managerNotifier: managerStateNotifier,
       ),
     );
   }
@@ -60,13 +63,15 @@ class data extends StatelessWidget {
     required this.theme,
     required this.simulatedTime,
     required this.manager,
-    required this.reservation
+    required this.reservation,
+    required this.managerNotifier
   });
 
   final ThemeData theme;
   final DateTime simulatedTime;
   final ManagerState manager;
   final MyReservation reservation;
+  final ManagerStateNotifier managerNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -323,7 +328,8 @@ class data extends StatelessWidget {
               if(status == Status.confirmed)
                 ElevatedButton.icon(
                   onPressed: () {
-                    reservation.complete_reservation();
+                    //reservation.completeReservation();
+                    managerNotifier.completeReservation(reservation);
                   },
                   icon: const Icon(Icons.check_circle),
                   label: const Text('Marquer comme terminée'),
