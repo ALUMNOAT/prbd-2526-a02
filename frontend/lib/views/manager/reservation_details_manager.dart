@@ -8,6 +8,8 @@ import 'package:prbd_2526_a02/models/MyTable.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerState.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerStateProvider.dart';
 
+import '../../core/widgets/dialog_action.dart';
+import '../../core/widgets/dialog_box.dart';
 import '../../models/MyRestaurant.dart';
 import '../../models/MyUser.dart';
 import '../../models/enums/status.dart';
@@ -64,7 +66,7 @@ class data extends StatelessWidget {
     required this.simulatedTime,
     required this.manager,
     required this.reservation,
-    required this.managerNotifier
+    required this.managerNotifier,
   });
 
   final ThemeData theme;
@@ -324,12 +326,14 @@ class data extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              //BUTTON CONFIRM
+              //COMPLETE RESERVATION BUTTON
               if(status == Status.confirmed)
                 ElevatedButton.icon(
                   onPressed: () {
                     //reservation.completeReservation();
-                    managerNotifier.completeReservation(reservation);
+                    //managerNotifier.completeReservation(reservation);
+                    //buttonAction(context, reservation);
+                    confirmReservation(context);
                   },
                   icon: const Icon(Icons.check_circle),
                   label: const Text('Marquer comme terminée'),
@@ -337,12 +341,13 @@ class data extends StatelessWidget {
               if(status == Status.confirmed)
                 const SizedBox(height: 8),
 
-              //BUTTON CANCEL
+              //CANCEL RESERVATION BUTTON
               if(status == Status.pending ||
                   status == Status.confirmed)
                 OutlinedButton.icon(
                   onPressed: () {
                     reservation.cancel_reservation();
+
                   },
                   icon: const Icon(Icons.cancel),
                   label: const Text('Annuler'),
@@ -351,7 +356,7 @@ class data extends StatelessWidget {
                   status == Status.confirmed)
                 const SizedBox(height: 8),
 
-              //BUTTON ASSIGN TABLES
+              //ASSIGN TABLES BUTTON
               if(status == Status.pending)
                 OutlinedButton.icon(
                   onPressed: () {
@@ -387,4 +392,38 @@ class data extends StatelessWidget {
       ),
     );
   }
+
+  void confirmReservation(BuildContext context) async {
+    final confirm = await DialogBox(
+      title: 'Annuler la réservation',
+      message: 'Êtes-vous sûr de vouloir annuler cette réservation ? ',
+      actions: [
+        DialogAction(label: 'Non'),
+        DialogAction(label: 'Oui', color: Colors.red, isFilled: true),
+      ],
+    ).show(context);
+
+    if (confirm != 'Oui') return;
+
+    try {
+      managerNotifier.completeReservation(reservation);
+
+      // On vérifie si on est toujours sur la page avant de naviguer
+      if (!context.mounted) return;
+
+      // On ferme la page
+      Navigator.pop(context);
+
+    } catch (e) {
+      if (!context.mounted) return;
+      DialogBox(
+        title: 'Impossible d annuler la réservation',
+        message: 'Checker votre connection avec la base de données',
+        actions: [
+          DialogAction(label: 'OK'),
+        ],
+      ).show(context);
+    }
+  }
+
 }
