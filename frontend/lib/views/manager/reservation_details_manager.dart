@@ -52,7 +52,7 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
         theme: theme,
         simulatedTime: simulatedTime,
         manager: manager!,
-        reservation: reservation,
+        reservation: manager.getReservation(reservation.id),
         managerNotifier: managerStateNotifier,
       ),
     );
@@ -312,7 +312,8 @@ class data extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              Card(
+              if(tables.isNotEmpty)
+                Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -324,16 +325,15 @@ class data extends StatelessWidget {
                   ),
                 ),
               ),
+              if(tables.isEmpty)
+                Text('Aucune table assignée'),
               const SizedBox(height: 24),
 
               //COMPLETE RESERVATION BUTTON
               if(status == Status.confirmed)
                 ElevatedButton.icon(
                   onPressed: () {
-                    //reservation.completeReservation();
-                    //managerNotifier.completeReservation(reservation);
-                    //buttonAction(context, reservation);
-                    confirmReservation(context);
+                    completeReservation(context);
                   },
                   icon: const Icon(Icons.check_circle),
                   label: const Text('Marquer comme terminée'),
@@ -346,8 +346,7 @@ class data extends StatelessWidget {
                   status == Status.confirmed)
                 OutlinedButton.icon(
                   onPressed: () {
-                    reservation.cancel_reservation();
-
+                    cancelReservation(context);
                   },
                   icon: const Icon(Icons.cancel),
                   label: const Text('Annuler'),
@@ -393,10 +392,10 @@ class data extends StatelessWidget {
     );
   }
 
-  void confirmReservation(BuildContext context) async {
+  void completeReservation(BuildContext context) async {
     final confirm = await DialogBox(
-      title: 'Annuler la réservation',
-      message: 'Êtes-vous sûr de vouloir annuler cette réservation ? ',
+      title: 'Compléter la réservation',
+      message: 'Voulez-vous marquer cette réservation comme terminée ? ',
       actions: [
         DialogAction(label: 'Non'),
         DialogAction(label: 'Oui', color: Colors.red, isFilled: true),
@@ -412,18 +411,52 @@ class data extends StatelessWidget {
       if (!context.mounted) return;
 
       // On ferme la page
-      Navigator.pop(context);
+      //Navigator.pop(context);
 
     } catch (e) {
       if (!context.mounted) return;
       DialogBox(
-        title: 'Impossible d annuler la réservation',
-        message: 'Checker votre connection avec la base de données',
+        title: 'Impossible de compléter la réservation',
+        message: 'Vérifiez votre connection avec la base de données',
         actions: [
           DialogAction(label: 'OK'),
         ],
       ).show(context);
     }
   }
+
+  void cancelReservation(BuildContext context) async {
+    final confirm = await DialogBox(
+      title: 'Annuler la réservation',
+      message: 'Êtes-vous sûr de vouloir annuler cette réservation ? ',
+      actions: [
+        DialogAction(label: 'Non'),
+        DialogAction(label: 'Oui', color: Colors.red, isFilled: true),
+      ],
+    ).show(context);
+
+    if (confirm != 'Oui') return;
+
+    try {
+      managerNotifier.cancelReservation(reservation);
+
+      // On vérifie si on est toujours sur la page avant de naviguer
+      if (!context.mounted) return;
+
+      // On ferme la page
+      //Navigator.pop(context);
+
+    } catch (e) {
+      if (!context.mounted) return;
+      DialogBox(
+        title: 'Impossible d''annuler la réservation',
+        message: 'Vérifiez votre connection avec la base de données',
+        actions: [
+          DialogAction(label: 'OK'),
+        ],
+      ).show(context);
+    }
+  }
+
 
 }

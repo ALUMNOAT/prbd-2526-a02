@@ -105,7 +105,7 @@ class MyReservation {
     return copyWith(status: Status.completed);
   }
 
-  Future<void> cancel_reservation() async {
+  Future<MyReservation> cancelReservation() async {
     final response = await ApiClient.post(
       'cancel_reservation', // Correspond au nom de la fonction SQL créée
       body: json.encode({'id': id}),
@@ -114,6 +114,8 @@ class MyReservation {
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception('Failed to update reservation: ${response.body}');
     }
+
+    return copyWith(status: Status.cancelled);
   }
 
   // STATIC FUNCTIONS
