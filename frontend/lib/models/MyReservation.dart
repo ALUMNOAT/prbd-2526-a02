@@ -91,7 +91,16 @@ class MyReservation {
   @override
   int get hashCode => id.hashCode;
 
+  // GETS
+  int compareToTimewise(MyReservation other) {
+    int result = datetime.compareTo(other.datetime);
 
+    if(result == 0) result = id - other.id;
+
+    return result;
+  }
+
+  // DATABASE FUNCTIONS
   Future<MyReservation> completeReservation() async {
     final response = await ApiClient.post(
       'complete_reservation', // Correspond au nom de la fonction SQL créée

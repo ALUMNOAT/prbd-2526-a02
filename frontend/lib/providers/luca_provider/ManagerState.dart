@@ -148,10 +148,15 @@ class ManagerState {
     return services_;
   }
 
-  List<MyReservation> getRestaurantReservations(int restaurantId) =>
-      reservations.where(
-              (reservation) => reservation.restaurantId == restaurantId
-      ).toList();
+  List<MyReservation> getRestaurantReservations(int restaurantId) {
+    final reservations_ = reservations.where(
+            (reservation) => reservation.restaurantId == restaurantId
+    ).toList();
+
+    reservations_.sort((a, b) => a.compareToTimewise(b));
+
+    return reservations_;
+  }
 
   List<MyReservation> getServiceReservationsOnDateTime(MyService service, DateTime dateTime) =>
   //https://stackoverflow.com/questions/52978195/comparing-only-dates-of-datetimes-in-dart

@@ -27,6 +27,8 @@ class AssignTablesPage extends ConsumerStatefulWidget {
 }
 
 class _AssignTablesState extends ConsumerState<AssignTablesPage> {
+  int tableCount = 0;
+  final Set<MyTable> selectedTable = {};
   @override
   Widget build(BuildContext context) {
     final managerState = ref.watch(managerStateProvider);
@@ -147,8 +149,8 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Capacité totale: 6 places',
+                          Text(
+                            'Capacité totale: $tableCount places',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -220,13 +222,21 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
   }
 
   Card tableCard(MyTable table) {
+    bool isChecked = selectedTable.contains(table);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: CheckboxListTile(
-        value: false,
-        onChanged: (_) {
-          //TODO: update some values upstairs
+        value: isChecked,
+        onChanged: (newValue) {
+          selectedTable.contains(table)
+              ? selectedTable.remove(table)
+              : selectedTable.add(table);
+
+          updateTableCount(); //updates value
+          setState(() {});    //updates UI;
         },
+
         title: Text('Table ${table.tableNumber}'),
         subtitle: Text('Capacité: ${table.capacity} personnes',),
         secondary: const Icon(Icons.table_restaurant),
@@ -260,5 +270,12 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
         ),
       ),
     );
+  }
+
+  void updateTableCount() {
+    tableCount = 0;
+    for(MyTable table in selectedTable) {
+      tableCount += table.capacity;
+    }
   }
 }
