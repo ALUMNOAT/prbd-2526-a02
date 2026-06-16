@@ -93,7 +93,7 @@ class MyReservation {
 
   // GETS
   int compareToTimewise(MyReservation other) {
-    int result = datetime.compareTo(other.datetime);
+    int result = -datetime.compareTo(other.datetime);
 
     if(result == 0) result = id - other.id;
 
