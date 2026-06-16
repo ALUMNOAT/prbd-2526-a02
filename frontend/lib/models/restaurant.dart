@@ -1,125 +1,71 @@
-import 'dart:convert';
-import 'dart:developer';
-import 'package:prbd_2526_a02/core/services/api_client.dart';
-import 'package:prbd_2526_a02/models/MyReservation.dart';
-import 'package:prbd_2526_a02/models/reservation.dart';
-import 'package:prbd_2526_a02/models/user.dart';
+class Table {
+  final int id;
+  final int restaurantId;
+  final int tableNumber;
+  final int capacity;
 
-import 'enums/status.dart';
+  Table({
+    required this.id,
+    required this.restaurantId,
+    required this.tableNumber,
+    required this.capacity
+  });
+
+  factory Table.fromJson(Map<String, dynamic> json) => Table(
+    id: json['id'],
+    restaurantId: json['restaurant'],
+    tableNumber: json['table_number'],
+    capacity: json['capacity'],
+  );
+}
+
+class Service {
+  final int id;
+  final int dayOfWeek;
+  final String startTime;
+  final String endTime;
+
+  Service({
+    required this.id,
+    required this.dayOfWeek,
+    required this.startTime,
+    required this.endTime
+  });
+
+  factory Service.fromJson(Map<String, dynamic> json) => Service(
+    id: json['id'],
+    dayOfWeek: json['day_of_week'],
+    startTime: json['start_time'],
+    endTime: json['end_time'],
+  );
+}
 
 class Restaurant {
   final int id;
-  final String name;
-  final String address;
+  final String restoName;
+  final String restoAddress;
   final String city;
-  final String phone;
-  final String? description;
-  final double? rating;
-  final int? priceRange;
   final int slotDuration;
+  final List<Table> tables;
+  final List<Service> services;
 
   Restaurant({
     required this.id,
-    required this.name,
-    required this.address,
+    required this.restoName,
+    required this.restoAddress,
     required this.city,
-    required this.phone,
-    this.description,
-    this.rating,
-    this.priceRange,
     required this.slotDuration,
+    required this.tables,
+    required this.services
   });
 
-  factory Restaurant.fromJson(Map<String, dynamic> json) {
-    return Restaurant(
-      id: json['id'],
-      name: json['name'],
-      address: json['address'],
-      city: json['city'],
-      phone: json['phone'],
-      description: json['description'],
-      rating: json['rating'],
-      priceRange: json['price_range'],
-      slotDuration: json['slot_duration'],
-    );
-  }
-
-  //https://stackoverflow.com/questions/65343818/whats-the-meaning-of-arrow-in-dart-flutter
-  String get euroPricing {
-    return priceRange == null
-        ? '?'
-        : '€' * priceRange!; // added '!' because we know it's not null here
-  }
-
-  //https://stackoverflow.com/questions/59423646/how-to-filter-a-list-with-condition-in-dart
-  /*int get pendingCount =>
-    reservations.where((reservation) => reservation.status == Status.pending).toList().length;*/
-
-  /*
-   * L'utilisation de runtimeType dans la surcharge de l'opérateur == permet de s'assurer
-   * que l'objet other est exactement de la même classe que this. Cela évite des comparaisons
-   * entre objets d'une classe dérivée ou d'un autre type qui aurait des propriétés similaires.
-   */
-  @override
-  bool operator == (Object other) => identical(this, other) ||
-    other is Restaurant && runtimeType == other.runtimeType && id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
-
-
-
-  /*Future<List<MyReservation>> getReservations() async {
-    final response = await ApiClient.post(
-      'get_restaurant_reservations_by_id',
-      body: json.encode({'restaurant_id': id}),
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> body = json.decode(response.body);
-      List<MyReservation> reservations = body.map(
-              (dynamic item) => MyReservation.fromJson(item, restaurant_obj: this)
-      ).toList();
-      reservations.forEach((reservation) async => await reservation.setClient());
-
-      return reservations;
-
-    } else {
-      throw Exception('${response.statusCode}: Failed to get restaurant reservations from restaurant id');
-    }
-  }*/
-
-  /*Future<void> setReservations() async {
-    reservations = await getReservations();
-  }
-
-  static Future<Restaurant> getRestaurantById(int id) async {
-    final response = await ApiClient.post(
-      'get_restaurant_by_id',
-      body: json.encode({'restaurant_id': id}),
-    );
-
-    if (response.statusCode == 200) {
-      final restaurant = Restaurant.fromJson(json.decode(response.body));
-      await restaurant.setReservations();
-      return restaurant;
-    } else {
-      throw Exception('${response.statusCode}: Failed to get restaurant from restaurant id');
-    }
-  }*/
-
-  /*static Future<Restaurant> getManagerRestaurants(int managerId) async {
-    final response = await ApiClient.post(
-      'get_manager_restaurants',
-      body: json.encode({'manager_id': managerId}),
-    );
-
-    if (response.statusCode == 200) {
-      final restaurant = Restaurant.fromJson(json.decode(response.body));
-      await restaurant.setReservations();
-      return restaurant;
-    } else {
-      throw Exception('${response.statusCode}: Failed to get manager restaurants');
-    }
-  }*/
+  factory Restaurant.fromJson(Map<String, dynamic> json) => Restaurant(
+    id: json['id'],
+    restoName: json['resto_name'],
+    restoAddress: json['resto_address'],
+    city: json['city'],
+    slotDuration: json['slot_duration'] ?? 30,
+    tables: (json['tables'] as List).map((i) => Table.fromJson(i)).toList(),
+    services: (json['services'] as List).map((i) => Service.fromJson(i)).toList(),
+  );
 }
