@@ -40,7 +40,9 @@ class _HomeManagerPageState extends ConsumerState<HomeManagerPage> {
 
     return managerState_.when(
       loading: () => const CircularProgressIndicator(),
+
       error: (err, stack) => Text(err.toString()),
+
       data: (manager) {
         if (manager == null) {
           return Text("No manager found");

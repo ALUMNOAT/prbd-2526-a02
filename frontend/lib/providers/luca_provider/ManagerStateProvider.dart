@@ -57,7 +57,8 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState?> {
     final manager = state.value!;
 
     try {
-      reservation.cancelReservation();
+      final res_ = await reservation.cancelReservation();
+
       manager.reservations.remove(reservation);
       manager.reservationTables.remove(reservation.id);
 

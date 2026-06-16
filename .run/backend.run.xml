@@ -24,11 +24,13 @@
     <script-file value="$PROJECT_DIR$/backend/scripts/04_BR/04.12_br_reservation_tables_nomodify.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04_BR/04.13_br_reservation_shrodinger.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/04_BR/04.14_br_reservation_temporal.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05.00_ep_user.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05.00_ep_restaurant.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05.00_ep_reservation.sql" />
-    <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05.00_ep_tables.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05_ep_research_get_all_client_restaurants&amp;reservations.sql" />
     <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05.00_ep_manager_state.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05.00_ep_reservation.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05.00_ep_restaurant.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05.00_ep_table.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05.00_ep_tables.sql" />
+    <script-file value="$PROJECT_DIR$/backend/scripts/05_API_REST/05.00_ep_user.sql" />
     <script-mode>FILE</script-mode>
     <data-source id="ddd41155-14fe-4d46-803f-8e70c582de08" namespace="database/&quot;prbd-2526-a02&quot;/schema/&quot;public&quot;" />
     <method v="2" />

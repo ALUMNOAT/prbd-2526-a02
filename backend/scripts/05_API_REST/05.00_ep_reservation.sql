@@ -70,6 +70,9 @@ BEGIN
 
     UPDATE reservations r SET status = 'cancelled'
     WHERE r.id = cancel_reservation.id;
+    --RETURNING INTO (variable);
+
+    --RETURN (variable);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
