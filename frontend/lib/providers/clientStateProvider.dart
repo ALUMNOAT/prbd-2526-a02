@@ -48,6 +48,7 @@ class ClientStateNotifier extends AsyncNotifier<List<Reservation>> {
       await Reservation.annuler_reservation(id: id);
       ref.invalidateSelf();
     } catch (e) {
+      print("ERREUR DÉTAILLÉE : $e");
       state = AsyncError(
         "Cancelling the reservation $id failed.",
         StackTrace.current,

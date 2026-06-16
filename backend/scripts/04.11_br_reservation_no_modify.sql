@@ -1,6 +1,6 @@
 -- NETTOYAGE --
 DROP TRIGGER IF EXISTS trg_reservation_status_no_modify ON reservations;
-DROP FUNCTION IF EXISTS reservation_status_no_modify();
+DROP FUNCTION IF EXISTS reservation_status_no_modify() CASCADE;
 
 -- CREATION FONCTION --
 CREATE OR REPLACE FUNCTION reservation_status_no_modify()
