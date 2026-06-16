@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
-import '../models/restaurant.dart';
 import '../providers/currentUserProvider.dart';
 
 void main() async {
@@ -30,34 +29,14 @@ class _DetailRestaurantPageState extends ConsumerState<DetailRestaurantPage> {
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments;
-
-    // CORRECTION : Si 'args' est null (ex: après un F5 ou rafraîchissement),
-    // on affiche une page d'erreur propre au lieu de laisser l'appli planter.
-    if (args == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Erreur')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Données indisponibles."),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Retour"),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
+    ref.watch(currentUserProvider);
+    final securityNotifier = ref.read(currentUserProvider.notifier);
+    final userID = securityNotifier.userID;
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
 
-    // Une fois qu'on est sûr que 'args' n'est pas nul, on peut le caster
-    final res = args as Map<String, dynamic>;
+    // On récupère l'objet 'res' passé en argument de recherche_restaurants.dart (lors qu'on redirige)
+    final res = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
     return Scaffold(
       appBar: AppBar(
@@ -343,7 +322,7 @@ class _DetailRestaurantPageState extends ConsumerState<DetailRestaurantPage> {
                     context,
                     '/creation_reservation',
                     // Si on inclue pas argument lors du rechargement, il devient null = page plante
-                    arguments: {'restaurant': res},
+                    arguments: res,
                   ),
                   icon: const Icon(Icons.add),
                   label: const Text('Réserver'),
