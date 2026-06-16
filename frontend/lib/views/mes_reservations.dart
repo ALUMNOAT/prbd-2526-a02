@@ -4,7 +4,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/providers/currentUserProvider.dart';
 
-import '../providers/clientStateProvider.dart';
+import '../models/reservation.dart';
+import '../models/security.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -35,9 +36,7 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
     // On récupère le notifier pour accéder aux getters (userID, etc.)
     final securityNotifier = ref.read(currentUserProvider.notifier);
     final userName = securityNotifier.loggedUserName;
-
-    // On écoute le provider des réservations
-    final reservationsAsync = ref.watch(clientStateProvider);
+    final userID = securityNotifier.userID;
 
     final theme = Theme.of(context);
 
@@ -52,7 +51,7 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () => ref.invalidate(clientStateProvider),
+            onPressed: () => Navigator.pushReplacementNamed(context, '/homeClient'),
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -87,9 +86,14 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
           ),
         ),
       ),
+
+
+
+
       body: SafeArea(
         child: Column(
           children: [
+            //RESERVATION FILTER
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
               child: SegmentedButton<String>(
@@ -130,32 +134,44 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
               ),
             ),
             const SizedBox(height: 8),
+
+
             Expanded(
-              // MODIFIÉ : Utilisation de .when() sur le AsyncValue pour gérer les états (loading/error/data)
-              child: reservationsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Center(child: Text('Erreur: $err')),
-                data: (allReservations) {
-                  // Filtrage local en mémoire (pas d'appel API ici)
-                  final filteredReservations = allReservations.where((res) {
+              // Si non connecté, alors le rond tourne, sinon, on fetch
+              child: userID == null
+                ? const Center(child: CircularProgressIndicator())
+                : FutureBuilder<List<dynamic>>(
+                // On appelle ta fonction avec l'ID du notifier
+                future: Reservation.getClientReservations(userID),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Erreur: ${snapshot.error}'));
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final allReservations = snapshot.data ?? [];
+
+                  final reservations = allReservations.where((res) {
                     if (_currentFilter == 'all') return true;
-                    return res.status == _currentFilter; // Utilisation de l'objet typé Reservation
+                    return res['status'] == _currentFilter;
                   }).toList();
 
-                  if (filteredReservations.isEmpty) {
+                  if (reservations.isEmpty) {
                     return const Center(child: Text('Aucune réservation trouvée.'));
                   }
 
                   return ListView.builder(
                     padding: const EdgeInsets.all(16.0),
-                    itemCount: filteredReservations.length,
+                    itemCount: reservations.length,
                     itemBuilder: (context, index) {
-                      final res = filteredReservations[index];
+                      final res = reservations[index];
 
                       // On définit l'icône et la couleur selon le statut reçu de SQL
                       IconData statusIcon;
                       Color statusColor;
-                      switch (res.status) {
+                      switch (res['status']) {
                         case 'confirmed':
                           statusIcon = Icons.check_circle;
                           statusColor = Colors.green;
@@ -179,11 +195,11 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
                           onTap: () async {
                             // 1. Log des infos dans la console
                             print("--- Détails de la réservation cliquée ---");
-                            print("ID: ${res.id}");
-                            print("Titre (Resto): ${res.restoName}");
-                            print("Ville: ${res.city}");
-                            print("Date: ${res.datetime}");
-                            print("Status: ${res.status}");
+                            print("ID: ${res['id']}");
+                            print("Titre (Resto): ${res['resto_name']}");
+                            print("Adresse (Ville): ${res['city']}");
+                            print("Date: ${res['datetime']}");
+                            print("Status: ${res['status']}");
                             print("------------------------------------------");
 
                             await Navigator.pushNamed(
@@ -191,13 +207,18 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
                               '/details_reservation',
                               arguments: res, // On passe l'objet 'res' complet à la page suivante
                             );
+
+                            // si on retourne de detail_reservation, la view s'update
+                            if (mounted) {
+                              setState(() {});
+                            }
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Row(
                               children: [
                                 Tooltip(
-                                  message: res.status,
+                                  message: res['status'],
                                   child: Icon(statusIcon, size: 32, color: statusColor),
                                 ),
                                 const SizedBox(width: 16),
@@ -206,7 +227,7 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        res.restoName, // Donnée dynamique
+                                        res['resto_name'], // Donnée dynamique
                                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 4),
@@ -215,7 +236,7 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
                                           const Icon(Icons.location_on, size: 14),
                                           const SizedBox(width: 4),
                                           Text(
-                                            res.city, // Donnée dynamique
+                                            res['city'], // Donnée dynamique
                                             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                                           ),
                                         ],
@@ -226,14 +247,14 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
                                           const Icon(Icons.access_time, size: 16),
                                           const SizedBox(width: 4),
                                           Text(
-                                            DateFormat('EEE dd/MM/yyyy à HH:mm', 'fr_FR').format(res.datetime),
+                                            DateFormat('EEE dd/MM/yyyy à HH:mm', 'fr_FR').format(DateTime.parse(res['datetime'])),
                                             style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                                           ),
                                           const SizedBox(width: 12),
                                           const Icon(Icons.people, size: 16),
                                           const SizedBox(width: 4),
                                           Text(
-                                            '${res.numberOfGuests} convives', // Donnée dynamique
+                                            '${res['number_of_guests']} convives', // Donnée dynamique
                                             style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                                           ),
                                         ],
@@ -255,6 +276,8 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
           ],
         ),
       ),
+
+
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.pushNamed(context, '/recherche_restaurants'),
         icon: const Icon(Icons.add),

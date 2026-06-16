@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/core/tools/validating_text_editing_controller.dart';
-import 'package:prbd_2526_a02/models/restaurant.dart';
 import 'package:prbd_2526_a02/providers/clientStateProvider.dart';
 
 import '../models/reservation.dart';
@@ -38,8 +37,6 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
   int _numConvives = 2;
   bool _isInitialized = false;
 
-  Restaurant? _restaurant;
-
   @override
   void initState() {
     super.initState();
@@ -68,27 +65,14 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
     super.didChangeDependencies();
     if (!_isInitialized) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-
-      if (args != null && args.containsKey('restaurant')) {
-        final rawRestaurant = args['restaurant'];
-
-        // --- CORRECTION ICI ---
-        if (rawRestaurant is Map<String, dynamic>) {
-          // On transforme le Map brut en objet Restaurant grâce à la factory
-          _restaurant = Restaurant.fromJson(rawRestaurant);
-        } else if (rawRestaurant is Restaurant) {
-          // Si c'est déjà un objet, on l'assigne directement
-          _restaurant = rawRestaurant;
-        }
-        // ----------------------
-
-        if (args.containsKey('reservation')) {
-          final Reservation res = args['reservation'] as Reservation;
-          _selectedDate = res.datetime;
-          _selectedTime = TimeOfDay(hour: res.datetime.hour, minute: res.datetime.minute);
-          _numConvives = res.numberOfGuests;
-          _demandeController.text = res.specialRequests ?? '';
-        }
+      // On vérifie si on a bien reçu une réservation (mode édition)
+      if (args != null && args.containsKey('reservation')) {
+        final res = args['reservation'];
+        final DateTime dt = DateTime.parse(res['datetime']);
+        _selectedDate = dt;
+        _selectedTime = TimeOfDay(hour: dt.hour, minute: dt.minute);
+        _numConvives = res['number_of_guests'];
+        _demandeController.text = res['special_requests'] ?? '';
       }
       _isInitialized = true;
     }
@@ -96,15 +80,21 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(currentUserProvider);
+    final securityNotifier = ref.read(currentUserProvider.notifier);
+    final userID = securityNotifier.userID;
+
+    // 1. Récupération sécurisée des arguments
     final Object? routeArgs = ModalRoute.of(context)?.settings.arguments;
     final Map<String, dynamic> args = (routeArgs is Map<String, dynamic>) ? routeArgs : {};
 
-    if (_restaurant == null) return const Scaffold(body: Center(child: Text("Erreur : Restaurant non trouvé")));
+    final bool isEdit = args.containsKey('reservation');
 
-    final restaurant = _restaurant!;
-    final slots = _generateSlots(restaurant);
-    final isEdit = ModalRoute.of(context)?.settings.arguments != null &&
-        (ModalRoute.of(context)?.settings.arguments as Map).containsKey('reservation');
+    // 2. Détermination propre des données du restaurant
+    // Si c'est une édition, on prend args['restaurant'], sinon on prend args directement
+    final restaurantData = isEdit ? args['restaurant'] : args;
+
+    final slots = _generateSlots(restaurantData);
 
     final theme = Theme.of(context);
     final simulatedTime = DateTime(2024, 12, 4, 16, 0);
@@ -165,7 +155,7 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  restaurant.restoName ?? 'Restaurant inconnu',
+                  restaurantData['resto_name'] ?? 'Restaurant inconnu',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -403,11 +393,11 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
                 ElevatedButton.icon(
                   onPressed: (slots.isEmpty || _selectedTime == null)
                     ? null
-                    : () => _submitForm(context, isEdit),
+                    : () => _submitForm(context, args, isEdit),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  icon: Icon(isEdit ? Icons.save : Icons.add),
+                  icon: const Icon(Icons.add),
                   label: Text(isEdit ? 'Enregistrer les modifications' : 'Créer la réservation'),
                 ),
               ],
@@ -418,32 +408,41 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
     );
   }
 
-  List<TimeOfDay> _generateSlots(Restaurant restaurant) {
+  List<TimeOfDay> _generateSlots(Map<String, dynamic> res) {
     final List<TimeOfDay> allSlots = [];
-    final int dayOfWeek = _selectedDate.weekday;
 
-    // On filtre directement sur la liste d'objets Service
-    final services = restaurant.services.where((s) => s.dayOfWeek == dayOfWeek).toList();
+    // 1. Sécurité : vérifie si 'services' existe et n'est pas null
+    final dynamic servicesData = res['services'];
+    if (servicesData == null || servicesData is! List) {
+      return []; // Retourne une liste vide si aucune donnée de service n'est trouvée
+    }
+
+    final int dayOfWeek = _selectedDate.weekday;
+    final int slotDuration = res['slot_duration'] ?? 30;
+
+    // 2. Filtrage sécurisé
+    final List services = servicesData.where((s) => s['day_of_week'] == dayOfWeek).toList();
 
     for (var service in services) {
-      final startParts = service.startTime.split(':');
-      final endParts = service.endTime.split(':');
+      final startParts = service['start_time'].split(':');
+      final endParts = service['end_time'].split(':');
 
       DateTime current = DateTime(2000, 1, 1, int.parse(startParts[0]), int.parse(startParts[1]));
       final DateTime end = DateTime(2000, 1, 1, int.parse(endParts[0]), int.parse(endParts[1]));
 
       while (current.isBefore(end)) {
         allSlots.add(TimeOfDay(hour: current.hour, minute: current.minute));
-        current = current.add(Duration(minutes: restaurant.slotDuration));
+        current = current.add(Duration(minutes: slotDuration));
       }
     }
     return allSlots;
   }
 
-  Future<void> _submitForm(BuildContext context, bool isEdit) async {
+  Future<void> _submitForm(BuildContext context, Map<String, dynamic> args, bool isEdit) async {
     if (!await _validateForm() || _selectedTime == null) return;
 
     final notifier = ref.read(clientStateProvider.notifier);
+
     final fullDatetime = DateTime(
         _selectedDate.year,
         _selectedDate.month,
@@ -454,19 +453,19 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
 
     try {
       if (isEdit) {
-        final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-        final Reservation res = args!['reservation'] as Reservation;
+        // Appelle ta méthode de modification ici
         await notifier.editReservation(
-          id: res.id,
+          id: args['reservation']['id'],
           datetime: fullDatetime,
           nbConvives: _numConvives,
           specialRequests: _demandeController.text,
         );
       } else {
+        // Ta méthode de création actuelle
         final userID = ref.read(currentUserProvider.notifier).userID;
         await notifier.addReservation(
           clientId: int.parse(userID!),
-          restaurantId: _restaurant!.id, // Accès direct au champ typé
+          restaurantId: isEdit ? args['restaurant']['id'] : args['id'],
           datetime: fullDatetime,
           nbConvives: _numConvives,
           specialRequests: _demandeController.text,
@@ -491,4 +490,6 @@ class _ReservationFormPage extends ConsumerState<ReservationFormPage> {
 
   bool get _isFormValid =>
           _demandeController.isValid == true;
+
+
 }

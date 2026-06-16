@@ -164,10 +164,7 @@ grant execute on function is_email_available to anon;
 create or replace function is_name_available(name text) returns boolean as
 $$
 begin
-    return not exists(
-    select 1
-    from users
-    where LOWER(users.full_name) = lower(is_name_available.name));
+    return not exists(select 1 from users where users.full_name = is_name_available.name);
 end
 $$ language plpgsql security definer;
 

@@ -4,17 +4,10 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/config/app_config.dart';
 import 'package:prbd_2526_a02/providers/currentUserProvider.dart';
+import 'package:prbd_2526_a02/views/mes_reservations.dart';
 
 import '../models/reservation.dart';
-
-// MODIFICATION : Création d'un provider pour charger les données.
-// On utilise autoDispose pour que les données soient rechargées si on quitte et revient sur la page.
-final allRestaurantsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
-  final userID = ref.read(currentUserProvider.notifier).userID;
-  if (userID == null) return [];
-  // Appel direct à ta logique métier
-  return await Reservation.getAllClientRestaurantsReservations(userID);
-});
+import '../models/security.dart';
 
 void main() async {
   await initializeDateFormatting('fr_FR', null);
@@ -37,11 +30,14 @@ class SearchRestaurantsPage extends ConsumerStatefulWidget {
 }
 
 class _SearchRestaurantsPageState extends ConsumerState<SearchRestaurantsPage> {
-  String _searchQuery = '';
+  String _searchQuery = ' ';
 
   @override
   Widget build(BuildContext context) {
-    final restaurantsAsync = ref.watch(allRestaurantsProvider);
+    // watch triggers rebuild on change
+    ref.watch(currentUserProvider);
+    final securityNotifier = ref.read(currentUserProvider.notifier);
+    final userID = securityNotifier.userID;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -55,7 +51,10 @@ class _SearchRestaurantsPageState extends ConsumerState<SearchRestaurantsPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () => ref.invalidate(allRestaurantsProvider),
+            onPressed: () => Navigator.pushReplacementNamed(
+              context,
+              '/recherche_restaurants',
+            ),
           ),
         ],
         elevation: 2,
@@ -82,22 +81,49 @@ class _SearchRestaurantsPageState extends ConsumerState<SearchRestaurantsPage> {
               ),
             ),
             Expanded(
-              // MODIFICATION : Utilisation de .when() pour gérer loading/error/data proprement
-              child: restaurantsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, _) => Center(child: Text('Erreur: $err')),
-                data: (allRestaurants) {
-                  final filteredData = allRestaurants.where((res) {
-                    final name = (res['resto_name'] ?? '').toString().toLowerCase();
-                    final city = (res['city'] ?? '').toString().toLowerCase();
-                    final description = (res['description'] ?? '').toString().toLowerCase();
-                    return name.contains(_searchQuery) || city.contains(_searchQuery) || description.contains(_searchQuery);
-                  }).toList();
+              child: userID == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : FutureBuilder<List<dynamic>>(
+                      future: Reservation.getAllClientRestaurantsReservations(
+                        userID,
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Text('Erreur: ${snapshot.error}'),
+                          );
+                        }
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
 
-                  final bool isTooMany = filteredData.length >= AppConfig.maxRestaurantsSearch;
-                  final filteredRestaurants = isTooMany
-                      ? filteredData.take(AppConfig.maxRestaurantsSearch).toList()
-                      : filteredData;
+                        final allRestaurants = snapshot.data ?? [];
+
+                        final filteredData = allRestaurants.where((res) {
+                          final name = (res['resto_name'] ?? '').toString().toLowerCase();
+                          final city = (res['city'] ?? '').toString().toLowerCase();
+                          final description = (res['description'] ?? '').toString().toLowerCase();
+
+                          return name.contains(_searchQuery) ||
+                              city.contains(_searchQuery) ||
+                              description.contains(_searchQuery);
+                        }).toList();
+
+                        // On décide si on doit tronquer la liste ou pas
+                        final bool isTooMany = filteredData.length >= AppConfig.maxRestaurantsSearch;
+
+                        // Si trop de résultats, on ne prend que les X premiers (5 dans notre cas)
+                        final filteredRestaurants = isTooMany
+                            ? filteredData.take(AppConfig.maxRestaurantsSearch).toList()
+                            : filteredData;
+
+                        ///Comment comprendre
+                        ///allRestaurant = notre JSON qui contient tout
+                        ///filteredData = JSON qui contient les restaurants qu'on recherche dans le filtre, sinon contient tout allRestaurant
+                        ///filteredRestaurants = on affiche que les 5 premiers du filteredData, si filtre vide, 5 premiers du allRestaurant
 
                         // ON RETOURNE UNE COLUMN QUI CONTIENT TOUT
                         return Column(

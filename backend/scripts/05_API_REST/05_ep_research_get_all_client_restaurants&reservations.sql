@@ -1,5 +1,22 @@
 drop function if exists getclientallrestaurantreservationsandservices(int);
 
+
+CREATE TYPE table_info AS (
+                              id int,
+                              restaurant int,
+                              table_number int,
+                              capacity int
+                          );
+
+CREATE TYPE service_info AS (
+                                id int,
+                                restaurant int,
+                                day_of_week int,
+                                start_time time,
+                                end_time time
+                            );
+
+
 CREATE OR REPLACE FUNCTION getclientallrestaurantreservationsandservices(userid int)
     RETURNS TABLE (
                       id int,
@@ -49,18 +66,3 @@ END
 $$ STABLE SECURITY DEFINER LANGUAGE plpgsql;
 
 GRANT EXECUTE ON FUNCTION getclientallrestaurantreservationsandservices(int) TO authenticated;
-
-/* CREATE TYPE table_info AS (
-    id int,
-    restaurant int,
-    table_number int,
-    capacity int
-); */
-
-/* CREATE TYPE service_info AS (
-    id int,
-    restaurant int,
-    day_of_week int,
-    start_time time,
-    end_time time
-); */

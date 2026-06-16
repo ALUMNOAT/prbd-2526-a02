@@ -1,6 +1,65 @@
+import 'dart:convert';
+import 'dart:developer';
 import 'package:prbd_2526_a02/models/security.dart';
+import '../core/services/api_client.dart';
+import 'enums/role.dart';
+
 
 class User {
+  final int id;
+  final String email;
+  final String fullName;
+  final Role role;
+  final String? phone;
+
+  const User({
+    required this.id,
+    required this.email,
+    required this.fullName,
+    required this.role,
+    this.phone
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      email: json['email'],
+      fullName: json['full_name'],
+      // see Peter Gyarmati's answer :
+      // https://stackoverflow.com/questions/27673781/enum-from-string
+      role: Role.values.byName(json['role']),
+      phone: json['phone'],
+    );
+  }
+
+  static Future<User> getCurrentUser() async {
+    final response = await ApiClient.get('get_current_user');
+
+    if (response.statusCode == 200) {
+      return User.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to get current user');
+    }
+  }
+
+  static Future<User> getUserById(int id) async {
+    final response = await ApiClient.post(
+      'get_user_by_id',
+      body: json.encode({'id': id}),
+    );
+
+    if (response.statusCode == 200) {
+      return User.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('${response.statusCode}: Failed to get current user');
+    }
+  }
+
+
+  // ###########
+  // VALIDATIONS
+  // ###########
+
   static String? validateName(String? name) {
     final nameRegex = RegExp(
       r"^[A-Za-z]"
@@ -77,5 +136,4 @@ class User {
     }
     return null;
   }
-
 }
