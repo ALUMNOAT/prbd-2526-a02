@@ -30,6 +30,8 @@ class RestaurantManagementReservationPage extends ConsumerStatefulWidget {
 }
 
 class _RestaurantManagementReservationState extends ConsumerState<RestaurantManagementReservationPage> {
+  Set<String> selectedStatus = {'all'};
+
   @override
   Widget build(BuildContext context) {
     final restaurantId = ModalRoute.of(context)!.settings.arguments as int;
@@ -41,7 +43,7 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
     return managerState.when(
       error: (err, stack) => Text(err.toString()),
       loading: () => const CircularProgressIndicator(),
-      data: (manager) => Data(
+      data: (manager) => data(
         manager: manager!,
         restaurant: manager.getRestaurant(restaurantId),
         theme: theme,
@@ -50,27 +52,14 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
     );
   }
 
+  Scaffold data({
+    required ManagerState manager,
+    required MyRestaurant restaurant,
+    required ThemeData theme,
+    required DateTime simulatedTime,
+  }) {
+    final reservations = manager.getRestaurantReservations(restaurant.id, status: selectedStatus);
 
-}
-
-class Data extends StatelessWidget {
-  const Data({
-    super.key,
-    required this.manager,
-    required this.restaurant,
-    required this.theme,
-    required this.simulatedTime,
-  });
-
-  final ManagerState manager;
-  final MyRestaurant restaurant;
-  final ThemeData theme;
-  final DateTime simulatedTime;
-
-  @override
-  Widget build(BuildContext context) {
-    final reservations = manager.getRestaurantReservations(restaurant.id);
-    final String selectedFilterStatus = '';
     return Scaffold(
       //BAR
       appBar: AppBar(
@@ -100,7 +89,7 @@ class Data extends StatelessWidget {
               padding: const EdgeInsets.only(top: 2.0),
               child: Tooltip(
                 message:
-                    'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
                 child: Text(
                   DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
                       .format(simulatedTime),
@@ -126,36 +115,25 @@ class Data extends StatelessWidget {
               child: SegmentedButton<String>(
                 showSelectedIcon: false,
                 segments: [
+                  //ALL
                   ButtonSegment(
                     value: 'all',
                     icon: Icon(Icons.list, size: 24),
                     tooltip: 'Toutes',
                   ),
-    
-                  ButtonSegment(
-                    value: Status.pending.name,
-                    icon: Icon(Icons.pending, size: 24, color: Colors.orange),
-                    tooltip: 'En attente',
-                  ),
-                  ButtonSegment(
-                    value: Status.confirmed.name,
-                    icon: Icon(Icons.check_circle, size: 24, color: Colors.green),
-                    tooltip: 'Confirmées',
-                  ),
-                  ButtonSegment(
-                    value: Status.completed.name,
-                    icon: Icon(Icons.event_available, size: 24, color: Colors.blue),
-                    tooltip: 'Terminées',
-                  ),
-                  ButtonSegment(
-                    value: Status.cancelled.name,
-                    icon: Icon(Icons.cancel, size: 24, color: Colors.red),
-                    tooltip: 'Annulées',
+
+                  //STATUS
+                  for(Status status in Status.values)
+                    ButtonSegment(
+                    value: status.name,
+                    icon: Icon(status.iconData, size: 24, color: status.color),
+                    tooltip: '${status.frenchName}s',
                   ),
                 ],
-                selected: const {'all'},
-                onSelectionChanged: (selectedStatus) {
-
+                selected: selectedStatus,
+                onSelectionChanged: (newSelectedStatus) {
+                  selectedStatus = newSelectedStatus;
+                  setState(() {});
                 },
               ),
             ),
@@ -167,14 +145,14 @@ class Data extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 children: [
                   if(reservations.isEmpty)
-                  Text("No reservations")
-                else
-                  for (var reservation in reservations)
-                    ReservationCard(
-                      manager: manager,
-                      reservation: reservation,
-                      restaurant: restaurant,
-                    ),
+                    Text("No reservations")
+                  else
+                    for (var reservation in reservations)
+                      ReservationCard(
+                        manager: manager,
+                        reservation: reservation,
+                        restaurant: restaurant,
+                      ),
                 ],
               ),
             ),

@@ -148,9 +148,13 @@ class ManagerState {
     return services_;
   }
 
-  List<MyReservation> getRestaurantReservations(int restaurantId) {
+  List<MyReservation> getRestaurantReservations(int restaurantId, {Set<String>? status}) {
     final reservations_ = reservations.where(
             (reservation) => reservation.restaurantId == restaurantId
+                && ((status == null || status.contains('all'))
+                    ? true
+                    : status.contains(reservation.status.name)
+                )
     ).toList();
 
     reservations_.sort((a, b) => a.compareToTimewise(b));
