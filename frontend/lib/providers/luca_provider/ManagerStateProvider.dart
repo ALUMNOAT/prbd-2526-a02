@@ -2,11 +2,11 @@ import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prbd_2526_a02/models/MyReservation.dart';
-import 'package:prbd_2526_a02/models/enums/status.dart';
+import 'package:prbd_2526_a02/models/enums/Status.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/security_provider.dart';
 
 import '../../models/MyUser.dart';
-import '../../models/enums/role.dart';
+import '../../models/enums/Role.dart';
 import 'ManagerState.dart';
 
 final managerStateProvider = AsyncNotifierProvider<ManagerStateNotifier, ManagerState?>(

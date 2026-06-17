@@ -9,8 +9,8 @@ import 'package:prbd_2526_a02/models/MyUser.dart';
 import '../../models/MyReservation.dart';
 import '../../models/MyService.dart';
 import '../../models/MyTable.dart';
-import '../../models/enums/role.dart';
-import '../../models/enums/status.dart';
+import '../../models/enums/Role.dart';
+import '../../models/enums/Status.dart';
 
 
 class ManagerState {

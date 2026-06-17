@@ -5,7 +5,7 @@ import 'package:prbd_2526_a02/models/MyReservation.dart';
 import 'package:prbd_2526_a02/models/reservation.dart';
 import 'package:prbd_2526_a02/models/user.dart';
 
-import 'enums/status.dart';
+import 'enums/Status.dart';
 
 class Restaurant {
   final int id;

@@ -12,7 +12,7 @@ import '../../core/widgets/dialog_action.dart';
 import '../../core/widgets/dialog_box.dart';
 import '../../models/MyRestaurant.dart';
 import '../../models/MyUser.dart';
-import '../../models/enums/status.dart';
+import '../../models/enums/Status.dart';
 import '../../models/MyReservation.dart';
 
 void main() async {
@@ -264,7 +264,7 @@ class data extends StatelessWidget {
                           const Text('Statut: '),
                           Chip(
                             label:  Text(
-                              status.french_name,
+                              status.frenchName,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.white,

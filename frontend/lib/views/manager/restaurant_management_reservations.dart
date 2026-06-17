@@ -7,6 +7,7 @@ import 'package:prbd_2526_a02/providers/luca_provider/ManagerState.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerStateProvider.dart';
 
 import '../../models/MyRestaurant.dart';
+import '../../models/enums/Status.dart';
 import '../Widgets/reservation_card.dart';
 
 void main() async {
@@ -40,7 +41,7 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
     return managerState.when(
       error: (err, stack) => Text(err.toString()),
       loading: () => const CircularProgressIndicator(),
-      data: (manager) => data(
+      data: (manager) => Data(
         manager: manager!,
         restaurant: manager.getRestaurant(restaurantId),
         theme: theme,
@@ -48,10 +49,12 @@ class _RestaurantManagementReservationState extends ConsumerState<RestaurantMana
       ),
     );
   }
+
+
 }
 
-class data extends StatelessWidget {
-  const data({
+class Data extends StatelessWidget {
+  const Data({
     super.key,
     required this.manager,
     required this.restaurant,
@@ -67,6 +70,7 @@ class data extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reservations = manager.getRestaurantReservations(restaurant.id);
+    final String selectedFilterStatus = '';
     return Scaffold(
       //BAR
       appBar: AppBar(
@@ -121,7 +125,7 @@ class data extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
               child: SegmentedButton<String>(
                 showSelectedIcon: false,
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: 'all',
                     icon: Icon(Icons.list, size: 24),
@@ -129,28 +133,30 @@ class data extends StatelessWidget {
                   ),
     
                   ButtonSegment(
-                    value: 'pending',
+                    value: Status.pending.name,
                     icon: Icon(Icons.pending, size: 24, color: Colors.orange),
                     tooltip: 'En attente',
                   ),
                   ButtonSegment(
-                    value: 'confirmed',
+                    value: Status.confirmed.name,
                     icon: Icon(Icons.check_circle, size: 24, color: Colors.green),
                     tooltip: 'Confirmées',
                   ),
                   ButtonSegment(
-                    value: 'completed',
+                    value: Status.completed.name,
                     icon: Icon(Icons.event_available, size: 24, color: Colors.blue),
                     tooltip: 'Terminées',
                   ),
                   ButtonSegment(
-                    value: 'cancelled',
+                    value: Status.cancelled.name,
                     icon: Icon(Icons.cancel, size: 24, color: Colors.red),
                     tooltip: 'Annulées',
                   ),
                 ],
                 selected: const {'all'},
-                onSelectionChanged: (_) {},
+                onSelectionChanged: (selectedStatus) {
+
+                },
               ),
             ),
             const SizedBox(height: 8),

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 import 'package:prbd_2526_a02/models/MyTable.dart';
-import 'package:prbd_2526_a02/models/enums/status.dart';
+import 'package:prbd_2526_a02/models/enums/Status.dart';
 import '../core/services/api_client.dart';
 import 'MyUser.dart';
 
