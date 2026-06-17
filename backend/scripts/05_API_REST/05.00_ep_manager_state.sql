@@ -28,7 +28,7 @@ BEGIN
         WHERE rstm.manager = manager_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-GRANT EXECUTE ON FUNCTION get_manager_restaurants TO authenticated;
+GRANT EXECUTE ON FUNCTION get_manager_restaurants TO manager;
 
 
 
@@ -52,7 +52,7 @@ BEGIN
         WHERE rstm.manager = manager_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-GRANT EXECUTE ON FUNCTION get_manager_services TO authenticated;
+GRANT EXECUTE ON FUNCTION get_manager_services TO manager;
 
 
 
@@ -76,7 +76,7 @@ BEGIN
         WHERE rstm.manager = manager_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-GRANT EXECUTE ON FUNCTION get_manager_reservations TO authenticated;
+GRANT EXECUTE ON FUNCTION get_manager_reservations TO manager;
 
 
 
@@ -102,7 +102,7 @@ BEGIN
         WHERE rstm.manager = manager_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-GRANT EXECUTE ON FUNCTION get_manager_clients TO authenticated;
+GRANT EXECUTE ON FUNCTION get_manager_clients TO manager;
 
 
 
@@ -127,7 +127,7 @@ BEGIN
         WHERE rstm.manager = manager_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-GRANT EXECUTE ON FUNCTION get_manager_tables TO authenticated;
+GRANT EXECUTE ON FUNCTION get_manager_tables TO manager;
 
 
 
@@ -154,4 +154,4 @@ BEGIN
         WHERE rstm.manager = manager_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-GRANT EXECUTE ON FUNCTION get_manager_reservation_tables TO authenticated;
+GRANT EXECUTE ON FUNCTION get_manager_reservation_tables TO manager;

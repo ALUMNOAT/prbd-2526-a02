@@ -54,7 +54,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION complete_reservation TO authenticated;
+GRANT EXECUTE ON FUNCTION complete_reservation TO manager;
 
 
 
@@ -65,6 +65,7 @@ CREATE OR REPLACE FUNCTION cancel_reservation(id INT)
     RETURNS void AS
 $$
 BEGIN
+    --TODO: vérifier que ce soit le manager qui cancel !!!
     -- is a user currently connected ?
     PERFORM auth.check_logged();
 
@@ -76,4 +77,4 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION cancel_reservation TO authenticated;
+GRANT EXECUTE ON FUNCTION cancel_reservation TO manager;

@@ -64,6 +64,7 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState?> {
 
       reservation = reservation.copyWith(status: Status.cancelled);
       manager.reservations.add(reservation);
+
       state = AsyncData(manager);
     } catch (e) {
       state = AsyncValue.error(

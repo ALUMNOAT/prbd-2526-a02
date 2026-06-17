@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerState.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerStateProvider.dart';
-import 'package:prbd_2526_a02/providers/luca_provider/luca_reservation_provider.dart';
 
 import '../../models/MyRestaurant.dart';
 import '../Widgets/reservation_card.dart';
