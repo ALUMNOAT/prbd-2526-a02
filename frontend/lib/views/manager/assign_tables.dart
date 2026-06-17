@@ -137,45 +137,7 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
           if(tableCount > 0)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Card(
-              color: isEnoughTable
-                  ? Colors.green.shade50
-                  : Colors.red.shade50,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      color: Colors.green[700],
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Capacité totale: $tableCount places',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '✓ Capacité suffisante pour 4 convives',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.green.shade700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            child: totalCapacityCard(isEnoughTable, reservation),
           ),
 
           //TITLE
@@ -224,6 +186,93 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
       ),
     ),
   );
+  }
+
+  Card totalCapacityCard(bool isEnoughTable, MyReservation reservation) {
+    Card card;
+    if(isEnoughTable) {
+      card = Card(
+        color: Colors.green.shade50,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Colors.green[700],
+              ),
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    //TITLE
+                    Text(
+                      'Capacité totale: $tableCount places',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+
+                    //MESSAGE
+                    Text(
+                      '✓ Capacité suffisante pour ${reservation.numberOfGuests} convives',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.green.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      card = Card(
+        color: Colors.orange.shade50,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Icon(
+                Icons.warning,
+                color: Colors.yellow[700] ,
+              ),
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Capacité totale: $tableCount places',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text('⚠️ Capacité insuffisante pour ${reservation.numberOfGuests} convives',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.yellow.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return card;
   }
 
   Card tableCard(MyTable table) {
