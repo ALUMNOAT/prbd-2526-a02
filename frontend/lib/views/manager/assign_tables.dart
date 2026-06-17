@@ -28,6 +28,7 @@ class AssignTablesPage extends ConsumerStatefulWidget {
 
 class _AssignTablesState extends ConsumerState<AssignTablesPage> {
   int tableCount = 0;
+
   final Set<MyTable> selectedTable = {};
   @override
   Widget build(BuildContext context) {
@@ -59,6 +60,7 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
     final tables = manager.getRestaurantTables(reservation.restaurantId);
     final services = manager.getReservationServices(reservation);
     final occupiedTables = manager.getOccupiedTablesForReservation(reservation);
+    final isEnoughTable = tableCount >= reservation.numberOfGuests;
 
     return Scaffold(
     appBar: AppBar(
@@ -123,8 +125,8 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text('4 convives'),
-                    const Text('05/12/2024 à 20:00'),
+                    Text('${reservation.numberOfGuests} convives'),
+                    Text(DateFormat('EEE dd/MM/yyyy à HH:mm', 'fr_FR').format(reservation.datetime),),
                   ],
                 ),
               ),
@@ -135,7 +137,9 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Card(
-              color: Colors.green.shade50,
+              color: isEnoughTable
+                  ? Colors.green.shade50
+                  : Colors.red.shade50,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
