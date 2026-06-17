@@ -134,6 +134,7 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
           ),
 
           //TOTAL CURRENT CAPACITY
+          if(tableCount > 0)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Card(
@@ -211,7 +212,7 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: isEnoughTable ? () {} : null,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
