@@ -12,7 +12,7 @@ import '../../core/widgets/dialog_action.dart';
 import '../../core/widgets/dialog_box.dart';
 import '../../models/MyRestaurant.dart';
 import '../../models/MyUser.dart';
-import '../../models/enums/status.dart';
+import '../../models/enums/Status.dart';
 import '../../models/MyReservation.dart';
 
 void main() async {
@@ -48,7 +48,7 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
     return managerState.when(
       error: (err, stack) => Text(err.toString()),
       loading: () => const CircularProgressIndicator(),
-      data: (manager) => data(
+      data: (manager) => Data(
         theme: theme,
         simulatedTime: simulatedTime,
         manager: manager!,
@@ -59,8 +59,8 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
   }
 }
 
-class data extends StatelessWidget {
-  data({
+class Data extends StatelessWidget {
+  Data({
     super.key,
     required this.theme,
     required this.simulatedTime,
@@ -264,7 +264,7 @@ class data extends StatelessWidget {
                           const Text('Statut: '),
                           Chip(
                             label:  Text(
-                              status.french_name,
+                              status.frenchName,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.white,
@@ -457,6 +457,4 @@ class data extends StatelessWidget {
       ).show(context);
     }
   }
-
-
 }

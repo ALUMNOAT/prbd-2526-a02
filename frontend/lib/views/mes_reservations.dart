@@ -41,6 +41,7 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      //BAR
       appBar: AppBar(
         title: const Text('Mes réservations'),
         actions: [
@@ -87,9 +88,7 @@ class _HomeClientPageState extends ConsumerState<HomeClientPage> {
         ),
       ),
 
-
-
-
+      //BODY
       body: SafeArea(
         child: Column(
           children: [

@@ -9,8 +9,8 @@ import 'package:prbd_2526_a02/models/MyUser.dart';
 import '../../models/MyReservation.dart';
 import '../../models/MyService.dart';
 import '../../models/MyTable.dart';
-import '../../models/enums/role.dart';
-import '../../models/enums/status.dart';
+import '../../models/enums/Role.dart';
+import '../../models/enums/Status.dart';
 
 
 class ManagerState {
@@ -148,9 +148,13 @@ class ManagerState {
     return services_;
   }
 
-  List<MyReservation> getRestaurantReservations(int restaurantId) {
+  List<MyReservation> getRestaurantReservations(int restaurantId, {Set<String>? status}) {
     final reservations_ = reservations.where(
             (reservation) => reservation.restaurantId == restaurantId
+                && ((status == null || status.contains('all'))
+                    ? true
+                    : status.contains(reservation.status.name)
+                )
     ).toList();
 
     reservations_.sort((a, b) => a.compareToTimewise(b));

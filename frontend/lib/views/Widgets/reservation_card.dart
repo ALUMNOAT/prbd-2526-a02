@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/models/MyRestaurant.dart';
-import 'package:prbd_2526_a02/models/enums/status.dart';
+import 'package:prbd_2526_a02/models/enums/Status.dart';
 import 'package:prbd_2526_a02/models/MyReservation.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerState.dart';
 

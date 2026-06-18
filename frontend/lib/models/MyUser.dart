@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:prbd_2526_a02/core/services/api_client.dart';
-import 'package:prbd_2526_a02/models/enums/role.dart';
+import 'package:prbd_2526_a02/models/enums/Role.dart';
 
 class MyUser {
   // ATTRIBUTES
