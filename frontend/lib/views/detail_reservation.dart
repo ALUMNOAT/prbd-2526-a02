@@ -4,10 +4,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/core/widgets/dialog_action.dart';
 import 'package:prbd_2526_a02/models/reservation.dart';
-import 'package:prbd_2526_a02/views/mes_reservations.dart';
 
 import '../core/widgets/dialog_box.dart';
-import '../models/security.dart';
 import '../providers/clientStateProvider.dart';
 import '../providers/currentUserProvider.dart';
 
@@ -37,12 +35,12 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
     ref.watch(currentUserProvider);
 
     // On récupère l'objet 'res' passé en argument de mes_reservations.dart (lors qu'on redirige)
-    final res = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final res = ModalRoute.of(context)!.settings.arguments as Reservation;
 
     // Pour gérer les couleurs du status
     Color statusColor;
     String statusName;
-    switch (res['status']) {
+    switch (res.status) {
       case 'confirmed':
         statusColor = Colors.green;
         statusName = 'Confirmée';
@@ -78,12 +76,19 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
-            onPressed: () => Navigator.pushReplacementNamed(
+            onPressed: () {
+              // 1. On invalide le provider pour forcer un nouvel appel API au prochain watch
+              ref.invalidate(clientStateProvider);
+
+              // 2. On rafraîchit la page actuelle avec les nouvelles données
+              // (Note : Comme le provider sera invalidé, dès que la page
+              // se reconstruit, elle ira chercher la donnée fraîche).
+              Navigator.pushReplacementNamed(
                 context,
                 '/details_reservation',
-                // Si on inclue pas argument lors du rechargement, il devient null = page plante
                 arguments: res,
-            ),
+              );
+            },
           ),
         ],
         elevation: 2,
@@ -111,8 +116,6 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
           ),
         ),
       ),
-
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -131,7 +134,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              res['resto_name'],
+                              res.restoName,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -151,7 +154,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              res['resto_address'],
+                              res.restoAddress,
                               style: TextStyle(color: Colors.grey[600]),
                             ),
                           ),
@@ -163,7 +166,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
                           const Icon(Icons.phone, size: 16, color: Colors.grey),
                           const SizedBox(width: 4),
                           Text(
-                            res['phone'],
+                            res.phone ?? 'Non spécifié',
                             style: TextStyle(color: Colors.grey[600]),
                           ),
                         ],
@@ -176,7 +179,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
                           const Icon(Icons.calendar_today, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            'Date : ${DateFormat('EEE dd/MM/yyyy', 'fr_FR').format(DateTime.parse(res['datetime']))}',
+                            'Date : ${DateFormat('EEE dd/MM/yyyy', 'fr_FR').format(res.datetime)}',
                           ),
                         ],
                       ),
@@ -186,7 +189,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
                           const Icon(Icons.access_time, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            'Heure : ${DateFormat('HH:mm', 'fr_FR').format(DateTime.parse(res['datetime']))}',
+                            'Heure : ${DateFormat('HH:mm', 'fr_FR').format(res.datetime)}',
                           ),
                         ],
                       ),
@@ -196,7 +199,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
                           const Icon(Icons.people, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                              'Nombre de convives: ${res['number_of_guests']}',
+                            'Nombre de convives: ${res.numberOfGuests}',
                           ),
                         ],
                       ),
@@ -206,7 +209,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
                           const Icon(Icons.info, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                              'Statut: ',
+                            'Statut: ',
                           ),
                           Chip(
                             label: Text(
@@ -219,10 +222,10 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
                         ],
                       ),
 
-                      if (res['special_requests'] != null) ...[
-                      const SizedBox(height: 16),
-                      const Divider(),
-                      const SizedBox(height: 8),
+                      if (res.specialRequests != null) ...[
+                        const SizedBox(height: 16),
+                        const Divider(),
+                        const SizedBox(height: 8),
                         const Text(
                           'Demandes spéciales',
                           style: TextStyle(
@@ -232,7 +235,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          res['special_requests'],
+                          res.specialRequests ?? ' ',
                           style: TextStyle(color: Colors.grey[700]),
                         ),
                       ],
@@ -244,69 +247,69 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
               const SizedBox(height: 24),
 
               // On n'affiche la ligne de boutons QUE si le statut n'est pas "completed" ni "cancelled"
-              if (res['status'] != 'completed' && res['status'] != 'cancelled')
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      // Si confirmé, onPressed est null (bouton grisé), sinon il est actif
-                      onPressed: res['status'] == 'confirmed'
-                          ? null
-                          : () async {
-                        // Affiche un indicateur de chargement
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (_) => const Center(child: CircularProgressIndicator()),
-                        );
-
-                        try {
-                          // 1. Récupérer tous les restos pour trouver celui de la réservation
-                          final userID = ref.read(currentUserProvider.notifier).userID;
-                          final allRestos = await Reservation.getAllClientRestaurantsReservations(userID!);
-
-                          // 2. Trouver le restaurant correspondant à cette réservation
-                          final currentResto = allRestos.firstWhere(
-                                (r) => r['resto_name'] == res['resto_name'],
-                            orElse: () => throw Exception("Restaurant non trouvé"),
+              if (res.status != 'completed' && res.status != 'cancelled')
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        // Si confirmé, onPressed est null (bouton grisé), sinon il est actif
+                        onPressed: res.status == 'confirmed'
+                            ? null
+                            : () async {
+                          // Affiche un indicateur de chargement
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) => const Center(child: CircularProgressIndicator()),
                           );
 
-                          // 3. Fermer le chargement
-                          if (!context.mounted) return;
-                          Navigator.pop(context);
+                          try {
+                            // 1. Récupérer tous les restos pour trouver celui de la réservation
+                            final userID = ref.read(currentUserProvider.notifier).userID;
+                            final allRestos = await Reservation.getAllClientRestaurantsReservations(userID!);
 
-                          // 4. Naviguer vers le formulaire de création/modification
-                          Navigator.pushNamed(
-                            context,
-                            '/creation_reservation',
-                            arguments: {
-                              'restaurant': currentResto,
-                              'reservation': res, // <--- C'est cet argument que tu vas récupérer dans ReservationFormPage
-                            },
-                          );
-                        } catch (e) {
-                          if (!context.mounted) return;
-                          Navigator.pop(context); // Fermer le chargement
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Impossible de charger le formulaire.')),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Modifier'),
+                            // 2. Trouver le restaurant correspondant à cette réservation
+                            final currentResto = allRestos.firstWhere(
+                                  (r) => r['resto_name'] == res.restoName,
+                              orElse: () => throw Exception("Restaurant non trouvé"),
+                            );
+
+                            // 3. Fermer le chargement
+                            if (!context.mounted) return;
+                            Navigator.pop(context);
+
+                            // 4. Naviguer vers le formulaire de création/modification
+                            Navigator.pushNamed(
+                              context,
+                              '/creation_reservation',
+                              arguments: {
+                                'restaurant': currentResto,
+                                'reservation': res, // <--- C'est cet argument que tu vas récupérer dans ReservationFormPage
+                              },
+                            );
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            Navigator.pop(context); // Fermer le chargement
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Impossible de charger le formulaire.')),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.edit),
+                        label: const Text('Modifier'),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      // Toujours actif ici car on est déjà dans le "if" qui exclut annulé/terminé
-                      onPressed: () => _cancel_reservation(context, res),
-                      icon: const Icon(Icons.cancel),
-                      label: const Text('Annuler'),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        // Toujours actif ici car on est déjà dans le "if" qui exclut annulé/terminé
+                        onPressed: () => _cancel_reservation(context, res),
+                        icon: const Icon(Icons.cancel),
+                        label: const Text('Annuler'),
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
         ),
@@ -314,7 +317,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
     );
   }
 
-  void _cancel_reservation(BuildContext context, Map<String, dynamic> res) async {
+  void _cancel_reservation(BuildContext context, Reservation res) async {
     final confirm = await DialogBox(
       title: 'Annuler la réservation',
       message: 'Êtes-vous sûr de vouloir annuler cette réservation ? ',
@@ -327,14 +330,7 @@ class _ReservationDetailsPage extends ConsumerState<ReservationDetailsPage> {
     if (confirm != 'Oui') return;
 
     try {
-      /// If res['id'] is already an int inside the map,
-      /// int.parse() will crash because it expects a String. To be 100% safe, we use:
-      /// int.parse(res['id'].toString())
-      /// This works whether the source is a String or an Int.
-
-      // On effectue l'action métier
-      final int id = int.parse(res['id'].toString());
-      await ref.read(clientStateProvider.notifier).annuler_reservation(id: id);
+      await ref.read(clientStateProvider.notifier).annuler_reservation(id: res.id);
 
       // On vérifie si on est toujours sur la page avant de naviguer
       if (!context.mounted) return;

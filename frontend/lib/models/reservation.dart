@@ -6,6 +6,10 @@ class Reservation {
   final int id;
   final int client;
   final int restaurant;
+  final String restoName;
+  final String restoAddress;
+  final String city;
+  final String? phone;
   final DateTime datetime;
   final int numberOfGuests;
   final String status;
@@ -15,6 +19,10 @@ class Reservation {
     required this.id,
     required this.client,
     required this.restaurant,
+    required this.restoName,
+    required this.restoAddress,
+    required this.city,
+    this.phone,
     required this.datetime,
     required this.numberOfGuests,
     required this.status,
@@ -29,6 +37,10 @@ class Reservation {
       id: (json['id'] as num?)?.toInt() ?? 0,
       client: (json['client'] as num?)?.toInt() ?? 0,
       restaurant: (json['restaurant'] as num?)?.toInt() ?? 0,
+      restoName: json['resto_name']?.toString() ?? 'Inconnu',
+      restoAddress: json['resto_address']?.toString() ?? '',
+      city: json['city']?.toString() ?? '',
+      phone: json['phone']?.toString(),
       datetime: (json['datetime'] != null)
           ? DateTime.tryParse(json['datetime'].toString()) ?? DateTime.now()
           : DateTime.now(),

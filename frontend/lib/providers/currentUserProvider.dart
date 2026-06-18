@@ -5,7 +5,7 @@ import '../core/tools/params.dart';
 import '../models/security.dart';
 
 final currentUserProvider = AsyncNotifierProvider<CurrentUserNotifier, String?>(
-  () => CurrentUserNotifier(),
+      () => CurrentUserNotifier(),
 );
 
 class CurrentUserNotifier extends AsyncNotifier<String?> {

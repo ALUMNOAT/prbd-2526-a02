@@ -4,7 +4,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/core/widgets/dialog_action.dart';
 import 'package:prbd_2526_a02/models/security.dart';
-import 'package:prbd_2526_a02/providers/luca_provider/security_provider.dart';
 
 import '../core/tools/validating_text_editing_controller.dart';
 import '../core/widgets/dialog_box.dart';
@@ -47,7 +46,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
             onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-            ),
+          ),
         ],
         elevation: 2,
         backgroundColor: theme.colorScheme.primary,
@@ -202,7 +201,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       ),
                     ],
-                  ),                  // CLIENTS
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -232,7 +231,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       ),
                     ],
-                  ),                  // MANAGERS
+                  ),
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
@@ -279,8 +278,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   void _login(BuildContext context, String mail, String password) async {
     await ref.read(currentUserProvider.notifier).login(mail, password);
-    await ref.read(security_provider.notifier).login(mail, password);
-
     var securityState = ref.read(currentUserProvider);
 
     if (!context.mounted) return;
@@ -312,7 +309,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       title: 'Réinitialiser la base de données',
       message:
       'Êtes-vous sûr de vouloir réinitialiser la base de données ? '
-      'Cette action supprimera toutes les données et les restaurera aux valeurs par défaut. '
+          'Cette action supprimera toutes les données et les restaurera aux valeurs par défaut. '
       ,
       actions: [
         DialogAction(label: 'Annuler',),
@@ -331,10 +328,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       // 2. Show success and stay on login (or refresh)
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Base de données réinitialisée avec succès'),
-            backgroundColor: Colors.green,
-            //behavior pour look plus moderne (prend pas toute la largeur)
-            //behavior: SnackBarBehavior.floating,
+          content: Text('Base de données réinitialisée avec succès'),
+          backgroundColor: Colors.green,
+          //behavior pour look plus moderne (prend pas toute la largeur)
+          //behavior: SnackBarBehavior.floating,
         ),
       );
     } catch (e) {

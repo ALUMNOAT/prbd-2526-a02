@@ -226,7 +226,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   }
 
   bool get _isFormValid =>
-          _nameController.isValid == true &&
+      _nameController.isValid == true &&
           _emailController.isValid == true &&
           _passwordController.isValid == true &&
           _confirmPasswordController.isValid == true &&
