@@ -127,6 +127,23 @@ class MyReservation {
     return copyWith(status: Status.cancelled);
   }
 
+  Future<MyReservation> confirmReservation(Set<MyTable> tables) async {
+    final response = await ApiClient.post(
+      'confirm_reservation', // Correspond au nom de la fonction SQL créée
+      body: json.encode({
+        'id': id,
+        'tables_id': [for(MyTable table in tables) table.id],
+      }),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to update reservation: ${response.body}');
+    }
+
+    return copyWith(status: Status.confirmed);
+  }
+
+
   // STATIC FUNCTIONS
   static Future<List<MyReservation>> getManagerReservations(int managerId) async {
     final response = await ApiClient.post(

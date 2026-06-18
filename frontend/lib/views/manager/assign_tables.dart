@@ -7,6 +7,9 @@ import 'package:prbd_2526_a02/models/MyTable.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerState.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerStateProvider.dart';
 
+import '../../core/widgets/dialog_action.dart';
+import '../../core/widgets/dialog_box.dart';
+
 void main() async {
   await initializeDateFormatting('fr_FR', null);
   runApp(
@@ -28,8 +31,8 @@ class AssignTablesPage extends ConsumerStatefulWidget {
 
 class _AssignTablesState extends ConsumerState<AssignTablesPage> {
   int tableCount = 0;
-
   final Set<MyTable> selectedTable = {};
+
   @override
   Widget build(BuildContext context) {
     final managerState = ref.watch(managerStateProvider);
@@ -52,15 +55,17 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
 
   Scaffold data(
       BuildContext context,
-      ThemeData theme, DateTime simulatedTime,
+      ThemeData theme,
+      DateTime simulatedTime,
       MyReservation reservation,
-      ManagerState manager)
-  {
+      ManagerState manager
+      ) {
     final restaurant = manager.getRestaurant(reservation.restaurantId);
     final tables = manager.getRestaurantTables(reservation.restaurantId);
     final services = manager.getReservationServices(reservation);
     final occupiedTables = manager.getOccupiedTablesForReservation(reservation);
     final isEnoughTable = tableCount >= reservation.numberOfGuests;
+    final managerNotifier = ref.read(managerStateProvider.notifier);
 
     return Scaffold(
     appBar: AppBar(
@@ -174,7 +179,9 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: isEnoughTable ? () {} : null,
+                onPressed: isEnoughTable ? () {
+                  confirmReservation(context, managerNotifier, reservation, selectedTable);
+                } : null,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
@@ -332,4 +339,183 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
       tableCount += table.capacity;
     }
   }
+
+  void confirmReservation(
+      BuildContext context,
+      ManagerStateNotifier managerNotifier,
+      MyReservation reservation,
+      Set<MyTable> tables,
+      ) async {
+    try {
+      managerNotifier.confirmReservation(reservation, tables);
+
+      // On vérifie si on est toujours sur la page avant de naviguer
+      if (!context.mounted) return;
+
+      // On ferme la page
+      //Navigator.pop(context);
+
+    } catch (e) {
+      if (!context.mounted) return;
+      DialogBox(
+        title: 'Impossible de compléter la réservation',
+        message: 'Vérifiez votre connection avec la base de données',
+        actions: [
+          DialogAction(label: 'OK'),
+        ],
+      ).show(context);
+    }
+  }
 }
+
+/*class Data extends StatelessWidget {
+  final ThemeData theme;
+  final DateTime simulatedTime;
+  final MyReservation reservation;
+  final ManagerState manager;
+  final ManagerStateNotifier managerNotifier;
+
+  int tableCount = 0;
+  final Set<MyTable> selectedTable = {};
+
+  Data({
+    super.key,
+    required this.theme,
+    required this.simulatedTime,
+    required this.manager,
+    required this.reservation,
+    required this.managerNotifier,
+  });
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {Navigator.pop(context);},
+        ),
+        title: const Text('Assigner des tables'),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Rafraîchir les données',
+            onPressed: () {},
+          ),
+        ],
+        elevation: 2,
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        surfaceTintColor: Colors.transparent,
+        flexibleSpace: Align(
+          alignment: Alignment.topCenter,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 2.0),
+              child: Tooltip(
+                message:
+                'Date/heure simulée utilisée pour les tests.\nCliquez pour modifier.',
+                child: Text(
+                  DateFormat('EEEE dd/MM/yyyy HH:mm', 'fr_FR')
+                      .format(simulatedTime),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey[400],
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+
+
+      body: SafeArea(
+        child: Column(
+          children: [
+            //RESERVATION INFO
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Réservation',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text('${reservation.numberOfGuests} convives'),
+                      Text(DateFormat('EEE dd/MM/yyyy à HH:mm', 'fr_FR').format(reservation.datetime),),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            //TOTAL CURRENT CAPACITY
+            if(tableCount > 0)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: totalCapacityCard(isEnoughTable, reservation),
+              ),
+
+            //TITLE
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Sélectionnez les tables disponibles',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+
+            //TABLES LIST
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(16.0),
+                children: [
+                  for(var table in tables)
+                    occupiedTables.contains(table)
+                        ? occupiedTableCard(table)
+                        : tableCard(table),
+                ],
+              ),
+            ),
+
+            //CONFIRM RESERVATION
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isEnoughTable ? () {} : null,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: const Text('Confirmer la réservation'),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+ */

@@ -48,7 +48,7 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
     return managerState.when(
       error: (err, stack) => Text(err.toString()),
       loading: () => const CircularProgressIndicator(),
-      data: (manager) => data(
+      data: (manager) => Data(
         theme: theme,
         simulatedTime: simulatedTime,
         manager: manager!,
@@ -59,8 +59,8 @@ class _ReservationDetailsManagerState extends ConsumerState<ReservationDetailsMa
   }
 }
 
-class data extends StatelessWidget {
-  data({
+class Data extends StatelessWidget {
+  Data({
     super.key,
     required this.theme,
     required this.simulatedTime,
@@ -457,6 +457,4 @@ class data extends StatelessWidget {
       ).show(context);
     }
   }
-
-
 }

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:prbd_2526_a02/models/MyReservation.dart';
+import 'package:prbd_2526_a02/models/MyTable.dart';
 import 'package:prbd_2526_a02/models/enums/Status.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/security_provider.dart';
 
@@ -74,4 +75,31 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState?> {
     }
   }
 
+  Future<MyReservation?> confirmReservation(
+      MyReservation reservation,
+      Set<MyTable> tables
+      ) async {
+    state = const AsyncLoading();
+    final manager = state.value!;
+
+    try {
+      final res_ = await reservation.confirmReservation(tables);
+
+      manager.reservations.remove(reservation);
+      reservation = reservation.copyWith(status: Status.confirmed);
+      manager.reservations.add(reservation);
+
+      manager.reservationTables[reservation.id]!.addAll([
+        for(MyTable table in tables)
+          table.id
+      ]);
+
+      state = AsyncData(manager);
+    } catch (e) {
+      state = AsyncValue.error(
+        "Something went wrong!\nPlease try again later.",
+        StackTrace.current,
+      );
+    }
+  }
 }
