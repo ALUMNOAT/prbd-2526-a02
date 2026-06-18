@@ -347,13 +347,13 @@ class _AssignTablesState extends ConsumerState<AssignTablesPage> {
       Set<MyTable> tables,
       ) async {
     try {
-      managerNotifier.confirmReservation(reservation, tables);
+      await managerNotifier.confirmReservation(reservation, tables);
 
       // On vérifie si on est toujours sur la page avant de naviguer
       if (!context.mounted) return;
 
       // On ferme la page
-      //Navigator.pop(context);
+      Navigator.pop(context);
 
     } catch (e) {
       if (!context.mounted) return;

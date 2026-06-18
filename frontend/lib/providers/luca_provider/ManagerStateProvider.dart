@@ -89,12 +89,14 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState?> {
       reservation = reservation.copyWith(status: Status.confirmed);
       manager.reservations.add(reservation);
 
-      manager.reservationTables[reservation.id]!.addAll([
-        for(MyTable table in tables)
-          table.id
+      manager.reservationTables[reservation.id] = List<int>.from([
+          for(MyTable table in tables)
+            table.id
       ]);
 
       state = AsyncData(manager);
+
+      return res_;
     } catch (e) {
       state = AsyncValue.error(
         "Something went wrong!\nPlease try again later.",

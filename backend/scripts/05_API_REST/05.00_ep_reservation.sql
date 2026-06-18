@@ -87,7 +87,7 @@ GRANT EXECUTE ON FUNCTION cancel_reservation TO manager;
 --https://stackoverflow.com/questions/20815028/how-do-i-insert-multiple-values-into-a-postgresql-table-at-once#20820950
 --https://stackoverflow.com/questions/12956069/postgres-function-with-list-argument-and-in-clause
 DROP FUNCTION IF EXISTS confirm_reservation(INT, INT[]);
-CREATE OR REPLACE FUNCTION confirm_reservation(id INT, tables_id INT[])
+CREATE OR REPLACE FUNCTION confirm_reservation(reservation_id INT, tables_id INT[])
     RETURNS void AS
 $$
 BEGIN
@@ -96,10 +96,10 @@ BEGIN
     PERFORM auth.check_logged();
 
     INSERT INTO reservation_tables
-    VALUES (confirm_reservation.id, unnest(tables_id));
+    VALUES (reservation_id, unnest(tables_id));
 
-    /*UPDATE reservations r SET status = 'confirmed'
-    WHERE r.id = confirm_reservation.id;*/
+    UPDATE reservations r SET status = 'confirmed'
+    WHERE r.id = reservation_id;
 
 
     --RETURNING INTO (variable);
@@ -107,8 +107,27 @@ BEGIN
     --RETURN (variable);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 GRANT EXECUTE ON FUNCTION confirm_reservation TO manager;
+
+
+DROP FUNCTION IF EXISTS add_reservation_table(INT, INT);
+CREATE OR REPLACE FUNCTION add_reservation_table(reservation_id INT, table_id INT)
+    RETURNS void AS
+$$
+BEGIN
+    --TODO: vérifier que ce soit le manager qui confirm !!!
+    -- is a user currently connected ?
+    PERFORM auth.check_logged();
+
+    INSERT INTO reservation_tables
+    VALUES (reservation_id, table_id);
+
+    --RETURNING INTO (variable);
+
+    --RETURN (variable);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+GRANT EXECUTE ON FUNCTION add_reservation_table TO manager;
 
 
 /*

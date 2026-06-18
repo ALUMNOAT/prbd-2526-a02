@@ -129,18 +129,33 @@ class MyReservation {
 
   Future<MyReservation> confirmReservation(Set<MyTable> tables) async {
     final response = await ApiClient.post(
-      'confirm_reservation', // Correspond au nom de la fonction SQL créée
+      'confirm_reservation',
       body: json.encode({
-        'id': id,
+        'reservation_id': id,
         'tables_id': [for(MyTable table in tables) table.id],
       }),
     );
 
     if (response.statusCode != 200 && response.statusCode != 204) {
-      throw Exception('Failed to update reservation: ${response.body}');
+      throw Exception('Failed to confirm reservation: ${response.body}');
     }
 
     return copyWith(status: Status.confirmed);
+  }
+
+  //TODO: delete this !
+  Future<void> addReservationTable(MyTable table) async {
+    final response = await ApiClient.post(
+      'add_reservation_table', // Correspond au nom de la fonction SQL créée
+      body: json.encode({
+        'reservation_id': id,
+        'table_id': table.id,
+      }),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to add table reservation: ${response.body}');
+    }
   }
 
 

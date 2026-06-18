@@ -26,8 +26,10 @@ $$ LANGUAGE plpgsql;
 -- 2. LE TRIGGER MAGIQUE (Constraint Trigger)
 DROP TRIGGER IF EXISTS trg_br12_no_table_for_pending_canceled ON reservation_tables;
 
+/*
 CREATE CONSTRAINT TRIGGER trg_br12_no_table_for_pending_canceled
     AFTER INSERT OR UPDATE ON reservation_tables
     DEFERRABLE INITIALLY DEFERRED
     FOR EACH ROW
 EXECUTE FUNCTION check_br12_reservation_status();
+*/
