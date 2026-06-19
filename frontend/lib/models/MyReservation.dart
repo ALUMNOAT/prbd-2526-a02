@@ -143,22 +143,6 @@ class MyReservation {
     return copyWith(status: Status.confirmed);
   }
 
-  //TODO: delete this !
-  Future<void> addReservationTable(MyTable table) async {
-    final response = await ApiClient.post(
-      'add_reservation_table', // Correspond au nom de la fonction SQL créée
-      body: json.encode({
-        'reservation_id': id,
-        'table_id': table.id,
-      }),
-    );
-
-    if (response.statusCode != 200 && response.statusCode != 204) {
-      throw Exception('Failed to add table reservation: ${response.body}');
-    }
-  }
-
-
   // STATIC FUNCTIONS
   static Future<List<MyReservation>> getManagerReservations(int managerId) async {
     final response = await ApiClient.post(
