@@ -31,7 +31,7 @@ BEGIN
           AND s.day_of_week = EXTRACT(ISODOW FROM NEW.datetime)
           -- Comparaison sur la valeur arrondie à la minute
           AND v_res_time >= s.start_time
-          AND v_res_time < s.end_time
+          AND v_res_time <= s.end_time
     ) INTO v_service_exists;
 
     IF NOT v_service_exists THEN

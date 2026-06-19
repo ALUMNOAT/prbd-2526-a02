@@ -1,5 +1,7 @@
 set search_path to public;
 
+drop table if exists reservations cascade;
+
 create table restaurants
 (
     id          serial primary key,
@@ -53,7 +55,8 @@ create table reservations
     datetime         timestamp   not null,
     number_of_guests int         not null,
     status           status_type not null default 'pending'::status_type,
-    special_requests text                 default null
+    special_requests text                 default null,
+    is_vip boolean not null default false
 );
 
 create table reservation_tables
@@ -257,29 +260,29 @@ begin
             (8, 2),
             (8, 5);
 
-    insert into reservations (id, client, restaurant, datetime, number_of_guests, status, special_requests)
-    values  (1, 3, 1, '2024-11-15 19:00:00', 2, 'confirmed', 'Table près de la fenêtre'),
-            (2, 4, 2, '2024-11-16 20:00:00', 2, 'pending', null),
-            (3, 6, 3, '2024-11-17 19:30:00', 4, 'confirmed', 'Anniversaire'),
-            (4, 3, 1, '2024-11-18 12:30:00', 4, 'confirmed', 'Déjeuner d''affaires'),
-            (5, 4, 2, '2024-11-19 19:00:00', 2, 'pending', 'Allergie aux noix'),
-            (6, 6, 3, '2024-11-20 20:00:00', 6, 'confirmed', null),
-            (7, 3, 1, '2024-11-21 19:30:00', 8, 'confirmed', 'Célébration'),
-            (8, 4, 2, '2024-11-22 12:00:00', 2, 'cancelled', null),
-            (9, 6, 3, '2024-11-23 18:30:00', 4, 'confirmed', 'Première visite'),
-            (10, 3, 1, '2024-11-24 12:30:00', 2, 'pending', null),
-            (11, 4, 2, '2024-11-25 19:00:00', 4, 'confirmed', 'Dîner romantique'),
-            (12, 6, 3, '2024-11-26 19:30:00', 2, 'completed', 'Excellent service'),
-            (13, 6, 1, '2024-11-27 19:00:00', 2, 'confirmed', 'Dîner en amoureux'),
-            (14, 6, 2, '2024-11-28 20:00:00', 3, 'confirmed', 'Soirée entre amis'),
-            (15, 6, 4, '2024-11-29 19:30:00', 4, 'confirmed', 'Découverte d''Anvers'),
-            (16, 6, 5, '2024-11-30 19:00:00', 2, 'confirmed', null),
-            (17, 6, 6, '2024-12-01 13:00:00', 4, 'confirmed', 'Célébration spéciale'),
-            (18, 6, 7, '2024-12-02 18:30:00', 2, 'cancelled', 'Pizza du vendredi'),
-            (19, 3, 8, '2024-12-03 19:00:00', 3, 'confirmed', 'Restaurant végétarien'),
-            (20, 6, 1, '2024-12-04 12:30:00', 2, 'confirmed', 'Déjeuner d''affaires'),
-            (21, 6, 2, '2024-12-05 20:00:00', 4, 'pending', 'Anniversaire de mariage'),
-            (22, 6, 4, '2024-12-06 19:00:00', 2, 'pending', null);
+    insert into reservations (id, client, restaurant, datetime, number_of_guests, status, special_requests, is_vip)
+    values  (1, 3, 1, '2024-11-15 19:00:00', 2, 'confirmed', 'Table près de la fenêtre', FALSE),
+            (2, 4, 2, '2024-11-16 20:00:00', 2, 'pending', null, FALSE),
+            (3, 6, 3, '2024-11-17 19:30:00', 4, 'confirmed', 'Anniversaire', FALSE),
+            (4, 3, 1, '2024-11-18 12:30:00', 4, 'confirmed', 'Déjeuner d''affaires', FALSE),
+            (5, 4, 2, '2024-11-19 19:00:00', 2, 'pending', 'Allergie aux noix', FALSE),
+            (6, 6, 3, '2024-11-20 20:00:00', 6, 'confirmed', null, FALSE),
+            (7, 3, 1, '2024-11-21 19:30:00', 8, 'confirmed', 'Célébration', FALSE),
+            (8, 4, 2, '2024-11-22 12:00:00', 2, 'cancelled', null, FALSE),
+            (9, 6, 3, '2024-11-23 18:30:00', 4, 'confirmed', 'Première visite', FALSE),
+            (10, 3, 1, '2024-11-24 12:30:00', 2, 'pending', null, FALSE),
+            (11, 4, 2, '2024-11-25 19:00:00', 4, 'confirmed', 'Dîner romantique', FALSE),
+            (12, 6, 3, '2024-11-26 19:30:00', 2, 'completed', 'Excellent service', FALSE),
+            (13, 6, 1, '2024-11-27 19:00:00', 2, 'confirmed', 'Dîner en amoureux', FALSE),
+            (14, 6, 2, '2024-11-28 20:00:00', 3, 'confirmed', 'Soirée entre amis', FALSE),
+            (15, 6, 4, '2024-11-29 19:30:00', 4, 'confirmed', 'Découverte d''Anvers', FALSE),
+            (16, 6, 5, '2024-11-30 19:00:00', 2, 'confirmed', null, FALSE),
+            (17, 6, 6, '2024-12-01 13:00:00', 4, 'confirmed', 'Célébration spéciale', FALSE),
+            (18, 6, 7, '2024-12-02 18:30:00', 2, 'cancelled', 'Pizza du vendredi', FALSE),
+            (19, 3, 8, '2024-12-03 19:00:00', 3, 'confirmed', 'Restaurant végétarien', FALSE),
+            (20, 6, 1, '2024-12-04 12:30:00', 2, 'confirmed', 'Déjeuner d''affaires', FALSE),
+            (21, 6, 2, '2024-12-05 20:00:00', 4, 'pending', 'Anniversaire de mariage', FALSE),
+            (22, 6, 4, '2024-12-06 19:00:00', 2, 'pending', null, FALSE);
 
     perform setval('reservations_id_seq', (select max(id) from reservations));
 
@@ -300,6 +303,18 @@ begin
             (17, 17),
             (19, 24),
             (20, 1);
+
+    insert into public.reservations (id, client, restaurant, datetime, number_of_guests, status, special_requests, is_vip)
+    values (23, 3, 1, '2024-12-04 19:00', 2, 'pending', null, FALSE),
+           (24, 4, 1, '2024-12-04 20:00', 2, 'pending', null, FALSE),
+           (25, 6, 1, '2024-12-04 20:00', 2, 'pending', null, FALSE),
+           (26, 6, 1, '2024-12-04 20:30', 4, 'cancelled', null, FALSE),
+           (27, 7, 1, '2024-12-04 19:30', 2, 'confirmed', null, FALSE);
+
+    insert into public.reservation_tables (reservation, "table")
+    values (27, 1);
+
+    perform setval('reservations_id_seq', (select max(id) from reservations));
 
     -- Réactiver tous les triggers sur toutes les tables
     alter table reservations enable trigger all;
