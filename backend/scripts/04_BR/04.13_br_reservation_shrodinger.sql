@@ -9,6 +9,7 @@ BEGIN
     IF (TG_OP = 'UPDATE' AND NEW.status = 'cancelled'::status_type) THEN
         RETURN NEW;
     END IF;
+
     SELECT id INTO v_service_id_new
     FROM public.services s
     WHERE s.restaurant = NEW.restaurant
@@ -38,3 +39,9 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS tgv_check_reservation_schrodinger ON reservations;
+CREATE TRIGGER tgv_check_reservation_schrodinger
+    AFTER INSERT OR UPDATE ON reservations
+    FOR EACH ROW
+EXECUTE FUNCTION check_reservation_schrodinger();
