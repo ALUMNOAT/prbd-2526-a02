@@ -31,7 +31,7 @@ BEGIN
           AND s.day_of_week = EXTRACT(ISODOW FROM NEW.datetime)
           -- Comparaison sur la valeur arrondie à la minute
           AND v_res_time >= s.start_time
-          AND v_res_time < s.end_time
+          AND v_res_time <= s.end_time
     ) INTO v_service_exists;
 
     IF NOT v_service_exists THEN
@@ -49,3 +49,38 @@ CREATE TRIGGER trigger_reservation_time_align_service_time
     BEFORE INSERT OR UPDATE ON public.reservations
     FOR EACH ROW
 EXECUTE FUNCTION check_reservation_time_align_service_time();
+
+
+
+/*
+CREATE OR REPLACE FUNCTION check_service_validity()
+    RETURNS TRIGGER AS $$
+DECLARE
+    v_slot_duration INT;
+    v_start_minutes INT = date_trunc('minute', NEW.start_time);
+    v_end_minutes INT = date_trunc('minute', NEW.end_time);
+BEGIN
+    SELECT r.slot_duration INTO v_slot_duration
+    FROM public.restaurants r
+    WHERE r.id = NEW.restaurant;
+
+    IF (v_start_minutes % v_slot_duration) <> 0 THEN
+        RAISE EXCEPTION 'BR-08: L''heure de start (%) n''est pas alignée sur le créneau de % min.', NEW.start_time, v_slot_duration;
+    END IF;
+
+    IF (v_end_minutes % v_slot_duration) <> 0 THEN
+        RAISE EXCEPTION 'BR-08: L''heure de end (%) n''est pas alignée sur le créneau de % min.', NEW.end_time, v_slot_duration;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+*/
+
+-- Suppression de l'ancien trigger si existant et création du nouveau
+DROP TRIGGER IF EXISTS tgv_check_service_validity ON public.services;
+/*CREATE TRIGGER tgv_check_service_validity
+    BEFORE INSERT OR UPDATE ON public.services
+    FOR EACH ROW
+EXECUTE FUNCTION check_service_validity();
+ */

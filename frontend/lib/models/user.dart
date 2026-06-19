@@ -3,7 +3,7 @@ import 'package:prbd_2526_a02/models/security.dart';
 class User {
   static String? validateName(String? name) {
     final nameRegex = RegExp(
-      r"^[A-Za-z]"
+        r"^[A-Za-z]"
     );
     if (name == null || name.isEmpty) {
       return 'Name is required';

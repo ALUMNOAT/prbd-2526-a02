@@ -1,3 +1,4 @@
+/*
 CREATE OR REPLACE FUNCTION check_reservation_schrodinger()
     RETURNS TRIGGER AS $$
 DECLARE
@@ -9,12 +10,13 @@ BEGIN
     IF (TG_OP = 'UPDATE' AND NEW.status = 'cancelled'::status_type) THEN
         RETURN NEW;
     END IF;
+
     SELECT id INTO v_service_id_new
     FROM public.services s
     WHERE s.restaurant = NEW.restaurant
       AND s.day_of_week = EXTRACT(ISODOW FROM NEW.datetime)
       AND NEW.datetime::time >= s.start_time
-      AND NEW.datetime::time < s.end_time;
+      AND NEW.datetime::time <= s.end_time;
 
     -- 2. Chercher un conflit : même client, même jour, même service, statut non-annulé
     IF EXISTS (
@@ -29,7 +31,7 @@ BEGIN
           -- Même service (on compare les start_time pour identifier le service)
           AND s_old.day_of_week = EXTRACT(ISODOW FROM r.datetime)
           AND r.datetime::time >= s_old.start_time
-          AND r.datetime::time < s_old.end_time
+          AND r.datetime::time <= s_old.end_time
           AND s_old.id = v_service_id_new
     ) THEN
         RAISE EXCEPTION 'BR-13: Un client ne peut pas avoir deux réservations pour le même service.';
@@ -38,3 +40,12 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+ */
+
+DROP TRIGGER IF EXISTS tgv_check_reservation_schrodinger ON reservations;
+/*
+CREATE TRIGGER tgv_check_reservation_schrodinger
+    AFTER INSERT OR UPDATE ON reservations
+    FOR EACH ROW
+EXECUTE FUNCTION check_reservation_schrodinger();
+ */

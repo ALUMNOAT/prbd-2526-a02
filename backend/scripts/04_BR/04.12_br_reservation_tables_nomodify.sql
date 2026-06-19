@@ -21,7 +21,7 @@ BEGIN
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 2. LE TRIGGER MAGIQUE (Constraint Trigger)
 DROP TRIGGER IF EXISTS trg_br12_no_table_for_pending_canceled ON reservation_tables;

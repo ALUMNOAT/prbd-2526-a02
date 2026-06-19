@@ -46,7 +46,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             icon: const Icon(Icons.refresh),
             tooltip: 'Rafraîchir les données',
             onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-            ),
+          ),
         ],
         elevation: 2,
         backgroundColor: theme.colorScheme.primary,
@@ -309,7 +309,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       title: 'Réinitialiser la base de données',
       message:
       'Êtes-vous sûr de vouloir réinitialiser la base de données ? '
-      'Cette action supprimera toutes les données et les restaurera aux valeurs par défaut. '
+          'Cette action supprimera toutes les données et les restaurera aux valeurs par défaut. '
       ,
       actions: [
         DialogAction(label: 'Annuler',),
@@ -328,10 +328,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       // 2. Show success and stay on login (or refresh)
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Base de données réinitialisée avec succès'),
-            backgroundColor: Colors.green,
-            //behavior pour look plus moderne (prend pas toute la largeur)
-            //behavior: SnackBarBehavior.floating,
+          content: Text('Base de données réinitialisée avec succès'),
+          backgroundColor: Colors.green,
+          //behavior pour look plus moderne (prend pas toute la largeur)
+          //behavior: SnackBarBehavior.floating,
         ),
       );
     } catch (e) {

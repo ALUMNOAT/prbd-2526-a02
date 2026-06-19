@@ -3,7 +3,7 @@ import '../models/reservation.dart';
 import 'currentUserProvider.dart';
 
 final clientStateProvider = AsyncNotifierProvider<ClientStateNotifier, List<Reservation>>(
-        () => ClientStateNotifier(),
+      () => ClientStateNotifier(),
 );
 
 class ClientStateNotifier extends AsyncNotifier<List<Reservation>> {
@@ -40,7 +40,10 @@ class ClientStateNotifier extends AsyncNotifier<List<Reservation>> {
     }
   }
 
-  Future<void> annuler_reservation({required int id}) async {
+  Future<void> annuler_reservation({
+    required int id
+  }) async {
+    state = const AsyncLoading();
     try {
       await Reservation.annuler_reservation(id: id);
       ref.invalidateSelf();
