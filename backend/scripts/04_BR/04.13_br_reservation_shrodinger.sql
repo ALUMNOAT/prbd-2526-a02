@@ -1,3 +1,4 @@
+/*
 CREATE OR REPLACE FUNCTION check_reservation_schrodinger()
     RETURNS TRIGGER AS $$
 DECLARE
@@ -39,9 +40,12 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+ */
 
 DROP TRIGGER IF EXISTS tgv_check_reservation_schrodinger ON reservations;
+/*
 CREATE TRIGGER tgv_check_reservation_schrodinger
     AFTER INSERT OR UPDATE ON reservations
     FOR EACH ROW
 EXECUTE FUNCTION check_reservation_schrodinger();
+ */

@@ -52,7 +52,7 @@ EXECUTE FUNCTION check_reservation_time_align_service_time();
 
 
 
-
+/*
 CREATE OR REPLACE FUNCTION check_service_validity()
     RETURNS TRIGGER AS $$
 DECLARE
@@ -75,10 +75,12 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+*/
 
 -- Suppression de l'ancien trigger si existant et création du nouveau
 DROP TRIGGER IF EXISTS tgv_check_service_validity ON public.services;
-CREATE TRIGGER tgv_check_service_validity
+/*CREATE TRIGGER tgv_check_service_validity
     BEFORE INSERT OR UPDATE ON public.services
     FOR EACH ROW
 EXECUTE FUNCTION check_service_validity();
+ */
