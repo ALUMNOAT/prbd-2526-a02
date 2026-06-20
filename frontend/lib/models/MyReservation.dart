@@ -15,6 +15,7 @@ class MyReservation {
   final int numberOfGuests;
   final Status status;
   final String? specialRequests;
+  final bool isVip;
   // OBJECT ATTRIBUTES
   final MyUser? client;
   final MyRestaurant? restaurant;
@@ -30,6 +31,7 @@ class MyReservation {
     required this.numberOfGuests,
     required this.status,
     this.specialRequests,
+    required this.isVip,
     this.client,
     this.restaurant,
     this.tables = const [],
@@ -44,6 +46,7 @@ class MyReservation {
     colNumberOfGuests = 'number_of_guests',
     colStatus = 'status',
     colSpecialRequests = 'special_requests',
+    colIsVip = 'is_vip',
   }) {
     return MyReservation(
       id: json[colId],
@@ -53,6 +56,7 @@ class MyReservation {
       numberOfGuests: json[colNumberOfGuests],
       status: Status.values.byName(json[colStatus]),
       specialRequests: json[colSpecialRequests],
+      isVip: json[colIsVip],
     );
   }
 
@@ -65,6 +69,7 @@ class MyReservation {
     int? numberOfGuests,
     Status? status,
     String? specialRequests,
+    bool? isVip,
     MyUser? client,
     MyRestaurant? restaurant,
     List<MyTable>? tables,
@@ -77,6 +82,7 @@ class MyReservation {
       numberOfGuests: numberOfGuests ?? this.numberOfGuests,
       status: status ?? this.status,
       specialRequests: specialRequests ?? this.specialRequests,
+      isVip: isVip ?? this.isVip,
       client: client ?? this.client,
       restaurant: restaurant ?? this.restaurant,
       tables: tables ?? this.tables,
@@ -125,6 +131,21 @@ class MyReservation {
     }
 
     return copyWith(status: Status.cancelled);
+  }
+
+  Future<MyReservation> setupVip() async {
+    final response = await ApiClient.post(
+      'setup_vip',
+      body: json.encode({
+        'id': id
+      }),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to update the vip value: ${response.body}');
+    }
+
+    return copyWith(isVip: !isVip);
   }
 
   Future<MyReservation> confirmReservation(Set<MyTable> tables) async {

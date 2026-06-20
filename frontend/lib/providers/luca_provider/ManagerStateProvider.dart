@@ -104,4 +104,25 @@ class ManagerStateNotifier extends AsyncNotifier<ManagerState?> {
       );
     }
   }
+
+  Future<void> setupVip(MyReservation reservation) async {
+    state = const AsyncLoading();
+    final manager = state.value!;
+
+    try {
+      final res_ = await reservation.setupVip();
+      var vip = reservation.isVip;
+
+      manager.reservations.remove(reservation);
+      reservation = reservation.copyWith(isVip: !vip);
+      manager.reservations.add(reservation);
+
+      state = AsyncData(manager);
+    } catch (e) {
+      state = AsyncValue.error(
+        e.toString(),
+        StackTrace.current,
+      );
+    }
+  }
 }

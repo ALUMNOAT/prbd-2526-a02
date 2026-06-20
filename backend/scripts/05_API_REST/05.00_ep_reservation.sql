@@ -129,6 +129,26 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION add_reservation_table TO manager;
 
+DROP FUNCTION IF EXISTS setup_vip(INT);
+CREATE OR REPLACE FUNCTION setup_vip(id INT)
+    RETURNS void AS
+$$
+BEGIN
+    --TODO: vérifier que ce soit le manager qui cancel !!!
+    -- is a user currently connected ?
+    PERFORM auth.check_logged();
+
+    UPDATE reservations r
+    SET is_vip = NOT is_vip
+    WHERE r.id = setup_vip.id;
+    --RETURNING INTO (variable);
+
+    --RETURN (variable);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION setup_vip TO manager;
+
 
 /*
 set search_path to auth;

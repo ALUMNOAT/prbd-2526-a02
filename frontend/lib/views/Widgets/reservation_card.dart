@@ -1,16 +1,18 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prbd_2526_a02/models/MyRestaurant.dart';
 import 'package:prbd_2526_a02/models/enums/Status.dart';
 import 'package:prbd_2526_a02/models/MyReservation.dart';
 import 'package:prbd_2526_a02/providers/luca_provider/ManagerState.dart';
+import 'package:prbd_2526_a02/providers/luca_provider/ManagerStateProvider.dart';
 
 import '../../models/MyUser.dart';
 
 
-class ReservationCard extends StatelessWidget {
+class ReservationCard extends ConsumerWidget {
   const ReservationCard({
     super.key,
     required this.manager,
@@ -23,9 +25,10 @@ class ReservationCard extends StatelessWidget {
   final MyRestaurant restaurant;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final Status status = reservation.status;
     final MyUser client = manager.getClientFromReservation(reservation.id);
+    final managerNotifier = ref.read(managerStateProvider.notifier);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -97,11 +100,33 @@ class ReservationCard extends StatelessWidget {
               ),
 
               //END ICON
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                icon: (reservation.isVip) ? Icon(Icons.star, size: 28, color: Colors.amber) : Icon(Icons.star_border, size: 28, color: Colors.grey),
+                onPressed: () {
+                  setup_vip(context, ref);
+                },
+              ),
               const Icon(Icons.chevron_right),
             ],
           ),
         ),
       ),
     );
+  }
+
+  void setup_vip(BuildContext context, WidgetRef ref) async {
+    try {
+      final managerNotifier = ref.read(managerStateProvider.notifier);
+      await managerNotifier.setupVip(reservation);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.grey,
+        ),
+      );
+    }
   }
 }

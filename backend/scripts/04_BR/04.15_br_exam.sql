@@ -15,7 +15,7 @@ begin
     select simulated_time from system_time into temps_simulé;
 
     -- 1) si réservation est non VIP et status est complété ou annulé
-    if (new.is_vip = false and new.status in ('completed', 'canceled')) then
+    if (new.is_vip = false and new.status in ('completed', 'cancelled')) then
     Raise Exception 'Mode VIP modifiable uniquement pour les reservations actives';
     END if;
 
